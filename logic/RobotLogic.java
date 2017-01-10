@@ -1,5 +1,6 @@
 package RUfoo.logic;
 
+import RUfoo.managers.Combat;
 import RUfoo.managers.Navigation;
 import battlecode.common.Clock;
 import battlecode.common.RobotController;
@@ -7,6 +8,7 @@ import battlecode.common.RobotController;
 public abstract class RobotLogic {
     protected RobotController rc;
 	protected Navigation navManager;
+	protected Combat combatManager;
     protected boolean active;
      
     /**
@@ -29,5 +31,6 @@ public abstract class RobotLogic {
     public void setRc(RobotController _rc) {
         rc = _rc;
         navManager = new Navigation(_rc);
+        combatManager = new Combat(_rc);
     }
 }
