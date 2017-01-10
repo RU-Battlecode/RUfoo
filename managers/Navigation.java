@@ -1,6 +1,7 @@
 package RUfoo.managers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import RUfoo.Util;
@@ -9,7 +10,6 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
 
 public class Navigation {
 
@@ -44,7 +44,7 @@ public class Navigation {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void dodgeBullets() {
 		if (rc.senseNearbyBullets().length > 0) {
 			List<Direction> possibleDirs = safeDirections();
@@ -62,26 +62,72 @@ public class Navigation {
 	
 	public List<Direction> safeDirections() {
 		List<Direction> safeDirections = new ArrayList<>();
-		
-		BulletInfo[] bullets = rc.senseNearbyBullets();
-		// TODO: Check where enemies are
-		//RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
-		
+
+		// Check all the general directions
 		for (Direction dir : DIRECTIONS) {
 			if (!rc.canMove(dir)) {
 				continue;
 			}
-			
-			MapLocation possibleLocation = rc.getLocation().add(dir);
-			
-			for (BulletInfo bullet : bullets) {
-				MapLocation futureBulletLoc = bullet.getLocation().add(bullet.getDir(), bullet.getSpeed()); 
-				if (!futureBulletLoc.isWithinDistance(possibleLocation, rc.getType().bodyRadius)) {
-					safeDirections.add(dir);
-				}
+
+			if (isDirectionSafe(dir)) {
+				safeDirections.add(dir);
 			}
 		}
-		
+						
 		return safeDirections;
+	}
+
+	public boolean isDirectionSafe(Direction dir) {
+		boolean safeSoFar = true;
+
+		// Find all the bullets near me.
+		BulletInfo[] bullets = rc.senseNearbyBullets();
+
+		// TODO: Check where enemies are
+		// RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius,
+		// rc.getTeam().opponent());
+
+		// This is where I want to be
+		MapLocation possibleLocation = rc.getLocation().add(dir);
+
+		for (BulletInfo bullet : bullets) {
+			// This is where the bullet will be!
+			MapLocation futureBulletLoc = bullet.getLocation().add(bullet.getDir(), bullet.getSpeed());
+			// Check if that bullet is in our body radius of our futureLocation.
+			if (futureBulletLoc.isWithinDistance(possibleLocation, rc.getType().bodyRadius)) {
+				safeSoFar = false;
+				break;
+			}
+		}
+
+		return safeSoFar;
+	}
+
+	public void moveToSafely(MapLocation loc) {
+		// Already there?
+		if (rc.getLocation().equals(loc)) {
+			return;
+		}
+
+		// The direct direction to the target location.
+		Direction direct = rc.getLocation().directionTo(loc);
+
+		// Find the safest directions that is closest to the direction we want
+		// to move.
+		Direction best = Collections.min(safeDirections(), (dir1, dir2) -> {
+			return Math.round(dir1.degreesBetween(direct) - dir2.degreesBetween(direct));
+		});
+
+		// Try to move in the safest direct, else just move directly to
+		// location.
+		try {
+			if (best != null) {
+				rc.move(best);
+			} else if (rc.canMove(direct)) {
+				rc.move(direct);
+			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
 	}
 }
