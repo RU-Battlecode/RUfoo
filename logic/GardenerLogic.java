@@ -22,6 +22,8 @@ public class GardenerLogic extends RobotLogic {
 		navManager.dodgeBullets();
 		if (scoutsMade < 2) {
 			build(RobotType.SCOUT);
+		} else {
+			build(RobotType.SOLDIER);
 		}
 	}
 	
