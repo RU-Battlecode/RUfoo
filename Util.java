@@ -2,7 +2,10 @@ package RUfoo;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
+
+import battlecode.common.MapLocation;
 
 public final class Util {
 	private static final Random rand = new Random();
@@ -17,5 +20,16 @@ public final class Util {
 	public static <T extends Object> T[] shuffle(T[] array) {
 		Collections.shuffle(Arrays.asList(array));
 		return array;
+	}
+	
+	public static MapLocation average(List<MapLocation> locations) {
+		float x = 0, y = 0;
+		for (MapLocation loc : locations) {
+			x += loc.x;
+			y += loc.y;
+		}
+		int size = Math.max(1,  locations.size());
+		return new MapLocation(x / size,
+							   y / size);
 	}
 }
