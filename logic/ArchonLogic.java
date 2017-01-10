@@ -2,7 +2,6 @@ package RUfoo.logic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import RUfoo.Util;
 import battlecode.common.Direction;
@@ -39,7 +38,7 @@ public class ArchonLogic extends RobotLogic {
 		}
 
 		// Do we need to build more gardeners?
-		if (gardeners.size() < GARDENER_BUILD_DIRECTIONS.length) {
+		if (gardeners.size() < GARDENER_BUILD_DIRECTIONS.length && rc.isBuildReady()) {
 			buildGardener(gardeners.size());
 		}
 
