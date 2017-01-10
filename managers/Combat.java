@@ -1,6 +1,5 @@
 package RUfoo.managers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -20,38 +19,47 @@ public class Combat {
 		rc = _rc;
 	}
 
+	// TODO: Maybe shoot to the left and the right of target?
 	public void singleShotAttack() {
+		singleShotAttack(findTarget());
+	}
+	
+	public void singleShotAttack(RobotInfo target) {
+		if (target != null && rc.canFireSingleShot()) {
+			try {
+				rc.fireSingleShot(rc.getLocation().directionTo(target.location));
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	// TODO: Make sure not hitting own players.
+	public RobotInfo findTarget() {
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		TreeInfo[] trees = rc.senseNearbyTrees();
-		
+
 		List<RobotInfo> hittable = Arrays.asList(enemies);
 		for (RobotInfo enemy : enemies) {
 			Vector2f dirToEnemy = new Vector2f(rc.getLocation(), enemy.getLocation());
 			for (TreeInfo tree : trees) {
 				Vector2f dirToTree = new Vector2f(rc.getLocation(), tree.getLocation());
 				MapLocation projection = dirToTree.projectOn(dirToEnemy);
-				
+
 				if (projection.distanceTo(tree.location) <= tree.getRadius()) {
 					// The bullet would just hit a tree if we fire it...
 					// Maybe we should just save ;)
 					hittable.remove(enemy);
-				} 
+				}
 			}
 		}
 		
 		if (hittable.size() > 0) {
-			Collections.sort(hittable, (e1, e2) -> {
+			return Collections.max(hittable, (e1, e2) -> {
 				return robotPriority(e1) - robotPriority(e2);
-			});	
-			
-		
-			if (rc.canFireSingleShot()) {
-				try {
-					rc.fireSingleShot(rc.getLocation().directionTo(hittable.get(0).location));
-				} catch (GameActionException e) {
-					e.printStackTrace();
-				}
-			}
+			});
+		} else {
+			return null;
 		}
 	}
 
@@ -64,6 +72,7 @@ public class Combat {
 
 		switch (robot.getType()) {
 		case ARCHON:
+			// TODO: only prioritize when it is alone!
 			priority += 1000;
 			break;
 		case GARDENER:
@@ -85,8 +94,8 @@ public class Combat {
 			System.out.println("Missing robot type in switch.");
 			break;
 		}
-		
-		// Prioritize low health! 
+
+		// Prioritize low health!
 		double percentHealth = robot.getHealth() / robot.getType().getStartingHealth();
 		priority += 100 * (1 - percentHealth); // this will be between 0 and 100
 
