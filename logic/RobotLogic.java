@@ -1,10 +1,12 @@
 package RUfoo.logic;
 
+import RUfoo.managers.Navigation;
 import battlecode.common.Clock;
 import battlecode.common.RobotController;
 
 public abstract class RobotLogic {
     protected RobotController rc;
+	protected Navigation navManager;
     protected boolean active;
      
     /**
@@ -26,5 +28,6 @@ public abstract class RobotLogic {
 
     public void setRc(RobotController _rc) {
         rc = _rc;
+        navManager = new Navigation(_rc);
     }
 }
