@@ -59,7 +59,7 @@ public class Navigation {
 			moveRandom();
 		}
 	}
-	
+
 	public List<Direction> safeDirections() {
 		List<Direction> safeDirections = new ArrayList<>();
 
@@ -73,7 +73,7 @@ public class Navigation {
 				safeDirections.add(dir);
 			}
 		}
-						
+
 		return safeDirections;
 	}
 
@@ -103,14 +103,22 @@ public class Navigation {
 		return safeSoFar;
 	}
 
-	public void moveToSafely(MapLocation loc) {
+	public void moveToSafely(MapLocation target) {
+		moveTo(target, true);
+	}
+
+	public void moveAggressively(MapLocation target) {
+		moveTo(target, false);
+	}
+	
+	void moveTo(MapLocation target, boolean prioritizeSafety) {
 		// Already there?
-		if (rc.getLocation().equals(loc)) {
+		if (rc.getLocation().equals(target)) {
 			return;
 		}
 
 		// The direct direction to the target location.
-		Direction direct = rc.getLocation().directionTo(loc);
+		Direction direct = rc.getLocation().directionTo(target);
 
 		// Find the safest directions that is closest to the direction we want
 		// to move.
@@ -118,12 +126,21 @@ public class Navigation {
 			return Math.round(dir1.degreesBetween(direct) - dir2.degreesBetween(direct));
 		});
 
+		
 		// Try to move in the safest direct, else just move directly to
 		// location.
-		try {
+		try {	
 			if (best != null) {
-				rc.move(best);
+				if (prioritizeSafety) {
+					// Obvious choice. Be safe.
+					rc.move(best);
+				} else if (best.degreesBetween(direct) >= 45 && rc.canMove(direct)) {
+					// The safest is to far off course for someone who
+					// does not care about safety. Just take the bullet.
+					rc.move(direct);
+				}
 			} else if (rc.canMove(direct)) {
+				// There was no best route, just move directly toward target
 				rc.move(direct);
 			}
 		} catch (GameActionException e) {
