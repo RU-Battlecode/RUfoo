@@ -17,6 +17,7 @@ public class SoldierLogic extends RobotLogic {
 			combatManager.singleShotAttack(target);
 		} else {
 			navManager.dodgeBullets();
+			navManager.moveRandom();
 		}
 	}
 	
