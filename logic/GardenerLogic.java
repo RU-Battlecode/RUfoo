@@ -13,10 +13,12 @@ public class GardenerLogic extends RobotLogic {
 
 	private int scoutsMade;
 	
-	public GardenerLogic() {
+	public GardenerLogic(RobotController _rc) {
+		super(_rc);
 		scoutsMade = 0;
+		failedBuildCount = 0;
 	}
-	
+
 	@Override
 	public void logic() {
 		navManager.dodgeBullets();

@@ -3,7 +3,9 @@ package RUfoo.logic;
 import RUfoo.managers.Combat;
 import RUfoo.managers.Navigation;
 import battlecode.common.Clock;
+import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
+import battlecode.common.TreeInfo;
 
 public abstract class RobotLogic {
     protected RobotController rc;
@@ -11,6 +13,12 @@ public abstract class RobotLogic {
 	protected Combat combatManager;
     protected boolean active;
      
+    public RobotLogic(RobotController _rc) {
+    	rc = _rc;
+    	navManager = new Navigation(_rc);
+        combatManager = new Combat(_rc);
+    }
+    
     /**
      * Called on robot creation in RobotPlayer.java.
      * Starts the robots active logic loop, that pauses the thead on completion.
@@ -28,9 +36,4 @@ public abstract class RobotLogic {
      */
     public abstract void logic();
 
-    public void setRc(RobotController _rc) {
-        rc = _rc;
-        navManager = new Navigation(_rc);
-        combatManager = new Combat(_rc);
-    }
 }

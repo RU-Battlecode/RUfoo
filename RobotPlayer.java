@@ -11,28 +11,27 @@ public class RobotPlayer {
 			RobotLogic logic = null;
 			switch (rc.getType()) {
 			case ARCHON:
-				logic = new ArchonLogic();
+				logic = new ArchonLogic(rc);
 				break;
 			case SCOUT:
-				logic = new ScoutLogic();
+				logic = new ScoutLogic(rc);
 				break;
 			case SOLDIER:
-				logic = new SoldierLogic();
+				logic = new SoldierLogic(rc);
 				break;
 			case GARDENER:
-				logic = new GardenerLogic();
+				logic = new GardenerLogic(rc);
 				break;
 			case LUMBERJACK:
-				logic = new LumberjackLogic();
+				logic = new LumberjackLogic(rc);
 				break;
 			case TANK:
-				logic = new TankLogic();
+				logic = new TankLogic(rc);
 				break;
 			default:
 				System.out.println("Missing logic");
 			}
 
-			logic.setRc(rc);
 			logic.run();
 	  }
 	  

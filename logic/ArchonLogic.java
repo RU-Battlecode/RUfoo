@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import RUfoo.Util;
+import RUfoo.managers.Navigation;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 
@@ -16,10 +18,9 @@ public class ArchonLogic extends RobotLogic {
 			Direction.getNorth(),
 			Direction.getEast().rotateRightDegrees(45),
 			Direction.getWest().rotateLeftDegrees(45) };
-
-	public ArchonLogic() {
-		super();
-		
+	
+	public ArchonLogic(RobotController _rc) {
+		super(_rc);
 	}
 	
 	@Override
