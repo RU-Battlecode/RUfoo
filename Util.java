@@ -28,8 +28,18 @@ public final class Util {
 			x += loc.x;
 			y += loc.y;
 		}
-		int size = Math.max(1,  locations.size());
+		float size = Math.max(1,  locations.size());
 		return new MapLocation(x / size,
 							   y / size);
+	}
+	
+	/**
+	 * Random number in range [min, max]
+	 * @param min
+	 * @param max
+	 * @return
+	 */
+	public static int random(int min, int max) {
+		return rand.nextInt(max - min + 1) + min;
 	}
 }
