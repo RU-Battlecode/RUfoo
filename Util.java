@@ -8,7 +8,7 @@ import java.util.Random;
 import battlecode.common.MapLocation;
 
 public final class Util {
-	private static final Random rand = new Random();
+	private static final Random rand = new Random(1337);
 	
 	private Util() {}
 	
