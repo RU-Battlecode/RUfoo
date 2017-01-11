@@ -39,16 +39,18 @@ public class ArchonLogic extends RobotLogic {
 
 		// Do we need to build more gardeners?
 		if (gardeners.size() < GARDENER_BUILD_DIRECTIONS.length && rc.isBuildReady()) {
-			buildGardener(gardeners.size());
+			buildGardener();
 		}
 
 		moveRelativeTo(gardeners);
 	}
 	
-	void buildGardener(int gardenerCount) {
-		if (rc.canBuildRobot(RobotType.GARDENER, GARDENER_BUILD_DIRECTIONS[gardenerCount])) {
+	void buildGardener() {
+		Direction dir = Util.randomChoice(Navigation.DIRECTIONS);
+		if (rc.canBuildRobot(RobotType.GARDENER, dir)) {
 			try {
-				rc.buildRobot(RobotType.GARDENER, GARDENER_BUILD_DIRECTIONS[gardenerCount]);
+				rc.buildRobot(RobotType.GARDENER, dir);
+				gardenerCount++;
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
@@ -56,8 +58,9 @@ public class ArchonLogic extends RobotLogic {
 	}
 	
 	void moveRelativeTo(List<RobotInfo> gardeners) {
-		if (gardeners.size() == 0) {
+		if (gardeners.size() <= 1) {
 			navManager.dodgeBullets();
+			navManager.moveRandom();
 			return;
 		}
 		
