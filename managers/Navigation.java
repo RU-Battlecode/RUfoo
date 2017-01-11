@@ -28,14 +28,22 @@ public class Navigation {
 	}
 
 	public void moveRandom() {
+		moveRandom(rc.getType().strideRadius);
+	}
+	
+	public void moveRandom(float dist) {
+		if (rc.hasMoved()) {
+			return;
+		}
+		
 		Direction dir = Util.randomChoice(DIRECTIONS);
 		try {
-			if (rc.canMove(dir)) {
-				rc.move(dir);
+			if (rc.canMove(dir, dist)) {
+				rc.move(dir, dist);
 			} else {
 				for (Direction direction : Util.shuffle(DIRECTIONS)) {
-					if (rc.canMove(direction)) {
-						rc.move(direction);
+					if (rc.canMove(direction, dist)) {
+						rc.move(direction, dist);
 						break;
 					}
 				}
@@ -55,8 +63,6 @@ public class Navigation {
 					e.printStackTrace();
 				}
 			}
-		} else {
-			moveRandom();
 		}
 	}
 
