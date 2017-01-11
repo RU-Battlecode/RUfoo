@@ -15,7 +15,7 @@ import battlecode.common.TreeInfo;
 
 public class GardenerLogic extends RobotLogic {
 
-	private static final Direction[] SCOUT_BUILD_DIRECTIONS = { Direction.getNorth(),
+	private static final Direction[] SCOUT_BUILD_DIRECTIONS = {
 			Direction.getEast().rotateRightDegrees(45), Direction.getWest().rotateLeftDegrees(45) };
 	
 	private int scoutsMade;
@@ -36,7 +36,7 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void build() {
-		if (scoutsMade < 2) {
+		if (scoutsMade < 1) {
 			build(RobotType.SCOUT);
 		} else {
 			build(RobotType.TANK);
