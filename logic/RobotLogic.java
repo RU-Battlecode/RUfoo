@@ -3,6 +3,7 @@ package RUfoo.logic;
 import RUfoo.managers.Combat;
 import RUfoo.managers.Construction;
 import RUfoo.managers.Navigation;
+import RUfoo.managers.Personality;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
@@ -13,6 +14,7 @@ public abstract class RobotLogic {
 	protected Navigation navManager;
 	protected Combat combatManager;
 	protected Construction constructionManager;
+	protected Personality personalityManager;
     protected boolean active;
      
     public RobotLogic(RobotController _rc) {
@@ -20,6 +22,7 @@ public abstract class RobotLogic {
     	navManager = new Navigation(_rc);
         combatManager = new Combat(_rc);
         constructionManager = new Construction(_rc);
+        personalityManager = new Personality(rc.getID());
     }
     
     /**
