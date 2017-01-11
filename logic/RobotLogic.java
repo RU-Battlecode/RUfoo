@@ -1,6 +1,7 @@
 package RUfoo.logic;
 
 import RUfoo.managers.Combat;
+import RUfoo.managers.Construction;
 import RUfoo.managers.Navigation;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
@@ -11,12 +12,14 @@ public abstract class RobotLogic {
     protected RobotController rc;
 	protected Navigation navManager;
 	protected Combat combatManager;
+	protected Construction constructionManager;
     protected boolean active;
      
     public RobotLogic(RobotController _rc) {
     	rc = _rc;
     	navManager = new Navigation(_rc);
         combatManager = new Combat(_rc);
+        constructionManager = new Construction(_rc);
     }
     
     /**
