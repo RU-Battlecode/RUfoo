@@ -51,7 +51,6 @@ public class ArchonLogic extends RobotLogic {
 		if (rc.canBuildRobot(RobotType.GARDENER, dir)) {
 			try {
 				rc.buildRobot(RobotType.GARDENER, dir);
-				gardenerCount++;
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
