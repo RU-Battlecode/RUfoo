@@ -56,7 +56,7 @@ public class GardenerLogic extends RobotLogic {
 
 	void manageTrees() {
 		// Load a garden construction plan.
-		if (!constructionManager.hasLoadedPlan()) {
+		if (!constructionManager.hasLoadedPlan() || rc.senseNearbyTrees().length == 0) {
 			constructionManager.loadPlan(BuildInstructions.SQUARE);
 		}
 
