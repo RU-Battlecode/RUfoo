@@ -70,7 +70,6 @@ public class GardenerLogic extends RobotLogic {
 		MapLocation nextBuildLocation = constructionManager.peekInstructionLocation();
 				
 		if (nextBuildLocation != null) {
-			System.out.println("My: " + rc.getLocation() + " next: " + nextBuildLocation + " dist: " + rc.getLocation().distanceTo(nextBuildLocation) + " spawn off: " + GameConstants.GENERAL_SPAWN_OFFSET);
 			
 			// Are we close enough to spawn the plant?
 			if (rc.getLocation().distanceTo(nextBuildLocation) <= 2.0) {
@@ -85,7 +84,6 @@ public class GardenerLogic extends RobotLogic {
 					try {
 						rc.plantTree(dir);
 						constructionManager.popInstructionLocation();
-						System.out.println("built one!!!!!");
 					} catch (GameActionException e) {
 						e.printStackTrace();
 						failedBuildCount++;
@@ -94,7 +92,6 @@ public class GardenerLogic extends RobotLogic {
 					failedBuildCount++;
 				}
 			} else {
-				System.out.println("moving to next build location... was not close enough");
 				navManager.moveAggressively(nextBuildLocation.add(new Direction(0, GameConstants.GENERAL_SPAWN_OFFSET)));
 			}
 		}
