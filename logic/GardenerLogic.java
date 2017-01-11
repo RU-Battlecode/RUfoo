@@ -51,12 +51,6 @@ public class GardenerLogic extends RobotLogic {
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
-		} else if (rc.getTeamBullets() > 100) {
-			try {
-				rc.donate(rc.getTeamBullets() - 100);
-			} catch (GameActionException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
