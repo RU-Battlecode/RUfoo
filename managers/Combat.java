@@ -73,7 +73,7 @@ public class Combat {
 		switch (robot.getType()) {
 		case ARCHON:
 			// TODO: only prioritize when it is alone!
-			priority += 1000;
+			priority += 90;
 			break;
 		case GARDENER:
 			priority += 90;
@@ -99,6 +99,16 @@ public class Combat {
 		double percentHealth = robot.getHealth() / robot.getType().getStartingHealth();
 		priority += 100 * (1 - percentHealth); // this will be between 0 and 100
 
+		// The robot hasn't attacked yet!
+		if (robot.getAttackCount() < 1) {
+			priority += 10;
+		}
+		
+		if (robot.moveCount > 0  && robot.location.distanceTo(rc.getLocation()) <= 2.0) {
+			// This bot has moved already so may not be able to dodge.
+			priority += 9;
+		}
+		
 		return priority;
 	}
 
