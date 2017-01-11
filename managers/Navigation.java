@@ -8,6 +8,7 @@ import RUfoo.Util;
 import battlecode.common.BulletInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
@@ -118,10 +119,15 @@ public class Navigation {
 	}
 	
 	void moveTo(MapLocation target, boolean prioritizeSafety) {
-		// Already there?
-		if (rc.getLocation().equals(target)) {
+		
+		float distToTarget = rc.getLocation().distanceTo(target);
+		
+		// Already there? or can't move?
+		if (distToTarget < GameConstants.GENERAL_SPAWN_OFFSET || rc.hasMoved()) {
 			return;
 		}
+		
+		float dist = Math.max(0, Math.min(rc.getType().strideRadius, distToTarget));
 
 		// The direct direction to the target location.
 		Direction direct = rc.getLocation().directionTo(target);
@@ -137,17 +143,22 @@ public class Navigation {
 		// location.
 		try {	
 			if (best != null) {
+				float degrees = best.degreesBetween(direct);
 				if (prioritizeSafety) {
 					// Obvious choice. Be safe.
-					rc.move(best);
-				} else if (best.degreesBetween(direct) >= 45 && rc.canMove(direct)) {
+					rc.move(best, dist);
+				} else if ((degrees <= 30 || (degrees >= 330 && degrees <= 360)) && rc.canMove(direct, dist)) {
 					// The safest is to far off course for someone who
 					// does not care about safety. Just take the bullet.
-					rc.move(direct);
+					rc.move(direct, dist);
+				} else {
+					moveRandom(dist);
 				}
-			} else if (rc.canMove(direct)) {
+			} else if (rc.canMove(direct, dist)) {
 				// There was no best route, just move directly toward target
-				rc.move(direct);
+				rc.move(direct, dist);
+			} else {
+				moveRandom(dist);
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
