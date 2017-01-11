@@ -55,6 +55,9 @@ public class Navigation {
 	}
 
 	public void dodgeBullets() {
+		if (rc.hasMoved()) {
+			return;
+		}
 		if (rc.senseNearbyBullets().length > 0) {
 			List<Direction> possibleDirs = safeDirections();
 			if (possibleDirs.size() > 0) {
