@@ -21,14 +21,37 @@ public abstract class RobotLogic {
     
     /**
      * Called on robot creation in RobotPlayer.java.
-     * Starts the robots active logic loop, that pauses the thead on completion.
+     * Starts the robots active logic loop, that pauses the thread on completion.
      */
     public void run() {
     	active = true;
     	while (active) {
     		logic();
+    		
+    		if (Clock.getBytecodesLeft() > 200) {
+    			shakeIt();
+    		}
+    		
     		Clock.yield();
     	}
+    }
+    
+    void shakeIt() {
+    	TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius);
+		for (TreeInfo tree : trees) {
+			if (tree.getTeam().equals(rc.getTeam().opponent())) {
+				continue;
+			}
+			
+			if (tree.containedBullets > 0 && rc.canShake(tree.ID)) {
+				try {
+					rc.shake(tree.ID);
+					System.out.println("May have just shaken " + tree.containedBullets);
+				} catch (GameActionException e) {
+					e.printStackTrace();
+				}
+			}
+		}
     }
     
     /**
