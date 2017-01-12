@@ -28,6 +28,46 @@ public class Navigation {
 		rc = _rc;
 	}
 
+	public void swarm() {
+
+		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+
+		if (friends.length > 0) {
+			moveToSafely(friends[0].location);
+		}
+
+	}
+
+	public void runAway() {
+		if (rc.hasMoved()) {
+			return;
+		}
+
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		List<Direction> safe = safeDirections();
+
+		Direction best = null;
+		for (RobotInfo enemy : enemies) {
+			Direction awayFrom = rc.getLocation().directionTo(enemy.location).opposite();
+			for (Direction safeDir : safe) {
+				if (Util.closeEnough(safeDir, awayFrom, 20)) {
+					if (rc.canMove(awayFrom)) {
+						best = awayFrom;
+					}
+				}
+			}
+		}
+		
+		if (best != null) {
+			try {
+				rc.move(best);	
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
+
 	public void moveRandom() {
 		moveRandom(rc.getType().strideRadius);
 	}

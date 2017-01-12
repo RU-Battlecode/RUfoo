@@ -12,7 +12,7 @@ public class ScoutLogic extends RobotLogic {
 	public void logic() {
 		combatManager.singleShotAttack();
 		navManager.dodgeBullets();
-		navManager.moveRandom();
+		navManager.swarm();
 	}
 
 }

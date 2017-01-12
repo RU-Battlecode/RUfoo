@@ -16,8 +16,7 @@ public class SoldierLogic extends RobotLogic {
 			navManager.moveAggressively(target.location);
 			combatManager.singleShotAttack(target);
 		} else {
-			navManager.dodgeBullets();
-			navManager.moveRandom();
+			navManager.swarm();
 		}
 	}
 	
