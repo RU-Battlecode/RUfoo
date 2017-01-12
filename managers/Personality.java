@@ -2,7 +2,7 @@ package RUfoo.managers;
 
 import java.util.Random;
 
-import RUfoo.Util;
+import RUfoo.util.Util;
 import battlecode.common.RobotController;
 
 /**

@@ -1,4 +1,4 @@
-package RUfoo;
+package RUfoo.util;
 
 import java.util.Arrays;
 import java.util.Collections;

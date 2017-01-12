@@ -3,8 +3,8 @@ package RUfoo.logic;
 import java.util.ArrayList;
 import java.util.List;
 
-import RUfoo.Util;
 import RUfoo.managers.Navigation;
+import RUfoo.util.Util;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;

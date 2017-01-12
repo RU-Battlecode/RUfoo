@@ -1,4 +1,4 @@
-package RUfoo;
+package RUfoo.util;
 
 import battlecode.common.MapLocation;
 
