@@ -18,6 +18,16 @@ public class Combat {
 	public Combat(RobotController _rc) {
 		rc = _rc;
 	}
+	
+	public MapLocation getClosestEnemySpawn() {
+		MapLocation[] enemySpawns = rc.getInitialArchonLocations(rc.getTeam().opponent());
+		
+		Arrays.sort(enemySpawns, (s1, s2) -> {
+			return Math.round(s1.distanceSquaredTo(rc.getLocation()) - s2.distanceSquaredTo(rc.getLocation()));
+		});
+		
+		return enemySpawns[0];
+	}
 
 	// TODO: Maybe shoot to the left and the right of target?
 	public void singleShotAttack() {
