@@ -82,7 +82,8 @@ public class Navigation {
 			if (rc.canMove(dir, dist)) {
 				rc.move(dir, dist);
 			} else {
-				for (Direction direction : Util.shuffle(DIRECTIONS)) {
+				Direction[] dirs = Util.shuffle(DIRECTIONS);
+				for (Direction direction : dirs) {
 					if (rc.canMove(direction, dist)) {
 						rc.move(direction, dist);
 						break;
@@ -194,14 +195,38 @@ public class Navigation {
 					// The safest is to far off course for someone who
 					// does not care about safety. Just take the bullet.
 					rc.move(direct, dist);
-				} else {
-					moveRandom(dist);
 				}
-			} else if (rc.canMove(direct, dist)) {
+			}
+
+			if (!rc.hasMoved()) {
 				// There was no best route, just move directly toward target
-				rc.move(direct, dist);
-			} else {
-				moveRandom(dist);
+				moveBest(direct, dist);
+			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void moveBest(Direction dir) {
+		moveBest(dir, rc.getType().strideRadius);
+	}
+
+	public void moveBest(Direction dir, float dist) {
+		if (rc.hasMoved()) {
+			return;
+		}
+
+		try {
+			if (rc.canMove(dir, dist)) {
+				rc.move(dir, dist);
+			} else if (rc.canMove(dir.rotateRightDegrees(45), dist)) {
+				rc.move(dir.rotateRightDegrees(45), dist);
+			} else if (rc.canMove(dir.rotateLeftDegrees(45), dist)) {
+				rc.move(dir.rotateLeftDegrees(45), dist);
+			} else if (rc.canMove(dir.rotateLeftDegrees(90), dist)) {
+				rc.move(dir.rotateLeftDegrees(90), dist);
+			} else if (rc.canMove(dir.rotateRightDegrees(90), dist)) {
+				rc.move(dir.rotateRightDegrees(90), dist);
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
