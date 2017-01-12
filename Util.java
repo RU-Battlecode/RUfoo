@@ -10,32 +10,32 @@ import battlecode.common.MapLocation;
 
 public final class Util {
 	private static final Random rand = new Random(1337);
-	
+
 	private Util() {}
-	
+
 	public static <T extends Object> T randomChoice(T[] array) {
 		int index = rand.nextInt(array.length);
 		return array[index];
 	}
-	
+
 	public static <T extends Object> T[] shuffle(T[] array) {
 		Collections.shuffle(Arrays.asList(array));
 		return array;
 	}
-	
+
 	public static MapLocation average(List<MapLocation> locations) {
 		float x = 0, y = 0;
 		for (MapLocation loc : locations) {
 			x += loc.x;
 			y += loc.y;
 		}
-		float size = Math.max(1,  locations.size());
-		return new MapLocation(x / size,
-							   y / size);
+		float size = Math.max(1, locations.size());
+		return new MapLocation(x / size, y / size);
 	}
-	
+
 	/**
 	 * Random number in range [min, max]
+	 * 
 	 * @param min
 	 * @param max
 	 * @return
@@ -43,11 +43,11 @@ public final class Util {
 	public static int random(int min, int max) {
 		return rand.nextInt(max - min + 1) + min;
 	}
-	
+
 	public static boolean closeEnough(Direction dir1, Direction dir2, float degreesOk) {
 		float degreesBetween = dir1.degreesBetween(dir2);
-		
-		return (degreesBetween >= 0 && degreesBetween <= degreesOk) ||
-				(degreesBetween >= 360 - degreesOk && degreesBetween <= 360);
+
+		return (degreesBetween >= 0 && degreesBetween <= degreesOk)
+				|| (degreesBetween >= 360 - degreesOk && degreesBetween <= 360);
 	}
 }

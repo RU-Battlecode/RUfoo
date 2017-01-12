@@ -18,14 +18,14 @@ public class Combat {
 	public Combat(RobotController _rc) {
 		rc = _rc;
 	}
-	
+
 	public MapLocation getClosestEnemySpawn() {
 		MapLocation[] enemySpawns = rc.getInitialArchonLocations(rc.getTeam().opponent());
-		
+
 		Arrays.sort(enemySpawns, (s1, s2) -> {
 			return Math.round(s1.distanceSquaredTo(rc.getLocation()) - s2.distanceSquaredTo(rc.getLocation()));
 		});
-		
+
 		return enemySpawns[0];
 	}
 
@@ -33,7 +33,7 @@ public class Combat {
 	public void singleShotAttack() {
 		singleShotAttack(findTarget());
 	}
-	
+
 	public void singleShotAttack(RobotInfo target) {
 		if (target != null && rc.canFireSingleShot()) {
 			try {
@@ -63,7 +63,7 @@ public class Combat {
 				}
 			}
 		}
-		
+
 		if (hittable.size() > 0) {
 			return Collections.max(hittable, (e1, e2) -> {
 				return robotPriority(e1) - robotPriority(e2);
@@ -113,12 +113,12 @@ public class Combat {
 		if (robot.getAttackCount() < 1) {
 			priority += 10;
 		}
-		
-		if (robot.moveCount > 0  && robot.location.distanceTo(rc.getLocation()) <= 2.0) {
+
+		if (robot.moveCount > 0 && robot.location.distanceTo(rc.getLocation()) <= 2.0) {
 			// This bot has moved already so may not be able to dodge.
 			priority += 9;
 		}
-		
+
 		return priority;
 	}
 

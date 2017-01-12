@@ -60,10 +60,10 @@ public class Navigation {
 				}
 			}
 		}
-		
+
 		if (best != null) {
 			try {
-				rc.move(best);	
+				rc.move(best);
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
@@ -74,12 +74,12 @@ public class Navigation {
 	public void moveRandom() {
 		moveRandom(rc.getType().strideRadius);
 	}
-	
+
 	public void moveRandom(float dist) {
 		if (rc.hasMoved()) {
 			return;
 		}
-		
+
 		Direction dir = Util.randomChoice(DIRECTIONS);
 		try {
 			if (rc.canMove(dir, dist)) {
@@ -164,16 +164,16 @@ public class Navigation {
 	public void moveAggressively(MapLocation target) {
 		moveTo(target, false);
 	}
-	
+
 	void moveTo(MapLocation target, boolean prioritizeSafety) {
-		
+
 		float distToTarget = rc.getLocation().distanceTo(target);
-		
+
 		// Already there? or can't move?
 		if (distToTarget < GameConstants.GENERAL_SPAWN_OFFSET || rc.hasMoved()) {
 			return;
 		}
-		
+
 		float dist = Math.max(0, Math.min(rc.getType().strideRadius, distToTarget));
 
 		// The direct direction to the target location.
@@ -185,10 +185,9 @@ public class Navigation {
 			return Math.round(dir1.degreesBetween(direct) - dir2.degreesBetween(direct));
 		});
 
-		
 		// Try to move in the safest direct, else just move directly to
 		// location.
-		try {	
+		try {
 			if (best != null) {
 				float degrees = best.degreesBetween(direct);
 				if (prioritizeSafety) {
@@ -235,19 +234,20 @@ public class Navigation {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void moveByTrees(boolean includeFriendly) {
 		if (rc.hasMoved()) {
 			return;
 		}
-		
+
 		TreeInfo[] trees = rc.senseNearbyTrees();
 		// Sort furthest first
 		Arrays.sort(trees, (t1, t2) -> {
-			return Math.round(t1.location.distanceSquaredTo(rc.getLocation()) - t2.location.distanceSquaredTo(rc.getLocation()));
+			return Math.round(
+					t1.location.distanceSquaredTo(rc.getLocation()) - t2.location.distanceSquaredTo(rc.getLocation()));
 		});
-		
-		for (TreeInfo tree : trees) {	
+
+		for (TreeInfo tree : trees) {
 			if (rc.getTeam() != tree.getTeam() || includeFriendly) {
 				moveAggressively(tree.location);
 			}

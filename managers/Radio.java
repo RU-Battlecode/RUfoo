@@ -7,7 +7,7 @@ import battlecode.common.RobotController;
 public class Radio {
 
 	private RobotController rc;
-		
+
 	public Radio(RobotController _rc) {
 		rc = _rc;
 	}

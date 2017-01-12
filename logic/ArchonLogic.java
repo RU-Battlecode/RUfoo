@@ -7,7 +7,6 @@ import RUfoo.Util;
 import RUfoo.managers.Navigation;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -18,11 +17,11 @@ public class ArchonLogic extends RobotLogic {
 			Direction.getNorth(),
 			Direction.getEast().rotateRightDegrees(45),
 			Direction.getWest().rotateLeftDegrees(45) };
-	
+
 	public ArchonLogic(RobotController _rc) {
 		super(_rc);
 	}
-	
+
 	@Override
 	public void logic() {
 		RobotInfo[] robots = rc.senseNearbyRobots();
@@ -47,7 +46,7 @@ public class ArchonLogic extends RobotLogic {
 		navManager.runAway();
 		navManager.moveRandom();
 	}
-	
+
 	void buildGardener() {
 		Direction dir = Util.randomChoice(Navigation.DIRECTIONS);
 		if (rc.canBuildRobot(RobotType.GARDENER, dir)) {
