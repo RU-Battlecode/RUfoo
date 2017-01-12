@@ -167,4 +167,26 @@ public class Navigation {
 			e.printStackTrace();
 		}
 	}
+	
+	public void moveByTrees(boolean includeFriendly) {
+		if (rc.hasMoved()) {
+			return;
+		}
+		
+		TreeInfo[] trees = rc.senseNearbyTrees();
+		// Sort furthest first
+		Arrays.sort(trees, (t1, t2) -> {
+			return Math.round(t1.location.distanceSquaredTo(rc.getLocation()) - t2.location.distanceSquaredTo(rc.getLocation()));
+		});
+		
+		for (TreeInfo tree : trees) {	
+			if (rc.getTeam() != tree.getTeam() || includeFriendly) {
+				moveAggressively(tree.location);
+			}
+		}
+
+		if (!rc.hasMoved()) {
+			moveRandom();
+		}
+	}
 }
