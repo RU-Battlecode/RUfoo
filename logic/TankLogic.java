@@ -13,11 +13,11 @@ public class TankLogic extends RobotLogic {
 	public void logic() {
 		RobotInfo target = combatManager.findTarget();
 		if (target != null) {
-			navManager.moveAggressively(target.location);
+			navManager.moveAggressively(target.location.add(rc.getLocation().directionTo(target.location)));
 			combatManager.singleShotAttack(target);
 		} else {
 			navManager.dodgeBullets();
-			navManager.moveRandom();
+			navManager.moveByTrees(false);
 		}
 	}
 
