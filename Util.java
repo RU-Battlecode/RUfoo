@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 
 public final class Util {
@@ -41,5 +42,12 @@ public final class Util {
 	 */
 	public static int random(int min, int max) {
 		return rand.nextInt(max - min + 1) + min;
+	}
+	
+	public static boolean closeEnough(Direction dir1, Direction dir2, float degreesOk) {
+		float degreesBetween = dir1.degreesBetween(dir2);
+		
+		return (degreesBetween >= 0 && degreesBetween <= degreesOk) ||
+				(degreesBetween >= 360 - degreesOk && degreesBetween <= 360);
 	}
 }
