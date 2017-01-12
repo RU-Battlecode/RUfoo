@@ -19,6 +19,7 @@ public abstract class RobotLogic {
     	rc = _rc;
     	navManager = new Navigation(rc);
         combatManager = new Combat(rc);
+        personalityManager = new Personality(rc);
     }
     
     /**
