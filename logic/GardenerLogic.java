@@ -2,50 +2,64 @@ package RUfoo.logic;
 
 import java.util.Arrays;
 
-import RUfoo.Util;
-import RUfoo.managers.BuildInstructions;
 import RUfoo.managers.Navigation;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 import battlecode.common.TreeInfo;
 
+// 0. Record base position?
+
+// 1. Build trees... 
+/*
+ *   T T          T T       
+ *       T  or  T      or  
+ *   T T          T T
+ *   
+ *      T
+ *   T     T   
+ *   T     T
+ */
+
+// 2. build scouts...
+//
+
+// 3.
+// Build best units we can afford...
+
 public class GardenerLogic extends RobotLogic {
 
-	private static final Direction[] SCOUT_BUILD_DIRECTIONS = {
-			Direction.getEast().rotateRightDegrees(45), Direction.getWest().rotateLeftDegrees(45) };
+	private static final Direction[] TREE_BUILD_DIRS = {
+			Direction.getNorth(),
+			Navigation.NORTH_WEST.rotateLeftDegrees(15),
+			Navigation.NORTH_EAST.rotateRightDegrees(15),
+			Navigation.SOUTH_WEST.rotateRightDegrees(15),
+			Navigation.SOUTH_EAST.rotateLeftDegrees(15),
+	};
+		
+	private float buildOffset;
+	private Direction buildDirection;
 	
-	private int scoutsMade;
-	private int failedBuildCount;
-
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
-		scoutsMade = 0;
-		failedBuildCount = 0;
+		Direction pointAt = rc.getLocation().directionTo(combatManager.getClosestEnemySpawn());
+		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
+		buildDirection = Direction.getSouth().rotateLeftDegrees(buildOffset);
 	}
 
 	@Override
 	public void logic() {
-		navManager.dodgeBullets();
-		manageTrees();
-		build();
-		donate();
+		donateToWin();
+		plantTrees();
+		waterTrees();
+		buildRobots();
 	}
-
-	void build() {
-		if (scoutsMade < 1) {
-			build(RobotType.SCOUT);
-		} else {
-			build(RobotType.TANK);
-			build(RobotType.SOLDIER);
-		}
-	}
-
-	void donate() {
-		if (rc.getTeamBullets() + rc.getTeamVictoryPoints() >= GameConstants.VICTORY_POINTS_TO_WIN) {
+	
+	void donateToWin() {
+		// If we can win... win.
+		if (rc.getTeamVictoryPoints() + (int)(rc.getTeamBullets() / 10) >= GameConstants.VICTORY_POINTS_TO_WIN) {
 			try {
 				rc.donate(rc.getTeamBullets());
 			} catch (GameActionException e) {
@@ -53,51 +67,25 @@ public class GardenerLogic extends RobotLogic {
 			}
 		}
 	}
-
-	void manageTrees() {
-		// Load a garden construction plan.
-		if (!constructionManager.hasLoadedPlan() || rc.senseNearbyTrees().length == 0) {
-			constructionManager.loadPlan(BuildInstructions.SQUARE);
-		}
-
-		// Get the next instruction plan location. Null if done.
-		MapLocation nextBuildLocation = constructionManager.peekInstructionLocation();
-				
-		if (nextBuildLocation != null) {
-			
-			// Are we close enough to spawn the plant?
-			if (rc.getLocation().distanceTo(nextBuildLocation) <= 2.0) {
-				// Direction to the build site can be null if the robot is
-				// directly on the location.
-				Direction dir = rc.getLocation().directionTo(nextBuildLocation);
-
-				if (dir == null) {
-					// Try to take a step back because we are right on the location we want to build.
-					navManager.moveRandom(GameConstants.GENERAL_SPAWN_OFFSET / 2);
-				} else if (rc.canPlantTree(dir)) {
-					try {
-						rc.plantTree(dir);
-						constructionManager.popInstructionLocation();
-					} catch (GameActionException e) {
-						e.printStackTrace();
-						failedBuildCount++;
-					}
-				} else {
-					failedBuildCount++;
+	
+	void plantTrees() {
+		for (Direction dir : TREE_BUILD_DIRS) {
+			dir = dir.rotateLeftDegrees(buildOffset);
+			if (rc.canPlantTree(dir)) {
+				try {
+					rc.plantTree(dir);
+					break;
+				} catch (GameActionException e) {
+					e.printStackTrace();
 				}
-			} else {
-				navManager.moveAggressively(nextBuildLocation.add(new Direction(0, GameConstants.GENERAL_SPAWN_OFFSET)));
 			}
 		}
-
-		if (failedBuildCount > personalityManager.getPatience()) {
-			failedBuildCount = 0;
-			// Give up, must be something in the way.
-			constructionManager.popInstructionLocation();
-		}
-		
-		// Water trees if you can
+	}
+	
+	void waterTrees() {
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
+		
+		// Lowest health trees first.
 		Arrays.sort(trees, (t1, t2) -> {
 			return Math.round(t1.health - t2.health);
 		});
@@ -109,24 +97,18 @@ public class GardenerLogic extends RobotLogic {
 				} catch (GameActionException e) {
 					e.printStackTrace();
 				}
-			} else {
-				navManager.moveAggressively(tree.location);
 			}
-		}
+		}	
 	}
-
+	
+	void buildRobots() {
+		build(RobotType.SCOUT);
+	}
+	
 	void build(RobotType type) {
-		Direction dir = Util.randomChoice(Navigation.DIRECTIONS);
-		if (type == RobotType.SCOUT) {
-			dir = SCOUT_BUILD_DIRECTIONS[scoutsMade % SCOUT_BUILD_DIRECTIONS.length];
-		}
-
-		if (rc.canBuildRobot(type, dir)) {
+		if (rc.isBuildReady() && rc.hasRobotBuildRequirements(type) && rc.canBuildRobot(type, buildDirection)) {
 			try {
-				rc.buildRobot(type, dir);
-				if (type == RobotType.SCOUT) {
-					scoutsMade++;
-				}
+				rc.buildRobot(type, buildDirection);
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
