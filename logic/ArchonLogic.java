@@ -43,7 +43,9 @@ public class ArchonLogic extends RobotLogic {
 			buildGardener();
 		}
 
-		moveRelativeTo(gardeners);
+		navManager.dodgeBullets();
+		navManager.runAway();
+		navManager.moveRandom();
 	}
 	
 	void buildGardener() {
@@ -55,20 +57,5 @@ public class ArchonLogic extends RobotLogic {
 				e.printStackTrace();
 			}
 		}
-	}
-	
-	void moveRelativeTo(List<RobotInfo> gardeners) {
-		if (gardeners.size() <= 1) {
-			navManager.dodgeBullets();
-			navManager.moveRandom();
-			return;
-		}
-		
-		// Move to the center of all gardeners
-		List<MapLocation> locations = new ArrayList<>();
-		for (RobotInfo gardener : gardeners) {
-			locations.add(gardener.location);
-		}
-		navManager.moveToSafely(Util.average(locations));
 	}
 }
