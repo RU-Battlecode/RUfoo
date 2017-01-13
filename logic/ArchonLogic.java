@@ -42,9 +42,9 @@ public class ArchonLogic extends RobotLogic {
 			buildGardener();
 		}
 
-		navManager.dodgeBullets();
-		navManager.runAway();
-		navManager.moveRandom();
+		nav.dodgeBullets();
+		nav.runAway();
+		nav.moveRandom();
 	}
 
 	void buildGardener() {

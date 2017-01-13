@@ -10,9 +10,9 @@ public class ScoutLogic extends RobotLogic {
 
 	@Override
 	public void logic() {
-		combatManager.singleShotAttack();
-		navManager.dodgeBullets();
-		navManager.swarm();
+		combat.singleShotAttack();
+		nav.dodgeBullets();
+		nav.swarm();
 	}
 
 }

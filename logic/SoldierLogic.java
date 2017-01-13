@@ -11,12 +11,12 @@ public class SoldierLogic extends RobotLogic {
 
 	@Override
 	public void logic() {
-		RobotInfo target = combatManager.findTarget();
+		RobotInfo target = combat.findTarget();
 		if (target != null) {
-			navManager.moveAggressively(target.location);
-			combatManager.singleShotAttack(target);
+			nav.moveAggressively(target.location);
+			combat.singleShotAttack(target);
 		} else {
-			navManager.swarm();
+			nav.swarm();
 		}
 	}
 

@@ -3,6 +3,7 @@ package RUfoo.logic;
 import RUfoo.managers.Combat;
 import RUfoo.managers.Navigation;
 import RUfoo.managers.Personality;
+import RUfoo.managers.Radio;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
@@ -10,16 +11,18 @@ import battlecode.common.TreeInfo;
 
 public abstract class RobotLogic {
 	protected RobotController rc;
-	protected Navigation navManager;
-	protected Combat combatManager;
-	protected Personality personalityManager;
+	protected Navigation nav;
+	protected Combat combat;
+	protected Personality personality;
+	protected Radio radio;
 	protected boolean active;
 
 	public RobotLogic(RobotController _rc) {
 		rc = _rc;
-		navManager = new Navigation(rc);
-		combatManager = new Combat(rc);
-		personalityManager = new Personality(rc);
+		nav = new Navigation(rc);
+		combat = new Combat(rc);
+		personality = new Personality(rc);
+		radio = new Radio(rc);
 	}
 
 	/**

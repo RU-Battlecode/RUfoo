@@ -31,19 +31,19 @@ import battlecode.common.TreeInfo;
 
 public class GardenerLogic extends RobotLogic {
 
-	private static final Direction[] TREE_BUILD_DIRS = { 
-			Direction.getNorth(),
-			Navigation.NORTH_WEST.rotateLeftDegrees(15),
-			Navigation.NORTH_EAST.rotateRightDegrees(15),
-			Navigation.SOUTH_WEST.rotateRightDegrees(15),
-			Navigation.SOUTH_EAST.rotateLeftDegrees(15), };
+	private static final float DONATE_AFTER = 500; // bullets
+	private static final float DONATE_PERCENTAGE = 0.10f;
+
+	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(),
+			Navigation.NORTH_WEST.rotateLeftDegrees(15), Navigation.NORTH_EAST.rotateRightDegrees(15),
+			Navigation.SOUTH_WEST.rotateRightDegrees(15), Navigation.SOUTH_EAST.rotateLeftDegrees(15), };
 
 	private float buildOffset;
 	private Direction buildDirection;
 
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
-		Direction pointAt = rc.getLocation().directionTo(combatManager.getClosestEnemySpawn());
+		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn());
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
 		buildDirection = Direction.getSouth().rotateLeftDegrees(buildOffset);
 	}
