@@ -57,13 +57,25 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void donateToWin() {
-		// If we can win... win.
-		if (rc.getTeamVictoryPoints() + (int) (rc.getTeamBullets() / 10) >= GameConstants.VICTORY_POINTS_TO_WIN) {
-			try {
+		try {
+			if (rc.getRoundNum() == rc.getRoundLimit() - 1) {
+
+				// End game. Just donate all.
 				rc.donate(rc.getTeamBullets());
-			} catch (GameActionException e) {
-				e.printStackTrace();
+
+			} else {
+				// If we can win... win.
+				if (rc.getTeamVictoryPoints()
+						+ (int) (rc.getTeamBullets() / 10) >= GameConstants.VICTORY_POINTS_TO_WIN) {
+
+					rc.donate(rc.getTeamBullets());
+
+				} else if (rc.getTeamBullets() > DONATE_AFTER) {
+					rc.donate(rc.getTeamBullets() * DONATE_PERCENTAGE);
+				}
 			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
 		}
 	}
 
