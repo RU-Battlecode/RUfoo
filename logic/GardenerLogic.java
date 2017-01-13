@@ -40,12 +40,15 @@ public class GardenerLogic extends RobotLogic {
 
 	private float buildOffset;
 	private Direction buildDirection;
-
+	private int scoutCount;
+	
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn());
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
 		buildDirection = Direction.getSouth().rotateLeftDegrees(buildOffset);
+		scoutCount = 0;
+
 	}
 
 	@Override
@@ -113,13 +116,24 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void buildRobots() {
-		build(RobotType.SCOUT);
+		if (rc.getRoundNum() > 500) {
+			build(RobotType.TANK);
+		}
+		
+		if (scoutCount < 1) {
+			build(RobotType.SCOUT);
+		} else {
+			build(RobotType.LUMBERJACK);
+		}
 	}
 
 	void build(RobotType type) {
 		if (rc.isBuildReady() && rc.hasRobotBuildRequirements(type) && rc.canBuildRobot(type, buildDirection)) {
 			try {
 				rc.buildRobot(type, buildDirection);
+				if (type == RobotType.SCOUT) {
+					scoutCount++;
+				}
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
