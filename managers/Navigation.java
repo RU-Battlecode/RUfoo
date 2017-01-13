@@ -181,9 +181,11 @@ public class Navigation {
 
 		// Find the safest directions that is closest to the direction we want
 		// to move.
-		Direction best = Collections.min(safeDirections(), (dir1, dir2) -> {
+		List<Direction> safeDirs = safeDirections();
+		
+		Direction best = (safeDirs.size() == 0 ? null : Collections.min(safeDirs, (dir1, dir2) -> {
 			return Math.round(dir1.degreesBetween(direct) - dir2.degreesBetween(direct));
-		});
+		}));
 
 		// Try to move in the safest direct, else just move directly to
 		// location.
