@@ -18,8 +18,11 @@ public class ArchonLogic extends RobotLogic {
 			Direction.getEast().rotateRightDegrees(45),
 			Direction.getWest().rotateLeftDegrees(45) };
 
+	private Direction buildDir;
+	
 	public ArchonLogic(RobotController _rc) {
 		super(_rc);
+		buildDir = nav.randomDirection();
 	}
 
 	@Override
@@ -44,7 +47,21 @@ public class ArchonLogic extends RobotLogic {
 
 		nav.dodgeBullets();
 		nav.runAway();
-		nav.moveRandom();
+		
+		try {
+			if (!rc.onTheMap(rc.getLocation().add(buildDir, rc.getType().sensorRadius / 2)) ||
+					!rc.canMove(buildDir, rc.getType().strideRadius)) {
+				buildDir = personality.getIsLeftHanded() ?  buildDir.rotateLeftDegrees(45) : buildDir.rotateRightDegrees(45);
+			}
+		} catch (GameActionException e) {
+			
+			e.printStackTrace();
+		}
+		
+		if (!rc.isBuildReady()) {
+			nav.moveBest(buildDir);
+		}
+		
 	}
 
 	void buildGardener() {
