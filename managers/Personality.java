@@ -60,6 +60,11 @@ public class Personality {
 					}
 					
 				}
+				
+				// Adoption...
+				if (mother == null) {
+					mother = robots[0];
+				}
 			}
 		}
 		
