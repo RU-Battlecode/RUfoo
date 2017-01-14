@@ -8,9 +8,10 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
-// 0. Record base position?
+// 0.  Find a good build spot. (Spread)
 
 // 1. Build trees... 
 /*
@@ -41,22 +42,40 @@ public class GardenerLogic extends RobotLogic {
 	private float buildOffset;
 	private Direction buildDirection;
 	private int scoutCount;
-	
+	private int lumberjackCount;
+	private boolean settled;
+
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn());
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
 		buildDirection = Direction.getSouth().rotateLeftDegrees(buildOffset);
 		scoutCount = 0;
-
+		lumberjackCount = 0;
 	}
 
 	@Override
 	public void logic() {
-		donateToWin();
-		plantTrees();
-		waterTrees();
-		buildRobots();
+		
+		if (settled) {
+			donateToWin();
+			plantTrees();
+			waterTrees();
+			buildRobots();
+			orderClearTrees();
+		} else {
+			findBaseLocation();
+		}
+	}
+	
+	void findBaseLocation() {
+		
+		if (rc.canPlantTree(buildDirection)) {
+			settled = true;
+		} else {
+			nav.moveBest(buildDirection.opposite());
+		}
+		
 	}
 
 	void donateToWin() {
@@ -116,13 +135,9 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void buildRobots() {
-		if (rc.getRoundNum() > 500) {
-			build(RobotType.TANK);
-		}
-		
 		if (scoutCount < 1) {
 			build(RobotType.SCOUT);
-		} else {
+		} else if (lumberjackCount < 2) {
 			build(RobotType.LUMBERJACK);
 		}
 	}
@@ -133,6 +148,8 @@ public class GardenerLogic extends RobotLogic {
 				rc.buildRobot(type, buildDirection);
 				if (type == RobotType.SCOUT) {
 					scoutCount++;
+				} else if (type == RobotType.LUMBERJACK) {
+					lumberjackCount++;
 				}
 			} catch (GameActionException e) {
 				e.printStackTrace();
