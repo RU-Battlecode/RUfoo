@@ -35,7 +35,7 @@ public class Combat {
 	}
 
 	public void singleShotAttack(RobotInfo target) {
-		if (target != null && rc.canFireSingleShot()) {
+		if (target != null && rc.canFireSingleShot() && !rc.hasAttacked()) {
 			try {
 				rc.fireSingleShot(rc.getLocation().directionTo(target.location));
 			} catch (GameActionException e) {
