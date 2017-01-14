@@ -10,13 +10,10 @@ import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
+import battlecode.common.TreeInfo;
 
 public class ArchonLogic extends RobotLogic {
-
-	private static final Direction[] GARDENER_BUILD_DIRECTIONS = { 
-			Direction.getNorth(),
-			Direction.getEast().rotateRightDegrees(45),
-			Direction.getWest().rotateLeftDegrees(45) };
 
 	private Direction buildDir;
 	
@@ -41,7 +38,7 @@ public class ArchonLogic extends RobotLogic {
 		}
 
 		// Do we need to build more gardeners?
-		if (gardeners.size() < GARDENER_BUILD_DIRECTIONS.length && rc.isBuildReady()) {
+		if (rc.isBuildReady() && gardeners.size() < 6) {
 			buildGardener();
 		}
 
