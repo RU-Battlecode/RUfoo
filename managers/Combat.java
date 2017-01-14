@@ -107,7 +107,7 @@ public class Combat {
 		}
 
 		// Prioritize low health!
-		double percentHealth = robot.getHealth() / robot.getType().getStartingHealth();
+		double percentHealth = robot.getHealth() / robot.getType().maxHealth;
 		priority += 100 * (1 - percentHealth); // this will be between 0 and 100
 
 		// The robot hasn't attacked yet!
