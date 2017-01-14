@@ -30,19 +30,17 @@ public class Navigation {
 	public Navigation(RobotController _rc) {
 		rc = _rc;
 	}
-	
+
 	public Direction randomDirection() {
 		return new Direction(Util.random(0.0f, 1.0f, rc.getRoundNum()), Util.random(0.0f, 1.0f, rc.getRoundNum()));
 	}
-	
-	public void swarm() {
 
+	public void swarm() {
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 
 		if (friends.length > 0) {
 			moveToSafely(friends[0].location);
 		}
-
 	}
 
 	public void runAway() {
@@ -182,7 +180,7 @@ public class Navigation {
 		// Find the safest directions that is closest to the direction we want
 		// to move.
 		List<Direction> safeDirs = safeDirections();
-		
+
 		Direction best = (safeDirs.size() == 0 ? null : Collections.min(safeDirs, (dir1, dir2) -> {
 			return Math.round(dir1.degreesBetween(direct) - dir2.degreesBetween(direct));
 		}));

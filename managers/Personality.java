@@ -86,4 +86,5 @@ public class Personality {
 	public int getPatience() {
 		return patience;
 	}
+	
 }
