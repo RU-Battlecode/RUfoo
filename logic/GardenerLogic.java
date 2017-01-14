@@ -66,10 +66,10 @@ public class GardenerLogic extends RobotLogic {
 		} else {
 			findBaseLocation();
 		}
+			
 	}
 	
 	void findBaseLocation() {
-		
 		if (rc.canPlantTree(buildDirection)) {
 			settled = true;
 		} else {
