@@ -29,7 +29,17 @@ public class Combat {
 
 		return enemySpawns[0];
 	}
+	
+	public MapLocation getFurthestEnemySpawn() {
+		MapLocation[] enemySpawns = rc.getInitialArchonLocations(rc.getTeam().opponent());
 
+		Arrays.sort(enemySpawns, (s1, s2) -> {
+			return Math.round(s2.distanceSquaredTo(rc.getLocation()) - s1.distanceSquaredTo(rc.getLocation()));
+		});
+
+		return enemySpawns[0];
+	} 
+	
 	// TODO: Maybe shoot to the left and the right of target?
 	public void singleShotAttack() {
 		singleShotAttack(findTarget());
