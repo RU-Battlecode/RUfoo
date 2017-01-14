@@ -105,11 +105,7 @@ public class Navigation {
 		if (rc.senseNearbyBullets().length > 0) {
 			List<Direction> possibleDirs = safeDirections();
 			if (possibleDirs.size() > 0) {
-				try {
-					rc.move(possibleDirs.get(0));
-				} catch (GameActionException e) {
-					e.printStackTrace();
-				}
+				moveBest(possibleDirs.get(0));
 			}
 		}
 	}
