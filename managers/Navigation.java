@@ -13,6 +13,7 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import battlecode.common.TreeInfo;
 
 public class Navigation {
@@ -136,9 +137,20 @@ public class Navigation {
 		BulletInfo[] bullets = rc.senseNearbyBullets();
 
 		// TODO: Check where enemies are
-		// RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius,
-		// rc.getTeam().opponent());
-
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		for (RobotInfo enemy : enemies) {
+			
+			if (enemy.getType() == RobotType.LUMBERJACK 
+					&& enemy.attackCount < 1
+					&& enemy.location.distanceTo(rc.getLocation()) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2.0) {
+				return false;
+			} else if (enemy.getType() == RobotType.SOLDIER
+					&& enemy.attackCount < 1) {
+				return false;
+			}
+			
+		}
+		 
 		// This is where I want to be
 		MapLocation possibleLocation = rc.getLocation().add(dir);
 
