@@ -28,18 +28,18 @@ import battlecode.common.TreeInfo;
 public class ScoutLogic extends RobotLogic {
 
 	private static final float LOW_HEALTH_PERCENT = 0.25f;
-	
+
 	private Direction exploreDir;
 	private MapLocation home;
 	private Map<MapLocation, Integer> treeMap;
-	
+
 	public ScoutLogic(RobotController _rc) {
 		super(_rc);
 		exploreDir = null;
 		home = personality.getMother().location; // aww
-		
-		if (home == null)  {
-			// :( 
+
+		if (home == null) {
+			// :(
 			home = rc.getLocation();
 		}
 		treeMap = new HashMap<>();
@@ -76,31 +76,31 @@ public class ScoutLogic extends RobotLogic {
 		if (!shouldExplore) {
 			exploreDir = rc.getLocation().directionTo(home);
 		}
-		
+
 		if (!isHome() || shouldExplore) {
 			nav.moveBest(exploreDir);
 		}
 	}
-	
+
 	private void countTrees() {
 		TreeInfo[] trees = rc.senseNearbyTrees();
-		
+
 		for (TreeInfo tree : trees) {
 			if (tree.getTeam() == Team.NEUTRAL) {
 				treeMap.put(tree.location, tree.ID);
 			}
 		}
-		
+
 	}
-	
+
 	boolean shouldExplore() {
 		try {
-			return rc.onTheMap(rc.getLocation().add(exploreDir, rc.getType().sensorRadius / 2)) &&
-					rc.getHealth() / rc.getType().maxHealth > LOW_HEALTH_PERCENT;
+			return rc.onTheMap(rc.getLocation().add(exploreDir, rc.getType().sensorRadius / 2))
+					&& rc.getHealth() / rc.getType().maxHealth > LOW_HEALTH_PERCENT;
 		} catch (GameActionException e) {
 			e.printStackTrace();
 			return true;
-		}	
+		}
 	}
 
 	boolean isHome() {
