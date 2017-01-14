@@ -1,4 +1,4 @@
-package RUfoo;
+package RUfoo.util;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,6 +42,11 @@ public final class Util {
 	 */
 	public static int random(int min, int max) {
 		return rand.nextInt(max - min + 1) + min;
+	}
+	
+	public static float random(float min, float max, int seed) {
+		rand.setSeed(seed);
+		return rand.nextFloat() * (max - min) + min;
 	}
 
 	public static boolean closeEnough(Direction dir1, Direction dir2, float degreesOk) {

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import RUfoo.Util;
+import RUfoo.util.Util;
 import battlecode.common.BulletInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -13,6 +13,7 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import battlecode.common.TreeInfo;
 
 public class Navigation {
@@ -31,14 +32,16 @@ public class Navigation {
 		rc = _rc;
 	}
 
-	public void swarm() {
+	public Direction randomDirection() {
+		return new Direction(Util.random(0.0f, 1.0f, rc.getRoundNum()), Util.random(0.0f, 1.0f, rc.getRoundNum()));
+	}
 
+	public void swarm() {
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 
 		if (friends.length > 0) {
 			moveToSafely(friends[0].location);
 		}
-
 	}
 
 	public void runAway() {
@@ -105,11 +108,7 @@ public class Navigation {
 		if (rc.senseNearbyBullets().length > 0) {
 			List<Direction> possibleDirs = safeDirections();
 			if (possibleDirs.size() > 0) {
-				try {
-					rc.move(possibleDirs.get(0));
-				} catch (GameActionException e) {
-					e.printStackTrace();
-				}
+				moveBest(possibleDirs.get(0));
 			}
 		}
 	}
@@ -138,9 +137,20 @@ public class Navigation {
 		BulletInfo[] bullets = rc.senseNearbyBullets();
 
 		// TODO: Check where enemies are
-		// RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius,
-		// rc.getTeam().opponent());
-
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		for (RobotInfo enemy : enemies) {
+			
+			if (enemy.getType() == RobotType.LUMBERJACK 
+					&& enemy.attackCount < 1
+					&& enemy.location.distanceTo(rc.getLocation()) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2.0) {
+				return false;
+			} else if (enemy.getType() == RobotType.SOLDIER
+					&& enemy.attackCount < 1) {
+				return false;
+			}
+			
+		}
+		 
 		// This is where I want to be
 		MapLocation possibleLocation = rc.getLocation().add(dir);
 
@@ -174,16 +184,18 @@ public class Navigation {
 			return;
 		}
 
-		float dist = Math.max(0, Math.min(rc.getType().strideRadius, distToTarget));
+		float dist = Math.max(0, Math.min(rc.getType().strideRadius, distToTarget - 0.1f));
 
 		// The direct direction to the target location.
 		Direction direct = rc.getLocation().directionTo(target);
 
 		// Find the safest directions that is closest to the direction we want
 		// to move.
-		Direction best = Collections.min(safeDirections(), (dir1, dir2) -> {
+		List<Direction> safeDirs = safeDirections();
+
+		Direction best = (safeDirs.size() == 0 ? null : Collections.min(safeDirs, (dir1, dir2) -> {
 			return Math.round(dir1.degreesBetween(direct) - dir2.degreesBetween(direct));
-		});
+		}));
 
 		// Try to move in the safest direct, else just move directly to
 		// location.
@@ -251,10 +263,6 @@ public class Navigation {
 			if (rc.getTeam() != tree.getTeam() || includeFriendly) {
 				moveAggressively(tree.location);
 			}
-		}
-
-		if (!rc.hasMoved()) {
-			moveRandom();
 		}
 	}
 }

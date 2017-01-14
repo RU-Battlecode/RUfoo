@@ -4,8 +4,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import RUfoo.Vector2f;
+import RUfoo.util.Vector2f;
 import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -28,14 +29,24 @@ public class Combat {
 
 		return enemySpawns[0];
 	}
+	
+	public MapLocation getFurthestEnemySpawn() {
+		MapLocation[] enemySpawns = rc.getInitialArchonLocations(rc.getTeam().opponent());
 
+		Arrays.sort(enemySpawns, (s1, s2) -> {
+			return Math.round(s2.distanceSquaredTo(rc.getLocation()) - s1.distanceSquaredTo(rc.getLocation()));
+		});
+
+		return enemySpawns[0];
+	} 
+	
 	// TODO: Maybe shoot to the left and the right of target?
 	public void singleShotAttack() {
 		singleShotAttack(findTarget());
 	}
 
 	public void singleShotAttack(RobotInfo target) {
-		if (target != null && rc.canFireSingleShot()) {
+		if (target != null && rc.canFireSingleShot() && !rc.hasAttacked()) {
 			try {
 				rc.fireSingleShot(rc.getLocation().directionTo(target.location));
 			} catch (GameActionException e) {
@@ -106,7 +117,7 @@ public class Combat {
 		}
 
 		// Prioritize low health!
-		double percentHealth = robot.getHealth() / robot.getType().getStartingHealth();
+		double percentHealth = robot.getHealth() / robot.getType().maxHealth;
 		priority += 100 * (1 - percentHealth); // this will be between 0 and 100
 
 		// The robot hasn't attacked yet!
@@ -120,6 +131,49 @@ public class Combat {
 		}
 
 		return priority;
+	}
+
+	// Melee
+
+	public int meleePriority(RobotInfo robot) {
+		int priority = robotPriority(robot);
+
+		// Close enemies = better [0,50]
+		priority += (rc.getType().sensorRadius - robot.getLocation().distanceTo(rc.getLocation())) * 50;
+
+		return priority;
+	}
+
+	public RobotInfo findMeleeTarget() {
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+
+		// Sort by attack priority.
+		Arrays.sort(enemies, (e1, e2) -> {
+			return meleePriority(e1) - meleePriority(e2);
+		});
+		
+		return enemies.length > 0 ? enemies[0] : null;
+	}
+
+	public void meleeAttackAggressive() {
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().strideRadius, rc.getTeam().opponent());
+
+		// Sort by attack priority.
+		Arrays.sort(enemies, (e1, e2) -> {
+			return meleePriority(e1) - meleePriority(e2);
+		});
+
+		for (RobotInfo enemy : enemies) {
+			if (rc.canStrike() && rc.getLocation().distanceTo(enemy.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2) {
+				try {
+					rc.strike();
+					break;
+				} catch (GameActionException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 	}
 
 }

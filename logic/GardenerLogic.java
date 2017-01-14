@@ -7,10 +7,12 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
-// 0. Record base position?
+// 0.  Find a good build spot. (Spread)
 
 // 1. Build trees... 
 /*
@@ -31,39 +33,83 @@ import battlecode.common.TreeInfo;
 
 public class GardenerLogic extends RobotLogic {
 
-	private static final Direction[] TREE_BUILD_DIRS = { 
-			Direction.getNorth(),
-			Navigation.NORTH_WEST.rotateLeftDegrees(15),
-			Navigation.NORTH_EAST.rotateRightDegrees(15),
-			Navigation.SOUTH_WEST.rotateRightDegrees(15),
-			Navigation.SOUTH_EAST.rotateLeftDegrees(15), };
+	private static final float DONATE_AFTER = 500; // bullets
+	private static final float DONATE_PERCENTAGE = 0.10f;
+	private static final int STEPS_BEFORE_SETTLE = 6;
+	private int stepsBeforeGiveUp = 70;
+
+	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(),
+			Navigation.NORTH_WEST.rotateLeftDegrees(15), Navigation.NORTH_EAST.rotateRightDegrees(15),
+			Navigation.SOUTH_WEST.rotateRightDegrees(15), Navigation.SOUTH_EAST.rotateLeftDegrees(15), };
 
 	private float buildOffset;
 	private Direction buildDirection;
+	private int scoutCount;
+	private int lumberjackCount;
+	private int steps;
+	private boolean settled;
 
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
-		Direction pointAt = rc.getLocation().directionTo(combatManager.getClosestEnemySpawn());
+		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn());
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
 		buildDirection = Direction.getSouth().rotateLeftDegrees(buildOffset);
+		scoutCount = 0;
+		lumberjackCount = 0;
+		
+		stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.7f);
 	}
 
 	@Override
 	public void logic() {
-		donateToWin();
-		plantTrees();
-		waterTrees();
-		buildRobots();
+		
+		if (settled) {
+			donateToWin();
+			plantTrees();
+			waterTrees();
+			buildRobots();
+			orderClearTrees();
+		} else {
+			findBaseLocation();
+		}
+			
+	}
+	
+	void findBaseLocation() {
+		RobotInfo archon = nearestArchon();
+		
+		if ((archon == null || archon.location.distanceTo(rc.getLocation()) <= 3.0f)
+				&& rc.hasTreeBuildRequirements() &&
+				(rc.canPlantTree(buildDirection) && steps > STEPS_BEFORE_SETTLE)
+				|| steps >= stepsBeforeGiveUp) {
+			settled = true;
+		} else {
+			nav.moveBest(buildDirection.opposite());
+			steps++;
+		}
+		
 	}
 
 	void donateToWin() {
-		// If we can win... win.
-		if (rc.getTeamVictoryPoints() + (int) (rc.getTeamBullets() / 10) >= GameConstants.VICTORY_POINTS_TO_WIN) {
-			try {
+		try {
+			if (rc.getRoundNum() == rc.getRoundLimit() - 1) {
+
+				// End game. Just donate all.
 				rc.donate(rc.getTeamBullets());
-			} catch (GameActionException e) {
-				e.printStackTrace();
+
+			} else {
+				// If we can win... win.
+				if (rc.getTeamVictoryPoints()
+						+ (int) (rc.getTeamBullets() / 10) >= GameConstants.VICTORY_POINTS_TO_WIN) {
+
+					rc.donate(rc.getTeamBullets());
+
+				} else if (rc.getTeamBullets() > DONATE_AFTER) {
+					rc.donate(rc.getTeamBullets() * DONATE_PERCENTAGE);
+				}
 			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -101,17 +147,49 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void buildRobots() {
-		build(RobotType.SCOUT);
+		if (scoutCount < 1) {
+			build(RobotType.SCOUT);
+		} else if (lumberjackCount < 2) {
+			build(RobotType.LUMBERJACK);
+		}
 	}
 
 	void build(RobotType type) {
 		if (rc.isBuildReady() && rc.hasRobotBuildRequirements(type) && rc.canBuildRobot(type, buildDirection)) {
 			try {
 				rc.buildRobot(type, buildDirection);
+				if (type == RobotType.SCOUT) {
+					scoutCount++;
+				} else if (type == RobotType.LUMBERJACK) {
+					lumberjackCount++;
+				}
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
+	void orderClearTrees() {
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+
+		for (TreeInfo tree : trees) {
+			radio.requestCutTreeAt(tree.location);
+			break;
+		}
+	}
+
+	RobotInfo nearestArchon() { 
+		RobotInfo archon = null;
+		
+		RobotInfo[] robots =  rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		
+		for (RobotInfo robot : robots) {
+			if (robot.getType() == RobotType.ARCHON) {
+				archon = robot;
+				break;
+			}
+		}
+		
+		return archon;
+	}
 }

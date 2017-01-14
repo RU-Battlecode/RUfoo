@@ -3,23 +3,23 @@ package RUfoo.logic;
 import java.util.ArrayList;
 import java.util.List;
 
-import RUfoo.Util;
 import RUfoo.managers.Navigation;
+import RUfoo.util.Util;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
+import battlecode.common.TreeInfo;
 
 public class ArchonLogic extends RobotLogic {
 
-	private static final Direction[] GARDENER_BUILD_DIRECTIONS = { 
-			Direction.getNorth(),
-			Direction.getEast().rotateRightDegrees(45),
-			Direction.getWest().rotateLeftDegrees(45) };
-
+	private Direction buildDir;
+	
 	public ArchonLogic(RobotController _rc) {
 		super(_rc);
+		buildDir = nav.randomDirection();
 	}
 
 	@Override
@@ -38,13 +38,28 @@ public class ArchonLogic extends RobotLogic {
 		}
 
 		// Do we need to build more gardeners?
-		if (gardeners.size() < GARDENER_BUILD_DIRECTIONS.length && rc.isBuildReady()) {
+		if (rc.isBuildReady() && gardeners.size() < 6) {
 			buildGardener();
 		}
 
-		navManager.dodgeBullets();
-		navManager.runAway();
-		navManager.moveRandom();
+		nav.dodgeBullets();
+		nav.runAway();
+		
+		try {
+			if (!rc.onTheMap(rc.getLocation().add(buildDir, rc.getType().sensorRadius / 2)) ||
+					!rc.canMove(buildDir, rc.getType().strideRadius)) {
+				buildDir = personality.getIsLeftHanded() ?  buildDir.rotateLeftDegrees(45) : buildDir.rotateRightDegrees(45);
+			}
+		} catch (GameActionException e) {
+			
+			e.printStackTrace();
+		}
+		
+		if (!rc.isBuildReady()) {
+			nav.moveBest(buildDir);
+		}
+		
+		orderClearTrees();
 	}
 
 	void buildGardener() {
@@ -55,6 +70,15 @@ public class ArchonLogic extends RobotLogic {
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	void orderClearTrees() {
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+
+		for (TreeInfo tree : trees) {
+			radio.requestCutTreeAt(tree.location);
+			break;
 		}
 	}
 }
