@@ -56,6 +56,10 @@ public class LumberjackLogic extends RobotLogic {
 
 		if (!rc.hasAttacked() && target == null) {
 			nav.moveByTrees(false);
+			
+			if (!rc.hasMoved()) {
+				nav.moveBest(rc.getLocation().directionTo(combat.getClosestEnemySpawn()));
+			}
 		}
 
 	}
