@@ -41,10 +41,10 @@ public class LumberjackLogic extends RobotLogic {
 	@Override
 	public void logic() {
 		moveOffSpawn();
-		
+
 		combat.meleeAttackAggressive();
 		RobotInfo target = combat.findMeleeTarget();
-		
+
 		if (!rc.hasAttacked()) {
 			if (target != null) {
 				moveTowards(target);
@@ -56,7 +56,7 @@ public class LumberjackLogic extends RobotLogic {
 
 		if (!rc.hasAttacked() && target == null) {
 			nav.moveByTrees(false);
-			
+
 			if (!rc.hasMoved()) {
 				nav.moveBest(rc.getLocation().directionTo(combat.getClosestEnemySpawn()));
 			}
@@ -71,7 +71,7 @@ public class LumberjackLogic extends RobotLogic {
 			}
 		}
 	}
-	
+
 	void clearTreesAroundBase() {
 		TreeInfo[] trees = rc.senseNearbyTrees();
 		final MapLocation nearest = nearestArchonOrGardener();
