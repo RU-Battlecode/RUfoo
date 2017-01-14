@@ -6,6 +6,7 @@ import java.util.List;
 
 import RUfoo.util.Vector2f;
 import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -120,6 +121,49 @@ public class Combat {
 		}
 
 		return priority;
+	}
+
+	// Melee
+
+	public int meleePriority(RobotInfo robot) {
+		int priority = robotPriority(robot);
+
+		// Close enemies = better [0,50]
+		priority += (rc.getType().sensorRadius - robot.getLocation().distanceTo(rc.getLocation())) * 50;
+
+		return priority;
+	}
+
+	public RobotInfo findMeleeTarget() {
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+
+		// Sort by attack priority.
+		Arrays.sort(enemies, (e1, e2) -> {
+			return meleePriority(e1) - meleePriority(e2);
+		});
+		
+		return enemies.length > 0 ? enemies[0] : null;
+	}
+
+	public void meleeAttackAggressive() {
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().strideRadius, rc.getTeam().opponent());
+
+		// Sort by attack priority.
+		Arrays.sort(enemies, (e1, e2) -> {
+			return meleePriority(e1) - meleePriority(e2);
+		});
+
+		for (RobotInfo enemy : enemies) {
+			if (rc.canStrike() && rc.getLocation().distanceTo(enemy.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2) {
+				try {
+					rc.strike();
+					break;
+				} catch (GameActionException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 	}
 
 }
