@@ -7,6 +7,7 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
@@ -34,6 +35,8 @@ public class GardenerLogic extends RobotLogic {
 
 	private static final float DONATE_AFTER = 500; // bullets
 	private static final float DONATE_PERCENTAGE = 0.10f;
+	private static final int STEPS_BEFORE_SETTLE = 6;
+	private int stepsBeforeGiveUp = 70;
 
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(),
 			Navigation.NORTH_WEST.rotateLeftDegrees(15), Navigation.NORTH_EAST.rotateRightDegrees(15),
@@ -43,6 +46,7 @@ public class GardenerLogic extends RobotLogic {
 	private Direction buildDirection;
 	private int scoutCount;
 	private int lumberjackCount;
+	private int steps;
 	private boolean settled;
 
 	public GardenerLogic(RobotController _rc) {
@@ -52,6 +56,8 @@ public class GardenerLogic extends RobotLogic {
 		buildDirection = Direction.getSouth().rotateLeftDegrees(buildOffset);
 		scoutCount = 0;
 		lumberjackCount = 0;
+		
+		stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.7f);
 	}
 
 	@Override
@@ -70,10 +76,16 @@ public class GardenerLogic extends RobotLogic {
 	}
 	
 	void findBaseLocation() {
-		if (rc.canPlantTree(buildDirection)) {
+		RobotInfo archon = nearestArchon();
+		
+		if ((archon == null || archon.location.distanceTo(rc.getLocation()) <= 3.0f)
+				&& rc.hasTreeBuildRequirements() &&
+				(rc.canPlantTree(buildDirection) && steps > STEPS_BEFORE_SETTLE)
+				|| steps >= stepsBeforeGiveUp) {
 			settled = true;
 		} else {
 			nav.moveBest(buildDirection.opposite());
+			steps++;
 		}
 		
 	}
@@ -166,4 +178,18 @@ public class GardenerLogic extends RobotLogic {
 		}
 	}
 
+	RobotInfo nearestArchon() { 
+		RobotInfo archon = null;
+		
+		RobotInfo[] robots =  rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		
+		for (RobotInfo robot : robots) {
+			if (robot.getType() == RobotType.ARCHON) {
+				archon = robot;
+				break;
+			}
+		}
+		
+		return archon;
+	}
 }
