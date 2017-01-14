@@ -7,6 +7,7 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
@@ -46,13 +47,26 @@ public class ScoutLogic extends RobotLogic {
 
 	@Override
 	public void logic() {
-		combat.singleShotAttack();
 		nav.dodgeBullets();
-		
-		explore();
-		//countTrees();
+		attackGardeners();
+
+		if (!rc.hasAttacked()) {
+			explore();
+		}
+		// countTrees();
 	}
-	
+
+	void attackGardeners() {
+		RobotInfo target = combat.findTarget();
+
+		if (target != null) {
+			if (nav.isDirectionSafe(rc.getLocation().directionTo(target.location))) {
+				nav.moveAggressively(target.location);
+			}
+			combat.singleShotAttack();
+		}
+	}
+
 	void explore() {
 		if (exploreDir == null) {
 			exploreDir = nav.randomDirection();
