@@ -76,19 +76,14 @@ public class LumberjackLogic extends RobotLogic {
 		TreeInfo[] trees = rc.senseNearbyTrees();
 		final MapLocation nearest = nearestArchonOrGardener();
 
-		if (nearest != null) {
-			// Closest trees first or closest tree to archon/gardener if they
-			// are
-			// near!
-			Arrays.sort(trees, (t1, t2) -> {
-				return Math.round(t1.location.distanceSquaredTo(nearest == null ? rc.getLocation() : nearest)
-						- t2.location.distanceSquaredTo(nearest == null ? rc.getLocation() : nearest));
-			});
-
-			clearAllTreesInArea(trees);
-		} else {
-
-		}
+		// Closest trees first or closest tree to archon/gardener if they
+		// are near!
+		Arrays.sort(trees, (t1, t2) -> {
+			return Math.round(t1.location.distanceSquaredTo(nearest == null ? rc.getLocation() : nearest)
+					- t2.location.distanceSquaredTo(nearest == null ? rc.getLocation() : nearest));
+		});
+		
+		clearAllTreesInArea(trees);
 	}
 
 	void checkRadioTreeChannel() {
