@@ -184,7 +184,7 @@ public class Navigation {
 			return;
 		}
 
-		float dist = Math.max(0, Math.min(rc.getType().strideRadius, distToTarget));
+		float dist = Math.max(0, Math.min(rc.getType().strideRadius, distToTarget - 0.1f));
 
 		// The direct direction to the target location.
 		Direction direct = rc.getLocation().directionTo(target);
