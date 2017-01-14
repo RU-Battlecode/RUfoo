@@ -140,4 +140,13 @@ public class GardenerLogic extends RobotLogic {
 		}
 	}
 
+	void orderClearTrees() {
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+
+		for (TreeInfo tree : trees) {
+			radio.requestCutTreeAt(tree.location);
+			break;
+		}
+	}
+
 }
