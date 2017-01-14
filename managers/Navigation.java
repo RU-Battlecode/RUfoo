@@ -250,9 +250,5 @@ public class Navigation {
 				moveAggressively(tree.location);
 			}
 		}
-
-		if (!rc.hasMoved()) {
-			moveRandom();
-		}
 	}
 }
