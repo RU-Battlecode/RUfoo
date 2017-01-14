@@ -30,7 +30,11 @@ public class Navigation {
 	public Navigation(RobotController _rc) {
 		rc = _rc;
 	}
-
+	
+	public Direction randomDirection() {
+		return new Direction(Util.random(0.0f, 1.0f, rc.getRoundNum()), Util.random(0.0f, 1.0f, rc.getRoundNum()));
+	}
+	
 	public void swarm() {
 
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
