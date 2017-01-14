@@ -59,6 +59,7 @@ public class ArchonLogic extends RobotLogic {
 			nav.moveBest(buildDir);
 		}
 		
+		orderClearTrees();
 	}
 
 	void buildGardener() {
@@ -69,6 +70,15 @@ public class ArchonLogic extends RobotLogic {
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	void orderClearTrees() {
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+
+		for (TreeInfo tree : trees) {
+			radio.requestCutTreeAt(tree.location);
+			break;
 		}
 	}
 }
