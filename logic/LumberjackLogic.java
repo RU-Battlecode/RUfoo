@@ -32,7 +32,7 @@ import battlecode.common.TreeInfo;
 
 public class LumberjackLogic extends RobotLogic {
 
-	private static final float HOME_BASE_RADIUS = 10.0f;
+	private static final float HOME_BASE_RADIUS = 5.0f;
 
 	public LumberjackLogic(RobotController _rc) {
 		super(_rc);
