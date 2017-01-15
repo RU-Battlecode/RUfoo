@@ -1,5 +1,6 @@
 package RUfoo.logic;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,58 +31,70 @@ public class ScoutLogic extends RobotLogic {
 	private static final float LOW_HEALTH_PERCENT = 0.25f;
 
 	private Direction exploreDir;
-	private MapLocation home;
 	private Map<MapLocation, Integer> treeMap;
 
 	public ScoutLogic(RobotController _rc) {
 		super(_rc);
-		exploreDir = null;
-		home = personality.getMother().location; // aww
-
-		if (home == null) {
-			// :(
-			home = rc.getLocation();
-		}
+		exploreDir = null;		
 		treeMap = new HashMap<>();
 	}
 
 	@Override
-	public void logic() {
-		nav.dodgeBullets();
-		attackGardeners();
+	public void logic() {	
+		RobotInfo target = combat.findTarget();
+		//nav.dodgeBullets();
+		attack(target);
 
-		if (!rc.hasAttacked()) {
+		if (target == null && !rc.hasAttacked()) {
+			if (personality.getIsLeftHanded()) {
+				moveToNewTrees();
+			}
 			explore();
 		}
 		// countTrees();
 	}
 
-	void attackGardeners() {
-		RobotInfo target = combat.findTarget();
-
+	void attack(RobotInfo target) {
 		if (target != null) {
 			if (nav.isDirectionSafe(rc.getLocation().directionTo(target.location))) {
-				nav.moveAggressively(target.location);
+				nav.moveToSafely(target.location);
 			}
-			combat.singleShotAttack();
+			combat.singleShotAttack(target);
 		}
 	}
 
 	void explore() {
-		if (exploreDir == null) {
+		if (exploreDir == null || isHome()) {
 			exploreDir = nav.randomDirection();
+			System.out.println("New xplor"+  exploreDir);
 		}
 
 		boolean shouldExplore = shouldExplore();
 		if (!shouldExplore) {
-			exploreDir = rc.getLocation().directionTo(home);
+			exploreDir = rc.getLocation().directionTo(personality.getHome());
 		}
 
-		if (!isHome() || shouldExplore) {
-			nav.moveBest(exploreDir);
-		}
+		nav.moveBest(exploreDir);
 	}
 
+	private void moveToNewTrees() {
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+		
+		// Furthest trees first!
+		Arrays.sort(trees, (t1, t2) -> {
+			return Math.round(t2.getLocation().distanceSquaredTo(rc.getLocation()) 
+							- t1.getLocation().distanceSquaredTo(rc.getLocation()));
+		});
+		
+		for(TreeInfo tree : trees) {
+			if (!treeMap.containsKey(tree.location)) {
+				treeMap.put(tree.location, tree.ID);
+				nav.moveToSafely(tree.location);
+			}
+		}
+		
+	}
+	
 	private void countTrees() {
 		TreeInfo[] trees = rc.senseNearbyTrees();
 
@@ -104,6 +117,6 @@ public class ScoutLogic extends RobotLogic {
 	}
 
 	boolean isHome() {
-		return rc.getLocation().distanceTo(home) <= rc.getType().bodyRadius * 3;
+		return rc.getLocation().distanceTo(personality.getHome()) <= rc.getType().bodyRadius * 3;
 	}
 }
