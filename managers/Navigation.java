@@ -246,6 +246,22 @@ public class Navigation {
 			e.printStackTrace();
 		}
 	}
+	
+	public void tryMove(MapLocation loc) {
+		if (rc.canMove(loc)) {
+			try {
+				rc.move(loc);
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				rc.move(rc.getLocation().directionTo(loc));
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	public void moveByTrees(boolean includeFriendly) {
 		if (rc.hasMoved()) {
