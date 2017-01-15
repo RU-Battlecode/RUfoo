@@ -97,7 +97,7 @@ public class Combat {
 			priority += 90;
 			break;
 		case GARDENER:
-			priority += 90;
+			priority += 100;
 			break;
 		case LUMBERJACK:
 			priority += 80;
@@ -121,7 +121,7 @@ public class Combat {
 		priority += 100 * (1 - percentHealth); // this will be between 0 and 100
 
 		// The robot hasn't attacked yet!
-		if (robot.getAttackCount() < 1) {
+		if (robot.getAttackCount() < 1 && robot.getType().canAttack()) {
 			priority += 10;
 		}
 
