@@ -3,6 +3,7 @@ package RUfoo.logic;
 import java.util.Arrays;
 
 import RUfoo.managers.Radio;
+import RUfoo.util.Util;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
@@ -58,7 +59,12 @@ public class LumberjackLogic extends RobotLogic {
 			nav.moveByTrees(false);
 
 			if (!rc.hasMoved()) {
-				nav.moveBest(rc.getLocation().directionTo(combat.getClosestEnemySpawn()));
+				RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+				if (Util.contains(robots, RobotType.GARDENER)) {
+					nav.moveRandom();
+				} else {
+					nav.moveBest(rc.getLocation().directionTo(combat.getClosestEnemySpawn()));
+				}
 			}
 		}
 

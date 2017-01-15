@@ -7,6 +7,8 @@ import java.util.Random;
 
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 
 public final class Util {
 	private static final Random rand = new Random(1337);
@@ -33,6 +35,15 @@ public final class Util {
 		return new MapLocation(x / size, y / size);
 	}
 
+	public static boolean contains(RobotInfo[] robots, RobotType type) {
+		for (RobotInfo r : robots) {
+			if (r.getType() == type) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Random number in range [min, max]
 	 * 
@@ -43,7 +54,7 @@ public final class Util {
 	public static int random(int min, int max) {
 		return rand.nextInt(max - min + 1) + min;
 	}
-	
+
 	public static float random(float min, float max, int seed) {
 		rand.setSeed(seed);
 		return rand.nextFloat() * (max - min) + min;

@@ -27,13 +27,13 @@ public class Navigation {
 
 	public static final Direction[] DIRECTIONS = { Direction.getNorth(), NORTH_EAST, Direction.getEast(), SOUTH_EAST,
 			Direction.getSouth(), SOUTH_WEST, Direction.getWest(), NORTH_WEST };
-
+	
 	public Navigation(RobotController _rc) {
 		rc = _rc;
 	}
 
 	public Direction randomDirection() {
-		return new Direction(Util.random(0.0f, 1.0f, rc.getRoundNum()), Util.random(0.0f, 1.0f, rc.getRoundNum()));
+		return new Direction(Util.random(0.0f, 1.0f, rc.getRoundNum()), Util.random(0.0f, 1.0f, rc.getID()));
 	}
 
 	public void swarm() {
@@ -244,6 +244,22 @@ public class Navigation {
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void tryMove(MapLocation loc) {
+		if (rc.canMove(loc)) {
+			try {
+				rc.move(loc);
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				rc.move(rc.getLocation().directionTo(loc));
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

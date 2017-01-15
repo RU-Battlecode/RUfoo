@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import RUfoo.util.Util;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -73,6 +74,10 @@ public class Personality {
 
 	public RobotInfo getMother() {
 		return mother;
+	}
+	
+	public MapLocation getHome() {
+		return mother == null ? rc.getLocation() : mother.location;
 	}
 	
 	public int age() {
