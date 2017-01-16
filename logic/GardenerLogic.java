@@ -36,7 +36,7 @@ public class GardenerLogic extends RobotLogic {
 
 	private static final float DONATE_AFTER = 500; // bullets
 	private static final float DONATE_PERCENTAGE = 0.10f;
-	private static final int STEPS_BEFORE_SETTLE = 6;
+	private static final int STEPS_BEFORE_SETTLE = 5;
 	private int stepsBeforeGiveUp = 70;
 
 	private static final Direction[] TREE_BUILD_DIRS = { 
