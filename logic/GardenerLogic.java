@@ -94,11 +94,11 @@ public class GardenerLogic extends RobotLogic {
 			settled = true;
 			baseLocation = rc.getLocation();
 		} else {
-			
+
 			if (archon != null) {
 				nav.moveBest(archon.location.directionTo(rc.getLocation()));
 			}
-			
+
 			nav.moveBest(buildDirection.opposite());
 			steps++;
 		}
@@ -256,7 +256,7 @@ public class GardenerLogic extends RobotLogic {
 			plantFailCount = 0;
 			success = true;
 		}
-			
+
 		return success;
 	}
 
