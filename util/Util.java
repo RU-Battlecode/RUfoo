@@ -56,7 +56,6 @@ public final class Util {
 	}
 
 	public static float random(float min, float max, int seed) {
-		rand.setSeed(seed);
 		return rand.nextFloat() * (max - min) + min;
 	}
 
