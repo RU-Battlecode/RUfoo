@@ -59,7 +59,7 @@ public class GardenerLogic extends RobotLogic {
 		super(_rc);
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn());
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
-		buildDirection = Direction.getSouth().rotateLeftDegrees(buildOffset);
+		buildDirection = TREE_BUILD_DIRS[0].opposite().rotateLeftDegrees(buildOffset);
 		scoutCount = lumberjackCount = 0;
 		baseLocation = rc.getLocation();
 		hasPlantedFront = hasPlantedMiddle = hasFinishedPlanting = false;
