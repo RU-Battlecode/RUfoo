@@ -80,7 +80,7 @@ public class ScoutLogic extends RobotLogic {
 	private void moveToNewTrees() {
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		
-		// Furthest trees first!
+		// Farthest trees first!
 		Arrays.sort(trees, (t1, t2) -> {
 			return Math.round(t2.getLocation().distanceSquaredTo(rc.getLocation()) 
 							- t1.getLocation().distanceSquaredTo(rc.getLocation()));
