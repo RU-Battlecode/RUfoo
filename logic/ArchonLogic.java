@@ -79,6 +79,11 @@ public class ArchonLogic extends RobotLogic {
 	void orderClearTrees() {
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 
+		// Biggest trees first!
+		Arrays.sort(trees, (t1, t2) -> {
+			return Math.round(t2.radius - t1.radius);
+		});
+
 		for (TreeInfo tree : trees) {
 			radio.requestCutTreeAt(tree.location);
 			break;
