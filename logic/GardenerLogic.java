@@ -72,11 +72,12 @@ public class GardenerLogic extends RobotLogic {
 	public void logic() {
 
 		if (settled) {
+			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 			donateToWin();
 			plantTrees();
 			waterTrees();
-			buildRobots();
-			orderClearTrees();
+			buildRobots(trees);
+			orderClearTrees(trees);
 		} else {
 			findBaseLocation();
 		}
@@ -174,8 +175,10 @@ public class GardenerLogic extends RobotLogic {
 		}
 	}
 
-	void buildRobots() {
-		if (scoutCount < 1) {
+	void buildRobots(TreeInfo[] trees) {
+		if (trees.length >= 25) {
+			build(RobotType.LUMBERJACK);
+		} else if (scoutCount < 1) {
 			build(RobotType.SCOUT);
 		} else if (lumberjackCount < 2) {
 			build(RobotType.LUMBERJACK);
@@ -197,9 +200,7 @@ public class GardenerLogic extends RobotLogic {
 		}
 	}
 
-	void orderClearTrees() {
-		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-
+	void orderClearTrees(TreeInfo[] trees) {
 		for (TreeInfo tree : trees) {
 			radio.requestCutTreeAt(tree.location);
 			break;
