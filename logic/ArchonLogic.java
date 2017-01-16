@@ -53,11 +53,11 @@ public class ArchonLogic extends RobotLogic {
 				break;
 			}
 		}
-		
-		if (built != null) { 
+
+		if (built != null) {
 			buildDirs.remove(built);
 		}
-		
+
 		if (rc.getRoundNum() == 600 && rc.getTeamVictoryPoints() < GameConstants.VICTORY_POINTS_TO_WIN * 0.80f) {
 			for (int i = 0; i < 5; i++) buildDirs.add(nav.randomDirection());
 		}
@@ -72,10 +72,10 @@ public class ArchonLogic extends RobotLogic {
 				e.printStackTrace();
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	void orderClearTrees() {
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 
