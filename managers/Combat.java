@@ -29,7 +29,7 @@ public class Combat {
 
 		return enemySpawns[0];
 	}
-	
+
 	public MapLocation getFurthestEnemySpawn() {
 		MapLocation[] enemySpawns = rc.getInitialArchonLocations(rc.getTeam().opponent());
 
@@ -151,7 +151,7 @@ public class Combat {
 		Arrays.sort(enemies, (e1, e2) -> {
 			return meleePriority(e1) - meleePriority(e2);
 		});
-		
+
 		return enemies.length > 0 ? enemies[0] : null;
 	}
 
@@ -164,7 +164,8 @@ public class Combat {
 		});
 
 		for (RobotInfo enemy : enemies) {
-			if (rc.canStrike() && rc.getLocation().distanceTo(enemy.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2) {
+			if (rc.canStrike()
+					&& rc.getLocation().distanceTo(enemy.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2) {
 				try {
 					rc.strike();
 					break;
@@ -173,7 +174,7 @@ public class Combat {
 				}
 			}
 		}
-		
+
 	}
 
 }
