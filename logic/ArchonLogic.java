@@ -8,6 +8,7 @@ import RUfoo.managers.Navigation;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
@@ -21,19 +22,28 @@ public class ArchonLogic extends RobotLogic {
 					Direction.getEast(), Direction.getWest(), Navigation.SOUTH_EAST, Navigation.SOUTH_WEST, }));
 
 	private float buildOffset;
-	
+	private MapLocation enemySpawn;
+
 	public ArchonLogic(RobotController _rc) {
 		super(_rc);
 
-		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn());
-		buildOffset = buildDirs.get(0).degreesBetween(pointAt); 
+		enemySpawn = combat.getClosestEnemySpawn();
+
+		
+		Direction pointAt = rc.getLocation().directionTo(enemySpawn);
+		buildOffset = buildDirs.get(0).degreesBetween(pointAt);
 	}
 
 	@Override
 	public void logic() {
+		
+		if (rc.getLocation().distanceTo(enemySpawn) < 20){
+			nav.moveBest(enemySpawn.directionTo(rc.getLocation()));
+		}
+		
 		buildBase();
 	}
-	
+
 	void buildBase() {
 		Direction built = null;
 		for (Direction dir : buildDirs) {
