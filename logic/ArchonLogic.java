@@ -16,15 +16,10 @@ import battlecode.common.TreeInfo;
 public class ArchonLogic extends RobotLogic {
 
 	// Prioritized build directions
-	private List<Direction> buildDirs = new ArrayList<>(Arrays.asList(new Direction[]{
-			Direction.getNorth(),
-			Navigation.NORTH_EAST,
-			Navigation.NORTH_WEST,
-			Direction.getEast(),
-			Direction.getWest(),
-			Navigation.SOUTH_EAST,
-			Navigation.SOUTH_WEST, }));
-	
+	private List<Direction> buildDirs = new ArrayList<>(
+			Arrays.asList(new Direction[] { Direction.getNorth(), Navigation.NORTH_EAST, Navigation.NORTH_WEST,
+					Direction.getEast(), Direction.getWest(), Navigation.SOUTH_EAST, Navigation.SOUTH_WEST, }));
+
 	private float buildOffset;
 	
 	public ArchonLogic(RobotController _rc) {
