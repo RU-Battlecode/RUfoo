@@ -31,7 +31,6 @@ import battlecode.common.TreeInfo;
 
 // 3.
 
-
 public class GardenerLogic extends RobotLogic {
 
 	private static final float DONATE_AFTER = 500; // bullets
@@ -39,14 +38,10 @@ public class GardenerLogic extends RobotLogic {
 	private static final int STEPS_BEFORE_SETTLE = 5;
 	private int stepsBeforeGiveUp = 70;
 
-	private static final Direction[] TREE_BUILD_DIRS = { 
-			Direction.getNorth(),
-			Direction.getEast(),
-			Direction.getWest(),
-			
+	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
+
 			Navigation.NORTH_WEST.rotateLeftDegrees(15), Navigation.NORTH_EAST.rotateRightDegrees(15),
-			Navigation.SOUTH_WEST.rotateRightDegrees(15), Navigation.SOUTH_EAST.rotateLeftDegrees(15),
-			};
+			Navigation.SOUTH_WEST.rotateRightDegrees(15), Navigation.SOUTH_EAST.rotateLeftDegrees(15), };
 
 	private float buildOffset;
 	private Direction buildDirection;
