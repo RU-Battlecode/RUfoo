@@ -61,12 +61,12 @@ public class ScoutLogic extends RobotLogic {
 				nav.moveAggressively(target.location);
 			}
 			
-			combat.singleShotAttack(target);
+			combat.shoot(target);
 		}
 	}
 
 	void explore() {
-		if (exploreDir == null) {
+		if (exploreDir == null || isHome()) {
 			exploreDir = nav.randomDirection();
 		}
 
