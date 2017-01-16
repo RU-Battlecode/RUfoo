@@ -74,8 +74,10 @@ public class ScoutLogic extends RobotLogic {
 		if (!shouldExplore) {
 			exploreDir = rc.getLocation().directionTo(personality.getHome());
 		}
-
-		nav.moveBest(exploreDir);
+		
+		if (exploreDir != null) {
+			nav.moveBest(exploreDir);
+		}
 	}
 
 	private void moveToNewTrees(TreeInfo[] trees) {
