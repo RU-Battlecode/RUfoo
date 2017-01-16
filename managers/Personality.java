@@ -39,10 +39,10 @@ public class Personality {
 		isLeftHanded = rand.nextInt(101) <= PERCENT_LEFT_HANDED;
 		patience = Util.random(5, 15);
 		birthday = rc.getRoundNum();
-		mother = determinMother();
+		mother = determineMother();
 	}
 
-	private RobotInfo determinMother() {
+	private RobotInfo determineMother() {
 		RobotInfo mother = null;
 		
 		if (rc.getType() != RobotType.ARCHON) {
@@ -59,7 +59,6 @@ public class Personality {
 						mother = r;
 						break;
 					}
-					
 				}
 				
 				// Adoption...

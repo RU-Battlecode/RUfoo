@@ -14,7 +14,7 @@ public class SoldierLogic extends RobotLogic {
 		RobotInfo target = combat.findTarget();
 		if (target != null) {
 			nav.moveAggressively(target.location);
-			combat.singleShotAttack(target);
+			combat.shoot(target);
 		} else {
 			nav.swarm();
 		}

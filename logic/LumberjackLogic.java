@@ -35,8 +35,13 @@ public class LumberjackLogic extends RobotLogic {
 
 	private static final float HOME_BASE_RADIUS = 5.0f;
 
+	private boolean nothingAtEnemySpawn;
+	private MapLocation enemySpawn;
+	
 	public LumberjackLogic(RobotController _rc) {
 		super(_rc);
+		enemySpawn = combat.getClosestEnemySpawn();
+		nothingAtEnemySpawn = false;
 	}
 
 	@Override
@@ -63,7 +68,14 @@ public class LumberjackLogic extends RobotLogic {
 				if (Util.contains(robots, RobotType.GARDENER)) {
 					nav.moveRandom();
 				} else {
-					nav.moveBest(rc.getLocation().directionTo(combat.getClosestEnemySpawn()));
+					
+					if (rc.getLocation().distanceTo(enemySpawn) <= 1.0f || nothingAtEnemySpawn) {
+						nothingAtEnemySpawn = true;
+						nav.moveByTrees(false);
+						nav.moveRandom();
+					} else {
+						nav.moveBest(rc.getLocation().directionTo(enemySpawn));
+					}
 				}
 			}
 		}

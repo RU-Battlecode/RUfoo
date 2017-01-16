@@ -29,7 +29,7 @@ public class Combat {
 
 		return enemySpawns[0];
 	}
-	
+
 	public MapLocation getFurthestEnemySpawn() {
 		MapLocation[] enemySpawns = rc.getInitialArchonLocations(rc.getTeam().opponent());
 
@@ -38,8 +38,18 @@ public class Combat {
 		});
 
 		return enemySpawns[0];
-	} 
-	
+	}
+
+	public void shoot(RobotInfo target) {
+		if (shouldUsePentadShot()) {
+			pentadShot(target);
+		} else if (shouldUseTriadShot()) {
+			triadShot(target);
+		} else {
+			singleShotAttack(target);
+		}
+	}
+
 	// TODO: Maybe shoot to the left and the right of target?
 	public void singleShotAttack() {
 		singleShotAttack(findTarget());
@@ -53,6 +63,38 @@ public class Combat {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public void pentadShot(RobotInfo target) {
+		if (target != null && rc.canFirePentadShot() && !rc.hasAttacked()) {
+			try {
+				rc.firePentadShot(rc.getLocation().directionTo(target.location));
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void triadShot(RobotInfo target) {
+		if (target != null && rc.canFireTriadShot() && !rc.hasAttacked()) {
+			try {
+				rc.fireTriadShot(rc.getLocation().directionTo(target.location));
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public boolean shouldUsePentadShot() {
+		return rc.canFirePentadShot() && GameConstants.VICTORY_POINTS_TO_WIN
+				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f
+				&& rc.getTeamBullets() > 200.0f;
+	}
+
+	public boolean shouldUseTriadShot() {
+		return rc.canFireTriadShot() && GameConstants.VICTORY_POINTS_TO_WIN
+				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f
+				&& rc.getTeamBullets() > 100.0f;
 	}
 
 	// TODO: Make sure not hitting own players.
@@ -103,7 +145,7 @@ public class Combat {
 			priority += 80;
 			break;
 		case SCOUT:
-			priority += 70;
+			priority += 80;
 			break;
 		case SOLDIER:
 			priority += 90;
@@ -151,7 +193,7 @@ public class Combat {
 		Arrays.sort(enemies, (e1, e2) -> {
 			return meleePriority(e1) - meleePriority(e2);
 		});
-		
+
 		return enemies.length > 0 ? enemies[0] : null;
 	}
 
@@ -164,7 +206,8 @@ public class Combat {
 		});
 
 		for (RobotInfo enemy : enemies) {
-			if (rc.canStrike() && rc.getLocation().distanceTo(enemy.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2) {
+			if (rc.canStrike()
+					&& rc.getLocation().distanceTo(enemy.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2) {
 				try {
 					rc.strike();
 					break;
@@ -173,7 +216,7 @@ public class Combat {
 				}
 			}
 		}
-		
+
 	}
 
 }

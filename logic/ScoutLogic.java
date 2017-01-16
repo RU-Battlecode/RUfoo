@@ -46,8 +46,9 @@ public class ScoutLogic extends RobotLogic {
 		attack(target);
 
 		if (target == null && !rc.hasAttacked()) {
-			if (personality.getIsLeftHanded()) {
-				moveToNewTrees();
+			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+			if (personality.getIsLeftHanded() || trees.length < 5) {
+				moveToNewTrees(trees);
 			}
 			explore();
 		}
@@ -57,30 +58,31 @@ public class ScoutLogic extends RobotLogic {
 	void attack(RobotInfo target) {
 		if (target != null) {
 			if (nav.isDirectionSafe(rc.getLocation().directionTo(target.location))) {
-				nav.moveToSafely(target.location);
+				nav.moveAggressively(target.location);
 			}
-			combat.singleShotAttack(target);
+			
+			combat.shoot(target);
 		}
 	}
 
 	void explore() {
 		if (exploreDir == null || isHome()) {
 			exploreDir = nav.randomDirection();
-			System.out.println("New xplor"+  exploreDir);
 		}
 
 		boolean shouldExplore = shouldExplore();
 		if (!shouldExplore) {
 			exploreDir = rc.getLocation().directionTo(personality.getHome());
 		}
-
-		nav.moveBest(exploreDir);
+		
+		if (exploreDir != null) {
+			nav.moveBest(exploreDir);
+		}
 	}
 
-	private void moveToNewTrees() {
-		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-		
-		// Furthest trees first!
+	private void moveToNewTrees(TreeInfo[] trees) {
+
+		// Farthest trees first!
 		Arrays.sort(trees, (t1, t2) -> {
 			return Math.round(t2.getLocation().distanceSquaredTo(rc.getLocation()) 
 							- t1.getLocation().distanceSquaredTo(rc.getLocation()));

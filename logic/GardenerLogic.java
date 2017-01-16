@@ -31,22 +31,17 @@ import battlecode.common.TreeInfo;
 
 // 3.
 
-
 public class GardenerLogic extends RobotLogic {
 
 	private static final float DONATE_AFTER = 500; // bullets
 	private static final float DONATE_PERCENTAGE = 0.10f;
-	private static final int STEPS_BEFORE_SETTLE = 6;
+	private static final int STEPS_BEFORE_SETTLE = 5;
 	private int stepsBeforeGiveUp = 70;
 
-	private static final Direction[] TREE_BUILD_DIRS = { 
-			Direction.getNorth(),
-			Direction.getEast(),
-			Direction.getWest(),
-			
+	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
+
 			Navigation.NORTH_WEST.rotateLeftDegrees(15), Navigation.NORTH_EAST.rotateRightDegrees(15),
-			Navigation.SOUTH_WEST.rotateRightDegrees(15), Navigation.SOUTH_EAST.rotateLeftDegrees(15),
-			};
+			Navigation.SOUTH_WEST.rotateRightDegrees(15), Navigation.SOUTH_EAST.rotateLeftDegrees(15), };
 
 	private float buildOffset;
 	private Direction buildDirection;
@@ -64,24 +59,25 @@ public class GardenerLogic extends RobotLogic {
 		super(_rc);
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn());
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
-		buildDirection = Direction.getSouth().rotateLeftDegrees(buildOffset);
+		buildDirection = TREE_BUILD_DIRS[0].opposite().rotateLeftDegrees(buildOffset);
 		scoutCount = lumberjackCount = 0;
 		baseLocation = rc.getLocation();
 		hasPlantedFront = hasPlantedMiddle = hasFinishedPlanting = false;
 		plantFailCount = 0;
 
-		stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.7f);
+		stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.6f);
 	}
 
 	@Override
 	public void logic() {
 
 		if (settled) {
+			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 			donateToWin();
 			plantTrees();
 			waterTrees();
-			buildRobots();
-			orderClearTrees();
+			buildRobots(trees);
+			orderClearTrees(trees);
 		} else {
 			findBaseLocation();
 		}
@@ -91,18 +87,18 @@ public class GardenerLogic extends RobotLogic {
 	void findBaseLocation() {
 		RobotInfo archon = nearestArchon();
 
-		if ((archon == null || archon.location.distanceTo(rc.getLocation()) <= 3.0f)
+		if ((archon == null || archon.location.distanceTo(rc.getLocation()) >= 3.0f)
 				&& rc.hasTreeBuildRequirements() && (rc.canPlantTree(buildDirection)
 						&& rc.canPlantTree(buildDirection.opposite()) && steps > STEPS_BEFORE_SETTLE)
 				|| steps >= stepsBeforeGiveUp) {
 			settled = true;
 			baseLocation = rc.getLocation();
 		} else {
-			
+
 			if (archon != null) {
 				nav.moveBest(archon.location.directionTo(rc.getLocation()));
 			}
-			
+
 			nav.moveBest(buildDirection.opposite());
 			steps++;
 		}
@@ -132,8 +128,7 @@ public class GardenerLogic extends RobotLogic {
 		}
 	}
 
-	void plantTrees() {
-
+	void plantTrees() {	
 		// We have to plant the front two first to maximize plants
 		if (!hasPlantedFront) {
 			hasPlantedFront = moveAndPlant(buildDirection.opposite());
@@ -144,13 +139,13 @@ public class GardenerLogic extends RobotLogic {
 			hasFinishedPlanting = moveAndPlant(buildDirection);
 		} else {
 			nav.tryMove(baseLocation);
-			
+
 			for (Direction dir : TREE_BUILD_DIRS) {
 				dir = dir.rotateLeftDegrees(buildOffset);
 				if (rc.canPlantTree(dir)) {
 					try {
 						rc.plantTree(dir);
-						return;
+						break;
 					} catch (GameActionException e) {
 						e.printStackTrace();
 					}
@@ -179,8 +174,10 @@ public class GardenerLogic extends RobotLogic {
 		}
 	}
 
-	void buildRobots() {
-		if (scoutCount < 1) {
+	void buildRobots(TreeInfo[] trees) {
+		if (trees.length >= 25) {
+			build(RobotType.LUMBERJACK);
+		} else if (scoutCount < 1) {
 			build(RobotType.SCOUT);
 		} else if (lumberjackCount < 2) {
 			build(RobotType.LUMBERJACK);
@@ -202,9 +199,7 @@ public class GardenerLogic extends RobotLogic {
 		}
 	}
 
-	void orderClearTrees() {
-		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-
+	void orderClearTrees(TreeInfo[] trees) {
 		for (TreeInfo tree : trees) {
 			radio.requestCutTreeAt(tree.location);
 			break;
@@ -231,33 +226,37 @@ public class GardenerLogic extends RobotLogic {
 		// Move forward to plant.
 		final MapLocation firstStep = baseLocation.add(dir, rc.getType().strideRadius);
 		final MapLocation endPoint = firstStep.add(dir, rc.getType().strideRadius + 0.01f);
+
 		nav.tryMove(endPoint);
+		if (!rc.hasMoved() && !rc.canMove(dir)) {
+			plantFailCount++;
+		}
 
 		if (rc.getLocation().distanceTo(endPoint) > 0.5f) {
-			return false;
-		}
-
-		// Plant the left and right plants!
-		try {
-			// Try plant left.
-			tryPlant(Direction.getWest().rotateLeftDegrees(buildOffset));
-
-			// Try plant right.
-			if (tryPlant(Direction.getEast().rotateLeftDegrees(buildOffset))) {
-				success = true;
-			}
-
-		} catch (GameActionException e) {
-			e.printStackTrace();
 			plantFailCount++;
-		} finally {
-			// Skip planting top if we get too frustrated
-			if (plantFailCount > personality.getPatience()) {
-				plantFailCount = 0;
-				success = true;
+			success = false;
+		} else {
+			// Plant the left and right plants!
+			try {
+				// Try plant left.
+				tryPlant(Direction.getWest().rotateLeftDegrees(buildOffset));
+
+				// Try plant right.
+				if (tryPlant(Direction.getEast().rotateLeftDegrees(buildOffset))) {
+					success = true;
+				}
+
+			} catch (GameActionException e) {
+				e.printStackTrace();
+				plantFailCount++;
 			}
 		}
-			
+
+		if (plantFailCount > personality.getPatience()) {
+			plantFailCount = 0;
+			success = true;
+		}
+
 		return success;
 	}
 
@@ -265,6 +264,10 @@ public class GardenerLogic extends RobotLogic {
 		if (rc.hasTreeBuildRequirements() && rc.isBuildReady() && rc.canPlantTree(dir)) {
 			rc.plantTree(dir);
 			return true;
+		}
+
+		if (rc.isBuildReady() && rc.hasTreeBuildRequirements() && !rc.canPlantTree(dir)) {
+			this.plantFailCount++;
 		}
 		
 		return false;
