@@ -65,7 +65,7 @@ public class GardenerLogic extends RobotLogic {
 		hasPlantedFront = hasPlantedMiddle = hasFinishedPlanting = false;
 		plantFailCount = 0;
 
-		stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.7f);
+		stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.6f);
 	}
 
 	@Override
