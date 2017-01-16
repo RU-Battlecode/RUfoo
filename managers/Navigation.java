@@ -118,7 +118,12 @@ public class Navigation {
 
 		// Check all the general directions
 		for (Direction dir : DIRECTIONS) {
-			if (!rc.canMove(dir)) {
+			try {
+				if (!rc.canMove(dir) || !rc.onTheMap(rc.getLocation().add(dir))) {
+					continue;
+				}
+			} catch (GameActionException e) {
+				e.printStackTrace();
 				continue;
 			}
 
