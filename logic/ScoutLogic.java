@@ -66,7 +66,7 @@ public class ScoutLogic extends RobotLogic {
 	}
 
 	void explore() {
-		if (exploreDir == null || isHome()) {
+		if (exploreDir == null) {
 			exploreDir = nav.randomDirection();
 		}
 
