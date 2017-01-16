@@ -42,6 +42,7 @@ public class ArchonLogic extends RobotLogic {
 		}
 		
 		buildBase();
+		nav.dodgeBullets();
 	}
 
 	void buildBase() {
