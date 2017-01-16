@@ -59,7 +59,8 @@ public class ArchonLogic extends RobotLogic {
 		}
 
 		if (rc.getRoundNum() == 600 && rc.getTeamVictoryPoints() < GameConstants.VICTORY_POINTS_TO_WIN * 0.80f) {
-			for (int i = 0; i < 5; i++) buildDirs.add(nav.randomDirection());
+			for (int i = 0; i < 2; i++)
+				buildDirs.add(nav.randomDirection());
 		}
 	}
 
