@@ -58,8 +58,9 @@ public class ScoutLogic extends RobotLogic {
 	void attack(RobotInfo target) {
 		if (target != null) {
 			if (nav.isDirectionSafe(rc.getLocation().directionTo(target.location))) {
-				nav.moveToSafely(target.location);
+				nav.moveAggressively(target.location);
 			}
+			
 			combat.singleShotAttack(target);
 		}
 	}
