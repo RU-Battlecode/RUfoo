@@ -10,6 +10,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
@@ -87,12 +88,23 @@ public class ArchonLogic extends RobotLogic {
 			buildDirs.remove(built);
 		}
 
-		if (rc.getRoundNum() == 600 && rc.getTeamVictoryPoints() < GameConstants.VICTORY_POINTS_TO_WIN * 0.80f) {
-			for (int i = 0; i < 2; i++)
-				buildDirs.add(nav.randomDirection());
+		if (rc.getRoundNum() > 600 && countGardners() < 3) {		
+			buildDirs.add(nav.randomDirection());
 		}
 	}
 
+	int countGardners() {
+		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		int gardenerCount = 0;
+		for (RobotInfo robot : robots) {
+			if (robot.type == RobotType.GARDENER) {
+				gardenerCount++;
+			}
+		}
+		
+		return gardenerCount;
+	}
+	
 	boolean buildGardener(Direction dir) {
 		if (rc.canBuildRobot(RobotType.GARDENER, dir)) {
 			try {
