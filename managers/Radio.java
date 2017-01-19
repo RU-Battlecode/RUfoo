@@ -29,15 +29,15 @@ public class Radio {
 	}
 
 	// Defense channel
-	public MapLocation readDefenseChannel() { 
+	public MapLocation readDefenseChannel() {
 		int msg = readChannel(DEFENSE_CHANNEL);
 		return msg == 0 ? null : intToMapLocation(msg);
 	}
-	
+
 	public void requestDefense(MapLocation loc) {
 		broadcast(DEFENSE_CHANNEL, mapLocationToInt(loc));
 	}
-	
+
 	// Tree channel
 	public MapLocation readTreeChannel() {
 		int msg = readChannel(TREE_CHANNEL);
@@ -48,7 +48,6 @@ public class Radio {
 		broadcast(TREE_CHANNEL, mapLocationToInt(loc));
 	}
 
-	
 	public void taskComplete(int channel) {
 		try {
 			rc.broadcast(channel, 0);
@@ -66,16 +65,17 @@ public class Radio {
 			e.printStackTrace();
 		}
 	}
-	
+
 	int readChannel(int channel) {
 		int msg = 0;
 		try {
 			msg = rc.readBroadcast(TREE_CHANNEL);
-		} catch(GameActionException e) {}
-		
+		} catch (GameActionException e) {
+		}
+
 		return msg;
 	}
-	
+
 	int mapLocationToInt(MapLocation loc) {
 		return Math.round(loc.x) << 16 | Math.round(loc.y);
 	}
@@ -83,5 +83,4 @@ public class Radio {
 	MapLocation intToMapLocation(int data) {
 		return new MapLocation(data >> 16, data & 0xffff);
 	}
-
 }

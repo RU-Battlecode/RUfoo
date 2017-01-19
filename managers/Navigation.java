@@ -27,7 +27,7 @@ public class Navigation {
 
 	public static final Direction[] DIRECTIONS = { Direction.getNorth(), NORTH_EAST, Direction.getEast(), SOUTH_EAST,
 			Direction.getSouth(), SOUTH_WEST, Direction.getWest(), NORTH_WEST };
-	
+
 	public Navigation(RobotController _rc) {
 		rc = _rc;
 	}
@@ -105,6 +105,7 @@ public class Navigation {
 		if (rc.hasMoved()) {
 			return;
 		}
+
 		if (rc.senseNearbyBullets().length > 0) {
 			List<Direction> possibleDirs = safeDirections();
 			if (possibleDirs.size() > 0) {
@@ -144,18 +145,16 @@ public class Navigation {
 		// TODO: Check where enemies are
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		for (RobotInfo enemy : enemies) {
-			
-			if (enemy.getType() == RobotType.LUMBERJACK 
-					&& enemy.attackCount < 1
+
+			if (enemy.getType() == RobotType.LUMBERJACK && enemy.attackCount < 1
 					&& enemy.location.distanceTo(rc.getLocation()) <= GameConstants.LUMBERJACK_STRIKE_RADIUS) {
 				return false;
-			} else if (enemy.getType() == RobotType.SOLDIER
-					&& enemy.attackCount < 1) {
+			} else if (enemy.getType() == RobotType.SOLDIER && enemy.attackCount < 1) {
 				return false;
 			}
-			
+
 		}
-		 
+
 		// This is where I want to be
 		MapLocation possibleLocation = rc.getLocation().add(dir);
 
@@ -251,24 +250,18 @@ public class Navigation {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void tryMove(MapLocation loc) {
-		
 		try {
 			if (rc.canSenseLocation(loc) && !rc.onTheMap(loc)) {
 				return;
 			}
-		} catch (GameActionException e1) {
-		
-			e1.printStackTrace();
-		}
-		
-		if (rc.canMove(loc)) {
-			try {
+
+			if (rc.canMove(loc)) {
 				rc.move(loc);
-			} catch (GameActionException e) {
-				e.printStackTrace();
 			}
+		} catch (GameActionException e1) {
+			e1.printStackTrace();
 		}
 	}
 
@@ -278,7 +271,7 @@ public class Navigation {
 		}
 
 		TreeInfo[] trees = rc.senseNearbyTrees();
-		// Sort furthest first
+		// Sort farthest first
 		Arrays.sort(trees, (t1, t2) -> {
 			return Math.round(
 					t1.location.distanceSquaredTo(rc.getLocation()) - t2.location.distanceSquaredTo(rc.getLocation()));
