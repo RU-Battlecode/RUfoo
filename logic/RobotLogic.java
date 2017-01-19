@@ -9,7 +9,15 @@ import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.TreeInfo;
 
+/**
+ * RobotLogic.java - Base abstract class to share common functionality between
+ * robot types.
+ * 
+ * @author Ben
+ *
+ */
 public abstract class RobotLogic {
+	
 	protected RobotController rc;
 	protected Navigation nav;
 	protected Combat combat;
@@ -35,14 +43,20 @@ public abstract class RobotLogic {
 			logic();
 
 			if (Clock.getBytecodesLeft() > 200) {
-				shakeIt();
+				shakeTrees();
 			}
 
 			Clock.yield();
 		}
 	}
 
-	void shakeIt() {
+	/**
+	 * This method should be overridden with the unique logic for each robot
+	 * type.
+	 */
+	public abstract void logic();
+
+	void shakeTrees() {
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius);
 		for (TreeInfo tree : trees) {
 			if (tree.getTeam().equals(rc.getTeam().opponent())) {
@@ -59,10 +73,4 @@ public abstract class RobotLogic {
 			}
 		}
 	}
-
-	/**
-	 * This method should be overridden with the unique logic for each bot type.
-	 */
-	public abstract void logic();
-
 }
