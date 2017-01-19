@@ -37,7 +37,7 @@ public class LumberjackLogic extends RobotLogic {
 
 	private boolean nothingAtEnemySpawn;
 	private MapLocation enemySpawn;
-	
+
 	public LumberjackLogic(RobotController _rc) {
 		super(_rc);
 		enemySpawn = combat.getClosestEnemySpawn();
@@ -46,29 +46,32 @@ public class LumberjackLogic extends RobotLogic {
 
 	@Override
 	public void logic() {
+		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+
 		moveOffSpawn();
 
-		combat.meleeAttackAggressive();
-		RobotInfo target = combat.findMeleeTarget();
+		RobotInfo target = combat.findMeleeTarget(enemies);
 
-		if (!rc.hasAttacked()) {
-			if (target != null) {
-				moveTowards(target);
-			}
+		combat.meleeAttack(enemies);
+
+		if (target != null) {
+			moveTowards(target);
 		}
 
-		checkRadioTreeChannel();
-		clearTreesAroundBase();
-
+		clearTreesAroundBase(robots);
+		
 		if (!rc.hasAttacked() && target == null) {
+			checkRadioTreeChannel();
+			
+			
 			nav.moveByTrees(false);
 
 			if (!rc.hasMoved()) {
-				RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 				if (Util.contains(robots, RobotType.GARDENER)) {
 					nav.moveRandom();
 				} else {
-					
+
 					if (rc.getLocation().distanceTo(enemySpawn) <= 1.0f || nothingAtEnemySpawn) {
 						nothingAtEnemySpawn = true;
 						nav.moveByTrees(false);
@@ -90,17 +93,18 @@ public class LumberjackLogic extends RobotLogic {
 		}
 	}
 
-	void clearTreesAroundBase() {
+	void clearTreesAroundBase(RobotInfo[] robots) {
 		TreeInfo[] trees = rc.senseNearbyTrees();
-		final MapLocation nearest = nearestArchonOrGardener();
+		final MapLocation nearest = nearestArchonOrGardener(robots);
 
 		// Closest trees first or closest tree to archon/gardener if they
 		// are near!
-		Arrays.sort(trees, (t1, t2) -> {
-			return Math.round(t1.location.distanceSquaredTo(nearest == null ? rc.getLocation() : nearest)
-					- t2.location.distanceSquaredTo(nearest == null ? rc.getLocation() : nearest));
-		});
-		
+		if (nearest != null) {
+			Arrays.sort(trees, (t1, t2) -> {
+				return Math.round(t1.location.distanceSquaredTo(nearest) - t2.location.distanceSquaredTo(nearest));
+			});
+		}
+
 		clearAllTreesInArea(trees);
 	}
 
@@ -122,12 +126,11 @@ public class LumberjackLogic extends RobotLogic {
 		}
 	}
 
-	MapLocation nearestArchonOrGardener() {
+	MapLocation nearestArchonOrGardener(RobotInfo[] robots) {
 		MapLocation nearest = null;
-		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 
-		for (RobotInfo robot : friends) {
-			if (robot.type == RobotType.ARCHON || robot.type == RobotType.GARDENER) {
+		for (RobotInfo robot : robots) {
+			if (robot.team == rc.getTeam() && robot.type == RobotType.ARCHON || robot.type == RobotType.GARDENER) {
 				nearest = robot.location;
 				break;
 			}
@@ -169,7 +172,7 @@ public class LumberjackLogic extends RobotLogic {
 	}
 
 	void moveTowards(RobotInfo target) {
-		if (rc.getLocation().distanceTo(target.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2.0) {
+		if (rc.canStrike() && rc.getLocation().distanceTo(target.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS) {
 			try {
 				rc.strike();
 			} catch (GameActionException e) {

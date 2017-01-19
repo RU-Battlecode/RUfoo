@@ -147,7 +147,7 @@ public class Navigation {
 			
 			if (enemy.getType() == RobotType.LUMBERJACK 
 					&& enemy.attackCount < 1
-					&& enemy.location.distanceTo(rc.getLocation()) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2.0) {
+					&& enemy.location.distanceTo(rc.getLocation()) <= GameConstants.LUMBERJACK_STRIKE_RADIUS) {
 				return false;
 			} else if (enemy.getType() == RobotType.SOLDIER
 					&& enemy.attackCount < 1) {

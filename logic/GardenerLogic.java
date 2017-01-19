@@ -5,7 +5,6 @@ import java.util.Arrays;
 import RUfoo.managers.Navigation;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -33,8 +32,6 @@ import battlecode.common.TreeInfo;
 
 public class GardenerLogic extends RobotLogic {
 
-	private static final float DONATE_AFTER = 500; // bullets
-	private static final float DONATE_PERCENTAGE = 0.10f;
 	private static final int STEPS_BEFORE_SETTLE = 5;
 	private int stepsBeforeGiveUp = 70;
 
@@ -73,7 +70,6 @@ public class GardenerLogic extends RobotLogic {
 
 		if (settled) {
 			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-			donateToWin();
 			plantTrees();
 			waterTrees();
 			buildRobots(trees);
@@ -103,29 +99,6 @@ public class GardenerLogic extends RobotLogic {
 			steps++;
 		}
 
-	}
-
-	void donateToWin() {
-		try {
-			if (rc.getRoundNum() == rc.getRoundLimit() - 1) {
-
-				// End game. Just donate all.
-				rc.donate(rc.getTeamBullets());
-
-			} else {
-				// If we can win... win.
-				if (rc.getTeamVictoryPoints()
-						+ (int) (rc.getTeamBullets() / 10) >= GameConstants.VICTORY_POINTS_TO_WIN) {
-
-					rc.donate(rc.getTeamBullets());
-
-				} else if (rc.getTeamBullets() > DONATE_AFTER) {
-					rc.donate(rc.getTeamBullets() * DONATE_PERCENTAGE);
-				}
-			}
-		} catch (GameActionException e) {
-			e.printStackTrace();
-		}
 	}
 
 	void plantTrees() {	
