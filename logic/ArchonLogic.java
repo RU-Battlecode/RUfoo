@@ -15,6 +15,25 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
+/**
+ * ArchonLogic.java - Archons attempt to build bases to farm bullets,
+ * while avoiding bullets. A perfect Archon base looks like: 
+ *        
+ *             *
+ *      *            *         
+ *         
+ *    *       /\       *
+ *            \/
+ *      *            *
+ *         
+ * Each * represents a Gardener @see GardenerLogic
+ * 
+ * The Archon will rotate it's base so that the north * is facing
+ * the closest enemy initial Archon location.
+ * 
+ * @author Ben
+ * 
+ */
 public class ArchonLogic extends RobotLogic {
 
 	private static final float DONATE_AFTER = 500; // bullets
@@ -33,14 +52,12 @@ public class ArchonLogic extends RobotLogic {
 
 		enemySpawn = combat.getClosestEnemySpawn();
 
-		
 		Direction pointAt = rc.getLocation().directionTo(enemySpawn);
 		buildOffset = buildDirs.get(0).degreesBetween(pointAt);
 	}
 
 	@Override
 	public void logic() {
-		
 		donateToWin();
 		
 		if (rc.getLocation().distanceTo(enemySpawn) < 20){
@@ -78,7 +95,7 @@ public class ArchonLogic extends RobotLogic {
 		Direction built = null;
 		for (Direction dir : buildDirs) {
 			Direction adjusted = dir.rotateLeftDegrees(buildOffset);
-			if (buildGardener(adjusted)) {
+			if (hireGardener(adjusted)) {
 				built = dir;
 				break;
 			}
@@ -105,10 +122,10 @@ public class ArchonLogic extends RobotLogic {
 		return gardenerCount;
 	}
 	
-	boolean buildGardener(Direction dir) {
-		if (rc.canBuildRobot(RobotType.GARDENER, dir)) {
+	boolean hireGardener(Direction dir) {
+		if (rc.canHireGardener(dir)) {
 			try {
-				rc.buildRobot(RobotType.GARDENER, dir);
+				rc.hireGardener(dir);
 				return true;
 			} catch (GameActionException e) {
 				e.printStackTrace();

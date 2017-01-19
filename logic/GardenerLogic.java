@@ -31,12 +31,30 @@ import battlecode.common.TreeInfo;
 
 // 3.
 
-public class GardenerLogic extends RobotLogic {
 
+/**
+ * GardenerLogic.java - Gardeners will try to find a perfect base location
+ * that will let them build gardens that look like:
+ * 
+ *					T T T
+ *					T G T
+ *					T B T
+ * T: Bullet tree
+ * G: Gardener
+ * B: buildLocation 
+ * 
+ * Gardeners will rotate the north tree to always face the closest enemy
+ * initial Archon location.
+ * 
+ * @author Ben
+ *
+ */
+public class GardenerLogic extends RobotLogic {
 
 	private static final float DONATE_AFTER = 500; // bullets
 	private static final float DONATE_PERCENTAGE = 0.10f;
-	private static final int STEPS_BEFORE_SETTLE = 5;
+	
+	private static final int MIN_STEPS_BEFORE_SETTLE = 5;
 	private int stepsBeforeGiveUp = 70;
 
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
@@ -113,7 +131,7 @@ public class GardenerLogic extends RobotLogic {
 
 		if ((archon == null || archon.location.distanceTo(rc.getLocation()) >= 3.0f)
 				&& rc.hasTreeBuildRequirements() && (rc.canPlantTree(buildDirection)
-						&& rc.canPlantTree(buildDirection.opposite()) && steps > STEPS_BEFORE_SETTLE)
+						&& rc.canPlantTree(buildDirection.opposite()) && steps > MIN_STEPS_BEFORE_SETTLE)
 				|| steps >= stepsBeforeGiveUp) {
 			settled = true;
 			baseLocation = rc.getLocation();

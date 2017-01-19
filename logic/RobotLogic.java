@@ -52,6 +52,7 @@ public abstract class RobotLogic {
 			if (tree.containedBullets > 0 && rc.canShake(tree.ID)) {
 				try {
 					rc.shake(tree.ID);
+					break;
 				} catch (GameActionException e) {
 					e.printStackTrace();
 				}
