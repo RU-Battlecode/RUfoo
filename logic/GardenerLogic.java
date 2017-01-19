@@ -13,25 +13,6 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
-// 0.  Find a good build spot. (Spread)
-
-// 1. Build trees... 
-/*
- *   T T T      T T T       
- *       T  or  T      or  
- *   T T T      T T T
- *   
- *   T  T  T
- *   T     T   
- *   T     T
- */
-
-// 2. build scout...
-//
-
-// 3.
-
-
 /**
  * GardenerLogic.java - Gardeners will try to find a perfect base location
  * that will let them build gardens that look like:
@@ -58,7 +39,6 @@ public class GardenerLogic extends RobotLogic {
 	private int stepsBeforeGiveUp = 70;
 
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
-
 			Navigation.NORTH_WEST.rotateLeftDegrees(15), Navigation.NORTH_EAST.rotateRightDegrees(15),
 			Navigation.SOUTH_WEST.rotateRightDegrees(15), Navigation.SOUTH_EAST.rotateLeftDegrees(15), };
 
@@ -171,7 +151,6 @@ public class GardenerLogic extends RobotLogic {
 				}
 			}
 		}
-
 	}
 
 	void waterTrees() {
