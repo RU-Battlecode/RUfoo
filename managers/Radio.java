@@ -28,28 +28,15 @@ public class Radio {
 	}
 
 	public MapLocation readTreeChannel() {
-
-		try {
-			int msg = rc.readBroadcast(TREE_CHANNEL);
-
-			return msg == 0 ? null : intToMapLocation(msg);
-
-		} catch (GameActionException e) {
-			e.printStackTrace();
-			return null;
-		}
+		int msg = readChannel(TREE_CHANNEL);
+		return msg == 0 ? null : intToMapLocation(msg);
 	}
 
 	public void requestCutTreeAt(MapLocation loc) {
-		try {
-			if (rc.readBroadcast(TREE_CHANNEL) == 0) {
-				rc.broadcast(TREE_CHANNEL, mapLocationToInt(loc));
-			}
-		} catch (GameActionException e) {
-			e.printStackTrace();
-		}
+		broadcast(TREE_CHANNEL, mapLocationToInt(loc));
 	}
 
+	
 	public void taskComplete(int channel) {
 		try {
 			rc.broadcast(channel, 0);
@@ -58,6 +45,25 @@ public class Radio {
 		}
 	}
 
+	void broadcast(int channel, int msg) {
+		try {
+			if (rc.readBroadcast(channel) == 0) {
+				rc.broadcast(channel, msg);
+			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	int readChannel(int channel) {
+		int msg = 0;
+		try {
+			msg = rc.readBroadcast(TREE_CHANNEL);
+		} catch(GameActionException e) {}
+		
+		return msg;
+	}
+	
 	int mapLocationToInt(MapLocation loc) {
 		return Math.round(loc.x) << 16 | Math.round(loc.y);
 	}
