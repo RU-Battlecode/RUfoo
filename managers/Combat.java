@@ -74,7 +74,7 @@ public class Combat {
 			}
 		}
 	}
-	
+
 	public void triadShot(RobotInfo target) {
 		if (target != null && rc.canFireTriadShot() && !rc.hasAttacked()) {
 			try {
@@ -180,15 +180,13 @@ public class Combat {
 	public int meleePriority(RobotInfo robot) {
 		int priority = robotPriority(robot);
 
-		// Close enemies = better [0,50]
-		priority += (rc.getType().sensorRadius - robot.getLocation().distanceTo(rc.getLocation())) * 50;
-
+		// Close enemies = better [0,100]
+		priority += (rc.getType().sensorRadius - robot.getLocation().distanceTo(rc.getLocation())) * 200;
+		
 		return priority;
 	}
 
-	public RobotInfo findMeleeTarget() {
-		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
-
+	public RobotInfo findMeleeTarget(RobotInfo[] enemies) {
 		// Sort by attack priority.
 		Arrays.sort(enemies, (e1, e2) -> {
 			return meleePriority(e1) - meleePriority(e2);
@@ -197,23 +195,25 @@ public class Combat {
 		return enemies.length > 0 ? enemies[0] : null;
 	}
 
-	public void meleeAttackAggressive() {
-		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().strideRadius, rc.getTeam().opponent());
-
-		// Sort by attack priority.
-		Arrays.sort(enemies, (e1, e2) -> {
-			return meleePriority(e1) - meleePriority(e2);
-		});
-
-		for (RobotInfo enemy : enemies) {
-			if (rc.canStrike()
-					&& rc.getLocation().distanceTo(enemy.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2) {
-				try {
-					rc.strike();
-					break;
-				} catch (GameActionException e) {
-					e.printStackTrace();
-				}
+	public void meleeAttack(RobotInfo[] robots) {
+	
+		if (! rc.canStrike()) {
+			return;
+		}
+		
+		boolean closeEnough = false;
+		for (RobotInfo robot : robots) {
+			if (rc.getLocation().distanceTo(robot.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2.0f) {
+				closeEnough = true;
+				break;
+			}
+		}
+		
+		if (closeEnough) {
+			try {
+				rc.strike();
+			} catch (GameActionException e) {
+				e.printStackTrace();
 			}
 		}
 
