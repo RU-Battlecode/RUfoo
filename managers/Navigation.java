@@ -264,6 +264,24 @@ public class Navigation {
 		} catch (GameActionException e1) {
 			e1.printStackTrace();
 		}
+		return false;
+	}
+	
+	public boolean tryMove(Direction dir) {
+		return tryMove(dir, rc.getType().strideRadius);
+	}
+	
+	public boolean tryMove(Direction dir, float dist) {
+		if (!rc.hasMoved() && rc.canMove(dir, dist)) {
+			try {
+				rc.move(dir, dist);
+				return true;
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return false;
 	}
 
 	public void moveByTrees(boolean includeFriendly) {
