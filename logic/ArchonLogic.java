@@ -7,7 +7,6 @@ import java.util.List;
 import RUfoo.managers.Navigation;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -28,17 +27,14 @@ import battlecode.common.TreeInfo;
  *         
  * Each * represents a Gardener @see GardenerLogic
  * 
- * The Archon will rotate it's base so that the north * is facing
- * the closest enemy initial Archon location.
+ * The Archon will rotate it's base so that the north * is facing the closest
+ * enemy initial Archon location.
  * 
  * @author Ben
  * 
  */
 public class ArchonLogic extends RobotLogic {
 
-	private static final float DONATE_AFTER = 500; // bullets
-	private static final float DONATE_PERCENTAGE = 0.10f;
-	
 	// Prioritized build directions
 	private List<Direction> buildDirs = new ArrayList<>(
 			Arrays.asList(new Direction[] { Direction.getNorth(), Navigation.NORTH_EAST, Navigation.NORTH_WEST,
@@ -58,39 +54,15 @@ public class ArchonLogic extends RobotLogic {
 
 	@Override
 	public void logic() {
-		donateToWin();
-		
-		if (rc.getLocation().distanceTo(enemySpawn) < 20){
+
+		if (rc.getLocation().distanceTo(enemySpawn) < 20) {
 			nav.moveBest(enemySpawn.directionTo(rc.getLocation()));
 		}
-		
+
 		buildBase();
 		nav.dodgeBullets();
 	}
 
-	void donateToWin() {
-		try {
-			if (rc.getRoundNum() == rc.getRoundLimit() - 1) {
-
-				// End game. Just donate all.
-				rc.donate(rc.getTeamBullets());
-
-			} else {
-				// If we can win... win.
-				if (rc.getTeamVictoryPoints()
-						+ (int) (rc.getTeamBullets() / 10) >= GameConstants.VICTORY_POINTS_TO_WIN) {
-
-					rc.donate(rc.getTeamBullets());
-
-				} else if (rc.getTeamBullets() > DONATE_AFTER) {
-					rc.donate(rc.getTeamBullets() * DONATE_PERCENTAGE);
-				}
-			}
-		} catch (GameActionException e) {
-			e.printStackTrace();
-		}
-	}
-	
 	void buildBase() {
 		Direction built = null;
 		for (Direction dir : buildDirs) {
