@@ -251,14 +251,15 @@ public class Navigation {
 		}
 	}
 
-	public void tryMove(MapLocation loc) {
+	public boolean tryMove(MapLocation loc) {
 		try {
 			if (rc.canSenseLocation(loc) && !rc.onTheMap(loc)) {
-				return;
+				return false;
 			}
 
 			if (rc.canMove(loc)) {
 				rc.move(loc);
+				return true;
 			}
 		} catch (GameActionException e1) {
 			e1.printStackTrace();
