@@ -77,7 +77,7 @@ public class ArchonLogic extends RobotLogic {
 			buildDirs.remove(built);
 		}
 
-		if (rc.getRoundNum() > 600 && countGardners() < 3) {		
+		if (countGardners() < 3) {
 			buildDirs.add(nav.randomDirection());
 		}
 	}
