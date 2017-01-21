@@ -3,7 +3,6 @@ package RUfoo.logic;
 import java.util.Arrays;
 
 import RUfoo.managers.Radio;
-import RUfoo.util.Util;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
