@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import battlecode.common.BodyInfo;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
@@ -23,6 +24,20 @@ public final class Util {
 	public static <T> T[] shuffle(T[] array) {
 		Collections.shuffle(Arrays.asList(array));
 		return array;
+	}
+
+	public static BodyInfo[] addAll(BodyInfo[] first, BodyInfo[] second) {
+		BodyInfo[] result = new BodyInfo[first.length + second.length];
+
+		for (int i = 0; i < first.length; i++) {
+			result[i] = first[i];
+		}
+
+		for (int i = 0; i < second.length; i++) {
+			result[i + first.length] = second[i];
+		}
+
+		return result;
 	}
 
 	public static MapLocation average(List<MapLocation> locations) {
