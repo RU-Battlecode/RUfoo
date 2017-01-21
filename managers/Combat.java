@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import RUfoo.util.Util;
 import RUfoo.util.Vector2f;
+import battlecode.common.BodyInfo;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
@@ -97,20 +99,23 @@ public class Combat {
 				&& rc.getTeamBullets() > 100.0f;
 	}
 
-	// TODO: Make sure not hitting own players.
 	public RobotInfo findTarget() {
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		TreeInfo[] trees = rc.senseNearbyTrees();
-
+		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		
+		// Avoid hitting friends and trees because bullets buy happiness.
+		BodyInfo[] bodiesToAvoid = Util.addAll(trees, friends);
+		
 		List<RobotInfo> hittable = Arrays.asList(enemies);
 		for (RobotInfo enemy : enemies) {
 			Vector2f dirToEnemy = new Vector2f(rc.getLocation(), enemy.getLocation());
-			for (TreeInfo tree : trees) {
-				Vector2f dirToTree = new Vector2f(rc.getLocation(), tree.getLocation());
+			for (BodyInfo body : bodiesToAvoid) {
+				Vector2f dirToTree = new Vector2f(rc.getLocation(), body.getLocation());
 				MapLocation projection = dirToTree.projectOn(dirToEnemy);
 
-				if (projection.distanceTo(tree.location) <= tree.getRadius()) {
-					// The bullet would just hit a tree if we fire it...
+				if (projection.distanceTo(body.getLocation()) <= body.getRadius()) {
+					// The bullet would just hit a tree or a friend if we fire it...
 					// Maybe we should just save ;)
 					hittable.remove(enemy);
 				}
