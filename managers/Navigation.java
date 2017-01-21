@@ -235,16 +235,16 @@ public class Navigation {
 		}
 
 		try {
-			if (rc.canMove(dir, dist)) {
-				rc.move(dir, dist);
-			} else if (rc.canMove(dir.rotateRightDegrees(45), dist)) {
-				rc.move(dir.rotateRightDegrees(45), dist);
-			} else if (rc.canMove(dir.rotateLeftDegrees(45), dist)) {
-				rc.move(dir.rotateLeftDegrees(45), dist);
-			} else if (rc.canMove(dir.rotateLeftDegrees(90), dist)) {
-				rc.move(dir.rotateLeftDegrees(90), dist);
-			} else if (rc.canMove(dir.rotateRightDegrees(90), dist)) {
-				rc.move(dir.rotateRightDegrees(90), dist);
+			float offset = 0.0f;
+			while (offset < 180.0f) {
+				if (rc.canMove(dir.rotateRightDegrees(offset), dist)) {
+					rc.move(dir.rotateRightDegrees(offset), dist);
+					break;
+				} else if (rc.canMove(dir.rotateRightDegrees(-offset), dist)) {
+					rc.move(dir.rotateRightDegrees(-offset), dist);
+					break;
+				}
+				offset += 15.0f;
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
