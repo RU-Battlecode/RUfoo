@@ -174,7 +174,8 @@ public class LumberjackLogic extends RobotLogic {
 				e.printStackTrace();
 			}
 		} else {
-			nav.moveAggressively(target.location);
+			nav.moveBest(rc.getLocation().directionTo(target.location));
+			//nav.moveAggressively(target.location);
 		}
 	}
 }
