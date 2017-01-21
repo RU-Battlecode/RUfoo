@@ -90,18 +90,22 @@ public class ArchonLogic extends RobotLogic {
 				gardenerCount++;
 			}
 		}
-		
+
 		return gardenerCount;
 	}
-	
+
 	boolean hireGardener(Direction dir) {
-		if (rc.canHireGardener(dir)) {
-			try {
-				rc.hireGardener(dir);
-				return true;
-			} catch (GameActionException e) {
-				e.printStackTrace();
+		try {
+			float offset = 0.0f;
+			while (offset < 360.0f) {
+				if (rc.canHireGardener(dir.rotateRightDegrees(personality.getIsLeftHanded() ? -offset : offset))) {
+					rc.hireGardener(dir.rotateRightDegrees(offset));
+					return true;
+				}
+				offset += 15.0f;
 			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
 		}
 
 		return false;
