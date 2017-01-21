@@ -97,7 +97,7 @@ public class GardenerLogic extends RobotLogic {
 		}
 	}
 
-	void plantTrees() {	
+	void plantTrees() {
 		// We have to plant the front two first to maximize plants
 		if (!hasPlantedFront) {
 			hasPlantedFront = moveAndPlant(buildDirection.opposite());
@@ -237,7 +237,7 @@ public class GardenerLogic extends RobotLogic {
 		if (rc.isBuildReady() && rc.hasTreeBuildRequirements() && !rc.canPlantTree(dir)) {
 			this.plantFailCount++;
 		}
-		
+
 		return false;
 	}
 }

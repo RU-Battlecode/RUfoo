@@ -63,8 +63,7 @@ public class LumberjackLogic extends RobotLogic {
 		
 		if (!rc.hasAttacked() && target == null) {
 			checkRadioTreeChannel();
-			
-			
+
 			nav.moveByTrees(false);
 
 			if (!rc.hasMoved()) {

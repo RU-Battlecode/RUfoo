@@ -182,7 +182,7 @@ public class Combat {
 
 		// Close enemies = better [0,100]
 		priority += (rc.getType().sensorRadius - robot.getLocation().distanceTo(rc.getLocation())) * 200;
-		
+
 		return priority;
 	}
 
@@ -196,11 +196,11 @@ public class Combat {
 	}
 
 	public void meleeAttack(RobotInfo[] robots) {
-	
-		if (! rc.canStrike()) {
+
+		if (!rc.canStrike()) {
 			return;
 		}
-		
+
 		boolean closeEnough = false;
 		for (RobotInfo robot : robots) {
 			if (rc.getLocation().distanceTo(robot.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2.0f) {
@@ -208,7 +208,7 @@ public class Combat {
 				break;
 			}
 		}
-		
+
 		if (closeEnough) {
 			try {
 				rc.strike();
