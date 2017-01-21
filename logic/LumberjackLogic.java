@@ -67,17 +67,13 @@ public class LumberjackLogic extends RobotLogic {
 			nav.moveByTrees(false);
 
 			if (!rc.hasMoved()) {
-				if (Util.contains(robots, RobotType.GARDENER)) {
+
+				if (rc.getLocation().distanceTo(enemySpawn) <= 1.0f || nothingAtEnemySpawn) {
+					nothingAtEnemySpawn = true;
+					nav.moveByTrees(false);
 					nav.moveRandom();
 				} else {
-
-					if (rc.getLocation().distanceTo(enemySpawn) <= 1.0f || nothingAtEnemySpawn) {
-						nothingAtEnemySpawn = true;
-						nav.moveByTrees(false);
-						nav.moveRandom();
-					} else {
-						nav.moveBest(rc.getLocation().directionTo(enemySpawn));
-					}
+					nav.moveBest(rc.getLocation().directionTo(enemySpawn));
 				}
 			}
 		}
