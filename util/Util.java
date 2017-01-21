@@ -15,12 +15,12 @@ public final class Util {
 
 	private Util() {}
 
-	public static <T extends Object> T randomChoice(T[] array) {
+	public static <T> T randomChoice(T[] array) {
 		int index = rand.nextInt(array.length);
 		return array[index];
 	}
 
-	public static <T extends Object> T[] shuffle(T[] array) {
+	public static <T> T[] shuffle(T[] array) {
 		Collections.shuffle(Arrays.asList(array));
 		return array;
 	}
@@ -60,6 +60,9 @@ public final class Util {
 	}
 
 	public static boolean closeEnough(Direction dir1, Direction dir2, float degreesOk) {
+		if (dir1 == null || dir2 == null) {
+			return false;
+		}
 		float degreesBetween = dir1.degreesBetween(dir2);
 
 		return (degreesBetween >= 0 && degreesBetween <= degreesOk)
