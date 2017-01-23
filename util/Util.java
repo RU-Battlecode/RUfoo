@@ -74,6 +74,10 @@ public final class Util {
 		return rand.nextFloat() * (max - min) + min;
 	}
 
+	public static boolean equals(float a, float b, float e) {
+		return Math.abs(a - b) <= e;
+	}
+	
 	public static boolean closeEnough(Direction dir1, Direction dir2, float degreesOk) {
 		if (dir1 == null || dir2 == null) {
 			return false;
