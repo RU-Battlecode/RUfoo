@@ -1,6 +1,8 @@
 package RUfoo.logic;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import RUfoo.managers.Navigation;
 import battlecode.common.Direction;
@@ -40,8 +42,6 @@ public class GardenerLogic extends RobotLogic {
 
 	private float buildOffset;
 	private Direction buildDirection;
-	private int scoutCount;
-	private int lumberjackCount;
 	private int steps;
 	private boolean settled;
 	private MapLocation baseLocation;
@@ -49,13 +49,15 @@ public class GardenerLogic extends RobotLogic {
 	private boolean hasPlantedMiddle;
 	private boolean hasFinishedPlanting;
 	private int plantFailCount;
-
+	private Map<RobotType, Integer> typeCount;
+	
+	
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn());
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
 		buildDirection = TREE_BUILD_DIRS[0].opposite().rotateLeftDegrees(buildOffset);
-		scoutCount = lumberjackCount = 0;
+		typeCount = new HashMap<>();
 		baseLocation = rc.getLocation();
 		hasPlantedFront = hasPlantedMiddle = hasFinishedPlanting = false;
 		plantFailCount = 0;
@@ -149,9 +151,11 @@ public class GardenerLogic extends RobotLogic {
 	void buildRobots(TreeInfo[] trees) {
 		if (trees.length >= 25) {
 			build(RobotType.LUMBERJACK);
-		} else if (scoutCount < 1) {
+		} else if (typeCount.getOrDefault(RobotType.SOLDIER, 0) < 1) {
+			build(RobotType.SOLDIER);
+		} else if (typeCount.getOrDefault(RobotType.SCOUT, 0) < 1) {
 			build(RobotType.SCOUT);
-		} else if (lumberjackCount < 2) {
+		} else if (typeCount.getOrDefault(RobotType.LUMBERJACK, 0) < 2) {
 			build(RobotType.LUMBERJACK);
 		}
 	}
@@ -160,11 +164,7 @@ public class GardenerLogic extends RobotLogic {
 		if (rc.isBuildReady() && rc.hasRobotBuildRequirements(type) && rc.canBuildRobot(type, buildDirection)) {
 			try {
 				rc.buildRobot(type, buildDirection);
-				if (type == RobotType.SCOUT) {
-					scoutCount++;
-				} else if (type == RobotType.LUMBERJACK) {
-					lumberjackCount++;
-				}
+				typeCount.put(type, typeCount.getOrDefault(type, 0) + 1);
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
