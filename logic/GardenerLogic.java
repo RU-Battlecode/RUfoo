@@ -75,6 +75,9 @@ public class GardenerLogic extends RobotLogic {
 			buildRobots(trees);
 			orderClearTrees(trees);
 		} else {
+			if (typeCount.getOrDefault(RobotType.SOLDIER, 0) < 2){
+				build(RobotType.SOLDIER);
+			}
 			findBaseLocation();
 		}
 	}
