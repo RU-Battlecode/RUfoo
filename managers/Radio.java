@@ -56,7 +56,7 @@ public class Radio {
 		}
 	}
 
-	void broadcast(int channel, int msg) {
+	public void broadcast(int channel, int msg) {
 		try {
 			if (rc.readBroadcast(channel) == 0) {
 				rc.broadcast(channel, msg);
@@ -66,10 +66,10 @@ public class Radio {
 		}
 	}
 
-	int readChannel(int channel) {
+	public int readChannel(int channel) {
 		int msg = 0;
 		try {
-			msg = rc.readBroadcast(TREE_CHANNEL);
+			msg = rc.readBroadcast(channel);
 		} catch (GameActionException e) {
 		}
 
