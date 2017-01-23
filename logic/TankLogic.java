@@ -18,7 +18,7 @@ public class TankLogic extends RobotLogic {
 		} else {
 			nav.dodgeBullets();
 			nav.moveByTrees(false);
-			nav.moveAggressively(combat.getClosestEnemySpawn());
+			nav.moveBest(rc.getLocation().directionTo(combat.getClosestEnemySpawn()));
 		}
 	}
 
