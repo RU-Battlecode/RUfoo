@@ -16,7 +16,8 @@ public class SoldierLogic extends RobotLogic {
 			nav.moveAggressively(target.location);
 			combat.shoot(target);
 		} else {
-			nav.swarm();
+			nav.dodgeBullets();
+			nav.moveBest(rc.getLocation().directionTo(combat.getClosestEnemySpawn()));
 		}
 	}
 
