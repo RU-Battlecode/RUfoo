@@ -78,19 +78,23 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void findBaseLocation() {
-		RobotInfo archon = nearestArchon();
+		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		RobotInfo archon = nearest(RobotType.ARCHON, robots);
+		RobotInfo gardener = nearest(RobotType.GARDENER, robots);
 
 		if ((archon == null || archon.location.distanceTo(rc.getLocation()) >= 3.0f)
 				&& rc.hasTreeBuildRequirements() && (rc.canPlantTree(buildDirection)
 						&& rc.canPlantTree(buildDirection.opposite()) && steps > MIN_STEPS_BEFORE_SETTLE)
-				|| steps >= stepsBeforeGiveUp) {
+				|| (steps >= stepsBeforeGiveUp && (gardener == null || gardener.location.distanceTo(rc.getLocation()) > 1.0f))) {
 			settled = true;
 			baseLocation = rc.getLocation();
 		} else {
 
 			if (archon != null) {
 				nav.moveBest(archon.location.directionTo(rc.getLocation()));
-			}
+			} else if (gardener != null) {
+				nav.moveBest(gardener.location.directionTo(rc.getLocation()));
+			} 
 
 			nav.moveBest(buildDirection.opposite());
 			steps++;
@@ -174,13 +178,11 @@ public class GardenerLogic extends RobotLogic {
 		}
 	}
 
-	RobotInfo nearestArchon() {
+	RobotInfo nearest(RobotType type, RobotInfo[] robots) {
 		RobotInfo archon = null;
-
-		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
-
+		
 		for (RobotInfo robot : robots) {
-			if (robot.getType() == RobotType.ARCHON) {
+			if (robot.getType() == type) {
 				archon = robot;
 				break;
 			}
