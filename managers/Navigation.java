@@ -252,6 +252,10 @@ public class Navigation {
 	}
 
 	public boolean tryMove(MapLocation loc) {
+		if (rc.hasMoved()) {
+			return false;
+		}
+		
 		try {
 			if (rc.canSenseLocation(loc) && !rc.onTheMap(loc)) {
 				return false;
