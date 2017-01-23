@@ -109,7 +109,10 @@ public class GardenerLogic extends RobotLogic {
 			hasPlantedFront = moveAndPlant(buildDirection.opposite());
 		} else if (!hasPlantedMiddle) {
 			nav.tryMove(baseLocation);
-			hasPlantedMiddle = true;
+			if (rc.getLocation().distanceTo(baseLocation) < 0.2f) {
+				hasPlantedMiddle = true;
+				plantFailCount = 0;
+			}
 		} else if (!hasFinishedPlanting) {
 			hasFinishedPlanting = moveAndPlant(buildDirection);
 		} else {
@@ -194,15 +197,16 @@ public class GardenerLogic extends RobotLogic {
 	boolean moveAndPlant(Direction dir) {
 		boolean success = false;
 		// Move forward to plant.
-		final MapLocation firstStep = baseLocation.add(dir, rc.getType().strideRadius);
-		final MapLocation endPoint = firstStep.add(dir, rc.getType().strideRadius + 0.01f);
+		final MapLocation firstThreeSteps = baseLocation.add(dir, rc.getType().strideRadius * 3.0f);
+		final MapLocation endPoint = firstThreeSteps.add(dir, rc.getType().strideRadius + 0.1f);
 
 		nav.tryMove(endPoint);
 		if (!rc.hasMoved() && !rc.canMove(dir)) {
 			plantFailCount++;
+			return false;
 		}
 
-		if (rc.getLocation().distanceTo(endPoint) > 0.5f) {
+		if (rc.getLocation().distanceTo(endPoint) > 0.3f) {
 			plantFailCount++;
 			success = false;
 		} else {
