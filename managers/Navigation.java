@@ -261,9 +261,13 @@ public class Navigation {
 				return false;
 			}
 
+			float dist = Math.min(rc.getType().strideRadius, Math.max(0, rc.getLocation().distanceTo(loc)));
+			Direction dir = rc.getLocation().directionTo(loc);
 			if (rc.canMove(loc)) {
 				rc.move(loc);
 				return true;
+			} else if (!tryMove(dir, dist)) {
+				moveBest(dir);
 			}
 		} catch (GameActionException e1) {
 			e1.printStackTrace();
