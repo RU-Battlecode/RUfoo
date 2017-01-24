@@ -69,13 +69,13 @@ public abstract class RobotLogic {
 
 	void donateToWin() {
 		try {
-			if (rc.getRoundNum() == rc.getRoundLimit() - 1) {
+			if (rc.getRoundNum() == rc.getRoundLimit() - 1 || opponentAboutToWin()) {
 				// End game. Just donate all.
 				rc.donate(rc.getTeamBullets());
 			}
 			// If we can win... win.
 			else if (rc.getTeamVictoryPoints()
-					+ (int) (rc.getTeamBullets() / 10) >= GameConstants.VICTORY_POINTS_TO_WIN) {
+					+ (int) (rc.getTeamBullets() / rc.getVictoryPointCost()) >= GameConstants.VICTORY_POINTS_TO_WIN) {
 
 				rc.donate(rc.getTeamBullets());
 
@@ -87,6 +87,10 @@ public abstract class RobotLogic {
 		}
 	}
 
+	boolean opponentAboutToWin() {
+		return rc.getOpponentVictoryPoints() > 900 && rc.getTeamVictoryPoints() > 800; 
+	}
+	
 	void shakeTrees() {
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius);
 		for (TreeInfo tree : trees) {
