@@ -53,10 +53,10 @@ public class ScoutLogic extends RobotLogic {
 		attack(target);
 
 		if (target == null && !rc.hasAttacked()) {
-			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-			if (personality.getIsLeftHanded() || trees.length < 5) {
-				moveToNewTrees(trees);
-			}
+//			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+//			if (trees.length < 5) {
+//				moveToNewTrees(trees);
+//			}
 			explore();
 		}
 		// countTrees();
