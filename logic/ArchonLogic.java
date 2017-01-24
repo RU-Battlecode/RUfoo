@@ -102,6 +102,7 @@ public class ArchonLogic extends RobotLogic {
 			while (offset < 360.0f) {
 				if (rc.canHireGardener(dir.rotateRightDegrees(personality.getIsLeftHanded() ? -offset : offset))) {
 					rc.hireGardener(dir.rotateRightDegrees(offset));
+					census.increment(RobotType.GARDENER);
 					return true;
 				}
 				offset += 15.0f;
