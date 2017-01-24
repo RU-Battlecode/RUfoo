@@ -1,8 +1,6 @@
 package RUfoo.logic;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import RUfoo.managers.Navigation;
 import battlecode.common.Direction;
@@ -48,16 +46,13 @@ public class GardenerLogic extends RobotLogic {
 	private boolean hasPlantedFront;
 	private boolean hasPlantedMiddle;
 	private boolean hasFinishedPlanting;
-	private int plantFailCount;
-	private Map<RobotType, Integer> typeCount;
-	
+	private int plantFailCount;	
 	
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn());
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
 		buildDirection = TREE_BUILD_DIRS[0].opposite().rotateLeftDegrees(buildOffset);
-		typeCount = new HashMap<>();
 		baseLocation = rc.getLocation();
 		hasPlantedFront = hasPlantedMiddle = hasFinishedPlanting = false;
 		plantFailCount = 0;
@@ -67,18 +62,25 @@ public class GardenerLogic extends RobotLogic {
 
 	@Override
 	public void logic() {
-
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
 		if (settled) {
-			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 			plantTrees();
-			waterTrees();
+			waterTrees(myTrees);
 			buildRobots(trees);
 			orderClearTrees(trees);
 		} else {
-			if (typeCount.getOrDefault(RobotType.SOLDIER, 0) < 2){
+			if (trees.length >= 8) {
+				build(RobotType.LUMBERJACK);
+			} else if (census.count(RobotType.SOLDIER) < 2) {
 				build(RobotType.SOLDIER);
-			}
+			} 
 			findBaseLocation();
+		}
+		
+		if (rc.getRoundNum() == 600 && myTrees.length < 7) {
+			settled = false;
+			plantFailCount = 0;	
 		}
 	}
 
@@ -135,9 +137,7 @@ public class GardenerLogic extends RobotLogic {
 		}
 	}
 
-	void waterTrees() {
-		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
-
+	void waterTrees(TreeInfo[] trees) {
 		// Lowest health trees first.
 		Arrays.sort(trees, (t1, t2) -> {
 			return Math.round(t1.health - t2.health);
@@ -155,13 +155,13 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void buildRobots(TreeInfo[] trees) {
-		if (trees.length >= 25) {
+		if (trees.length >= 8) {
 			build(RobotType.LUMBERJACK);
-		} else if (typeCount.getOrDefault(RobotType.SOLDIER, 0) < 1) {
+		} else if (census.count(RobotType.SOLDIER) < 3) {
 			build(RobotType.SOLDIER);
-		} else if (typeCount.getOrDefault(RobotType.SCOUT, 0) < 1) {
+		} else if (census.count(RobotType.SCOUT) < 4) {
 			build(RobotType.SCOUT);
-		} else if (typeCount.getOrDefault(RobotType.LUMBERJACK, 0) < 2) {
+		} else if (census.count(RobotType.LUMBERJACK) < 5) {
 			build(RobotType.LUMBERJACK);
 		}
 	}
@@ -170,7 +170,7 @@ public class GardenerLogic extends RobotLogic {
 		if (rc.isBuildReady() && rc.hasRobotBuildRequirements(type) && rc.canBuildRobot(type, buildDirection)) {
 			try {
 				rc.buildRobot(type, buildDirection);
-				typeCount.put(type, typeCount.getOrDefault(type, 0) + 1);
+				census.increment(type);
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
