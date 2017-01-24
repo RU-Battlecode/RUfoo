@@ -37,8 +37,7 @@ public class ArchonLogic extends RobotLogic {
 
 	// Prioritized build directions
 	private List<Direction> buildDirs = new ArrayList<>(
-			Arrays.asList(new Direction[] { Direction.getNorth(), Navigation.NORTH_EAST, Navigation.NORTH_WEST,
-					Direction.getEast(), Direction.getWest(), Navigation.SOUTH_EAST, Navigation.SOUTH_WEST, }));
+			Arrays.asList(new Direction[] { Direction.getNorth() }));
 
 	private float buildOffset;
 	private MapLocation enemySpawn;
@@ -76,24 +75,30 @@ public class ArchonLogic extends RobotLogic {
 		if (built != null) {
 			buildDirs.remove(built);
 		}
-
 		
-		Direction dir = nav.randomDirection();
-		if (countGardners() < 3 && rc.canBuildRobot(RobotType.GARDENER, dir)) {
-			buildDirs.add(dir);
-		}
-	}
-
-	int countGardners() {
-		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
-		int gardenerCount = 0;
-		for (RobotInfo robot : robots) {
-			if (robot.type == RobotType.GARDENER) {
-				gardenerCount++;
+		// Build orders
+		int round = rc.getRoundNum();	
+		switch (round) {
+		case 20:
+			buildDirs.add(Navigation.NORTH_EAST);
+			break;
+		case 30:
+			buildDirs.add(Navigation.NORTH_WEST);
+			break;
+		case 35:
+			buildDirs.add(Direction.getEast());
+			buildDirs.add(Direction.getWest());
+			break;
+		case 45:
+			buildDirs.add(Navigation.SOUTH_EAST);
+			buildDirs.add(Navigation.SOUTH_WEST);
+			break;
+		default:
+			Direction dir = nav.randomDirection();
+			if (round > 45 && census.count(RobotType.GARDENER) < 7 && rc.canBuildRobot(RobotType.GARDENER, dir)) {
+				buildDirs.add(dir);
 			}
-		}
-
-		return gardenerCount;
+		}	
 	}
 
 	boolean hireGardener(Direction dir) {
