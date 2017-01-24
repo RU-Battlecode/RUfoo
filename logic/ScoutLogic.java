@@ -103,17 +103,6 @@ public class ScoutLogic extends RobotLogic {
 		}
 		
 	}
-	
-	private void countTrees() {
-		TreeInfo[] trees = rc.senseNearbyTrees();
-
-		for (TreeInfo tree : trees) {
-			if (tree.getTeam() == Team.NEUTRAL) {
-				treeMap.put(tree.location, tree.ID);
-			}
-		}
-
-	}
 
 	boolean shouldExplore() {
 		try {
