@@ -4,14 +4,14 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+
+import static RUfoo.managers.Channel.*;
 
 public class Radio {
 
 	private RobotController rc;
-
-	public static final int TREE_CHANNEL = 0;
-	public static final int DEFENSE_CHANNEL = 1;
-
+	
 	public Radio(RobotController _rc) {
 		rc = _rc;
 	}
@@ -45,31 +45,39 @@ public class Radio {
 	}
 
 	public void requestCutTreeAt(MapLocation loc) {
-		broadcast(TREE_CHANNEL, mapLocationToInt(loc));
+		broadcastSafely(TREE_CHANNEL, mapLocationToInt(loc));
 	}
 
-	public void taskComplete(int channel) {
+	public void taskComplete(Channel channel) {
 		try {
-			rc.broadcast(channel, 0);
+			rc.broadcast(channel.ordinal(), 0);
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void broadcast(int channel, int msg) {
+	public void broadcastSafely(Channel channel, int msg) {
 		try {
-			if (rc.readBroadcast(channel) == 0) {
-				rc.broadcast(channel, msg);
+			if (rc.readBroadcast(channel.ordinal()) == 0) {
+				rc.broadcast(channel.ordinal(), msg);
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	public void broadcast(Channel channel, int msg) {
+		try {	
+			rc.broadcast(channel.ordinal(), msg);
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
+	}
 
-	public int readChannel(int channel) {
+	public int readChannel(Channel channel) {
 		int msg = 0;
 		try {
-			msg = rc.readBroadcast(channel);
+			msg = rc.readBroadcast(channel.ordinal());
 		} catch (GameActionException e) {
 		}
 
