@@ -27,6 +27,56 @@ public class Radio {
 		}
 		return freeIndex;
 	}
+	
+	// ENEMY_ARCHON_CHANNEL
+	public MapLocation[] readEnemyArchonChannel() {
+		int msg1 = readChannel(ENEMY_ARCHON_CHANNEL1);
+		int msg2 = readChannel(ENEMY_ARCHON_CHANNEL2);
+		int msg3 = readChannel(ENEMY_ARCHON_CHANNEL3);
+		return new MapLocation[] {
+				msg1 == 0 ? null : intToMapLocation(msg1),
+				msg2 == 0 ? null : intToMapLocation(msg2),
+				msg3 == 0 ? null : intToMapLocation(msg3),
+		};
+	}
+	
+	public void foundEnemyArchon(RobotInfo robot) {
+		
+		Channel[] archonIdChannels = new Channel[] {
+				ENEMY_ARCHON_ID_CHANNEL1,
+				ENEMY_ARCHON_ID_CHANNEL2,
+				ENEMY_ARCHON_ID_CHANNEL3
+		};
+		
+		int[] archonIds = new int[] {
+				readChannel(ENEMY_ARCHON_ID_CHANNEL1),
+				readChannel(ENEMY_ARCHON_ID_CHANNEL2),
+				readChannel(ENEMY_ARCHON_ID_CHANNEL3),
+		};
+	
+		Channel[] archonLocationChannels = new Channel[] {
+				ENEMY_ARCHON_CHANNEL1,
+				ENEMY_ARCHON_CHANNEL2,
+				ENEMY_ARCHON_CHANNEL3
+		};
+		
+		// If this robot is unseen then mark it as 1st/2nd/3rd enemy archon
+		for (int i = 0; i < archonIds.length; i++) {
+			if (archonIds[i] == 0) {
+				broadcast(archonIdChannels[i], robot.ID);
+				break;
+			}
+		}
+		
+		// Update the location of this enemy archon!
+		for (int i = 0; i < archonIds.length; i++) {
+			if (archonIds[i] == robot.ID) {
+				broadcast(archonLocationChannels[i], mapLocationToInt(robot.location));
+				break;
+			}
+		}
+		
+	}
 
 	// Defense channel
 	public MapLocation readDefenseChannel() {
