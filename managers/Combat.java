@@ -22,6 +22,20 @@ public class Combat {
 		rc = _rc;
 	}
 
+	public MapLocation getClosestEnemy() {
+		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		MapLocation closest = getClosestEnemySpawn();
+		
+		for (RobotInfo robot : robots) {
+			if (robot.location.distanceSquaredTo(rc.getLocation()) < 
+					closest.distanceSquaredTo(rc.getLocation())) {
+				closest = robot.location;
+			}
+		}
+		
+		return closest;
+	}
+	
 	public MapLocation getClosestEnemySpawn() {
 		MapLocation[] enemySpawns = rc.getInitialArchonLocations(rc.getTeam().opponent());
 
