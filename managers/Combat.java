@@ -98,14 +98,12 @@ public class Combat {
 
 	public boolean shouldUsePentadShot() {
 		return rc.canFirePentadShot() && GameConstants.VICTORY_POINTS_TO_WIN
-				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f
-				&& rc.getTeamBullets() > 200.0f;
+				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f;
 	}
 
 	public boolean shouldUseTriadShot() {
 		return rc.canFireTriadShot() && GameConstants.VICTORY_POINTS_TO_WIN
-				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f
-				&& rc.getTeamBullets() > 100.0f;
+				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f;
 	}
 
 	public RobotInfo findTarget() {
