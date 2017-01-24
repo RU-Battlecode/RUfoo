@@ -2,7 +2,7 @@ package RUfoo.logic;
 
 import java.util.Arrays;
 
-import RUfoo.managers.Radio;
+import RUfoo.managers.Channel;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
@@ -36,13 +36,18 @@ public class LumberjackLogic extends RobotLogic {
 
 	private boolean nothingAtEnemySpawn;
 	private MapLocation enemySpawn;
+	private TreeInfo targetTree;
+	private int treeFrustration;
 
 	public LumberjackLogic(RobotController _rc) {
 		super(_rc);
 		enemySpawn = combat.getClosestEnemySpawn();
 		nothingAtEnemySpawn = false;
+		
+		targetTree = null;
+		treeFrustration = 0;
 	}
-
+	
 	@Override
 	public void logic() {
 		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
@@ -81,7 +86,7 @@ public class LumberjackLogic extends RobotLogic {
 
 	void moveOffSpawn() {
 		if (personality.getMother() != null) {
-			if (rc.getLocation().distanceTo(personality.getMother().location) <= rc.getType().bodyRadius * 3.0) {
+			if (rc.getLocation().distanceTo(personality.getMother().location) <= rc.getType().sensorRadius) {
 				nav.moveBest(personality.getMother().location.directionTo(rc.getLocation()));
 			}
 		}
@@ -110,12 +115,12 @@ public class LumberjackLogic extends RobotLogic {
 			if (rc.canChop(requestedTree)) {
 				try {
 					rc.chop(requestedTree);
-					radio.taskComplete(Radio.TREE_CHANNEL);
+					radio.taskComplete(Channel.TREE_CHANNEL);
 				} catch (GameActionException e) {
 					e.printStackTrace();
 				}
 			} else {
-				nav.moveAggressively(requestedTree);
+				nav.moveBest(rc.getLocation().directionTo(requestedTree));
 			}
 		}
 	}
@@ -146,6 +151,7 @@ public class LumberjackLogic extends RobotLogic {
 			if (rc.canChop(tree.ID)) {
 				try {
 					rc.chop(tree.ID);
+					targetTree = null;
 					break;
 				} catch (GameActionException e) {
 					e.printStackTrace();
@@ -158,10 +164,20 @@ public class LumberjackLogic extends RobotLogic {
 				if (tree.team == rc.getTeam()) {
 					continue;
 				}
-
-				nav.moveAggressively(tree.location);
+				
+				if (treeFrustration > personality.getPatience() && targetTree == tree) {
+					treeFrustration = 0;
+					continue;
+				}
+			
+				nav.tryMove(tree.location);
+				targetTree = tree;
 				break;
 			}
+		}
+		
+		if (targetTree != null && !rc.hasAttacked()) {
+			treeFrustration++;
 		}
 	}
 
