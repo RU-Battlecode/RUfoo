@@ -11,7 +11,7 @@ public class SoldierLogic extends RobotLogic {
 
 	@Override
 	public void logic() {
-		RobotInfo target = combat.findTarget();
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		if (target != null) {
 			nav.moveAggressively(target.location);
 			combat.shoot(target);

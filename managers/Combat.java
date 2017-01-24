@@ -106,8 +106,7 @@ public class Combat {
 				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f;
 	}
 
-	public RobotInfo findTarget() {
-		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+	public RobotInfo findTarget(RobotInfo[] enemies) {
 		TreeInfo[] trees = rc.senseNearbyTrees();
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		

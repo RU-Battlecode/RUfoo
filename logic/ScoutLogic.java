@@ -41,8 +41,7 @@ public class ScoutLogic extends RobotLogic {
 
 	@Override
 	public void logic() {	
-		RobotInfo target = combat.findTarget();
-		//nav.dodgeBullets();
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		attack(target);
 
 		if (target == null && !rc.hasAttacked()) {
