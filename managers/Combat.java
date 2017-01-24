@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import RUfoo.util.Util;
 import RUfoo.util.Vector2f;
+import battlecode.common.BodyInfo;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
@@ -20,6 +22,20 @@ public class Combat {
 		rc = _rc;
 	}
 
+	public MapLocation getClosestEnemy() {
+		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		MapLocation closest = getClosestEnemySpawn();
+		
+		for (RobotInfo robot : robots) {
+			if (robot.location.distanceSquaredTo(rc.getLocation()) < 
+					closest.distanceSquaredTo(rc.getLocation())) {
+				closest = robot.location;
+			}
+		}
+		
+		return closest;
+	}
+	
 	public MapLocation getClosestEnemySpawn() {
 		MapLocation[] enemySpawns = rc.getInitialArchonLocations(rc.getTeam().opponent());
 
@@ -48,11 +64,6 @@ public class Combat {
 		} else {
 			singleShotAttack(target);
 		}
-	}
-
-	// TODO: Maybe shoot to the left and the right of target?
-	public void singleShotAttack() {
-		singleShotAttack(findTarget());
 	}
 
 	public void singleShotAttack(RobotInfo target) {
@@ -87,30 +98,30 @@ public class Combat {
 
 	public boolean shouldUsePentadShot() {
 		return rc.canFirePentadShot() && GameConstants.VICTORY_POINTS_TO_WIN
-				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f
-				&& rc.getTeamBullets() > 200.0f;
+				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f;
 	}
 
 	public boolean shouldUseTriadShot() {
 		return rc.canFireTriadShot() && GameConstants.VICTORY_POINTS_TO_WIN
-				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f
-				&& rc.getTeamBullets() > 100.0f;
+				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f;
 	}
 
-	// TODO: Make sure not hitting own players.
-	public RobotInfo findTarget() {
-		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+	public RobotInfo findTarget(RobotInfo[] enemies) {
 		TreeInfo[] trees = rc.senseNearbyTrees();
-
+		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		
+		// Avoid hitting friends and trees because bullets buy happiness.
+		BodyInfo[] bodiesToAvoid = Util.addAll(trees, friends);
+		
 		List<RobotInfo> hittable = Arrays.asList(enemies);
 		for (RobotInfo enemy : enemies) {
 			Vector2f dirToEnemy = new Vector2f(rc.getLocation(), enemy.getLocation());
-			for (TreeInfo tree : trees) {
-				Vector2f dirToTree = new Vector2f(rc.getLocation(), tree.getLocation());
+			for (BodyInfo body : bodiesToAvoid) {
+				Vector2f dirToTree = new Vector2f(rc.getLocation(), body.getLocation());
 				MapLocation projection = dirToTree.projectOn(dirToEnemy);
 
-				if (projection.distanceTo(tree.location) <= tree.getRadius()) {
-					// The bullet would just hit a tree if we fire it...
+				if (projection.distanceTo(body.getLocation()) <= body.getRadius()) {
+					// The bullet would just hit a tree or a friend if we fire it...
 					// Maybe we should just save ;)
 					hittable.remove(enemy);
 				}
@@ -182,7 +193,7 @@ public class Combat {
 
 		// Close enemies = better [0,100]
 		priority += (rc.getType().sensorRadius - robot.getLocation().distanceTo(rc.getLocation())) * 200;
-		
+
 		return priority;
 	}
 
@@ -196,11 +207,11 @@ public class Combat {
 	}
 
 	public void meleeAttack(RobotInfo[] robots) {
-	
-		if (! rc.canStrike()) {
+
+		if (!rc.canStrike()) {
 			return;
 		}
-		
+
 		boolean closeEnough = false;
 		for (RobotInfo robot : robots) {
 			if (rc.getLocation().distanceTo(robot.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS * 2.0f) {
@@ -208,7 +219,7 @@ public class Combat {
 				break;
 			}
 		}
-		
+
 		if (closeEnough) {
 			try {
 				rc.strike();

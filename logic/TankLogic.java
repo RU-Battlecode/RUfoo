@@ -11,14 +11,15 @@ public class TankLogic extends RobotLogic {
 
 	@Override
 	public void logic() {
-		RobotInfo target = combat.findTarget();
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		RobotInfo target = combat.findTarget(enemies);
 		if (target != null) {
 			nav.moveAggressively(target.location.add(rc.getLocation().directionTo(target.location)));
 			combat.singleShotAttack(target);
 		} else {
 			nav.dodgeBullets();
 			nav.moveByTrees(false);
-			nav.moveAggressively(combat.getClosestEnemySpawn());
+			nav.moveBest(rc.getLocation().directionTo(combat.getClosestEnemySpawn()));
 		}
 	}
 

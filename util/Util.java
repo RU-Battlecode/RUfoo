@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import battlecode.common.BodyInfo;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
@@ -15,14 +16,28 @@ public final class Util {
 
 	private Util() {}
 
-	public static <T extends Object> T randomChoice(T[] array) {
+	public static <T> T randomChoice(T[] array) {
 		int index = rand.nextInt(array.length);
 		return array[index];
 	}
 
-	public static <T extends Object> T[] shuffle(T[] array) {
+	public static <T> T[] shuffle(T[] array) {
 		Collections.shuffle(Arrays.asList(array));
 		return array;
+	}
+
+	public static BodyInfo[] addAll(BodyInfo[] first, BodyInfo[] second) {
+		BodyInfo[] result = new BodyInfo[first.length + second.length];
+
+		for (int i = 0; i < first.length; i++) {
+			result[i] = first[i];
+		}
+
+		for (int i = 0; i < second.length; i++) {
+			result[i + first.length] = second[i];
+		}
+
+		return result;
 	}
 
 	public static MapLocation average(List<MapLocation> locations) {
@@ -59,7 +74,14 @@ public final class Util {
 		return rand.nextFloat() * (max - min) + min;
 	}
 
+	public static boolean equals(float a, float b, float e) {
+		return Math.abs(a - b) <= e;
+	}
+	
 	public static boolean closeEnough(Direction dir1, Direction dir2, float degreesOk) {
+		if (dir1 == null || dir2 == null) {
+			return false;
+		}
 		float degreesBetween = dir1.degreesBetween(dir2);
 
 		return (degreesBetween >= 0 && degreesBetween <= degreesOk)

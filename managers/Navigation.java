@@ -27,7 +27,7 @@ public class Navigation {
 
 	public static final Direction[] DIRECTIONS = { Direction.getNorth(), NORTH_EAST, Direction.getEast(), SOUTH_EAST,
 			Direction.getSouth(), SOUTH_WEST, Direction.getWest(), NORTH_WEST };
-	
+
 	public Navigation(RobotController _rc) {
 		rc = _rc;
 	}
@@ -105,6 +105,7 @@ public class Navigation {
 		if (rc.hasMoved()) {
 			return;
 		}
+
 		if (rc.senseNearbyBullets().length > 0) {
 			List<Direction> possibleDirs = safeDirections();
 			if (possibleDirs.size() > 0) {
@@ -144,18 +145,16 @@ public class Navigation {
 		// TODO: Check where enemies are
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		for (RobotInfo enemy : enemies) {
-			
-			if (enemy.getType() == RobotType.LUMBERJACK 
-					&& enemy.attackCount < 1
+
+			if (enemy.getType() == RobotType.LUMBERJACK && enemy.attackCount < 1
 					&& enemy.location.distanceTo(rc.getLocation()) <= GameConstants.LUMBERJACK_STRIKE_RADIUS) {
 				return false;
-			} else if (enemy.getType() == RobotType.SOLDIER
-					&& enemy.attackCount < 1) {
+			} else if (enemy.getType() == RobotType.SOLDIER && enemy.attackCount < 1) {
 				return false;
 			}
-			
+
 		}
-		 
+
 		// This is where I want to be
 		MapLocation possibleLocation = rc.getLocation().add(dir);
 
@@ -236,40 +235,61 @@ public class Navigation {
 		}
 
 		try {
-			if (rc.canMove(dir, dist)) {
-				rc.move(dir, dist);
-			} else if (rc.canMove(dir.rotateRightDegrees(45), dist)) {
-				rc.move(dir.rotateRightDegrees(45), dist);
-			} else if (rc.canMove(dir.rotateLeftDegrees(45), dist)) {
-				rc.move(dir.rotateLeftDegrees(45), dist);
-			} else if (rc.canMove(dir.rotateLeftDegrees(90), dist)) {
-				rc.move(dir.rotateLeftDegrees(90), dist);
-			} else if (rc.canMove(dir.rotateRightDegrees(90), dist)) {
-				rc.move(dir.rotateRightDegrees(90), dist);
+			float offset = 0.0f;
+			while (offset < 180.0f) {
+				if (rc.canMove(dir.rotateRightDegrees(offset), dist)) {
+					rc.move(dir.rotateRightDegrees(offset), dist);
+					break;
+				} else if (rc.canMove(dir.rotateRightDegrees(-offset), dist)) {
+					rc.move(dir.rotateRightDegrees(-offset), dist);
+					break;
+				}
+				offset += 15.0f;
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	public void tryMove(MapLocation loc) {
+
+	public boolean tryMove(MapLocation loc) {
+		if (rc.hasMoved()) {
+			return false;
+		}
 		
 		try {
 			if (rc.canSenseLocation(loc) && !rc.onTheMap(loc)) {
-				return;
+				return false;
+			}
+
+			float dist = Math.min(rc.getType().strideRadius, Math.max(0, rc.getLocation().distanceTo(loc)));
+			Direction dir = rc.getLocation().directionTo(loc);
+			if (rc.canMove(loc)) {
+				rc.move(loc);
+				return true;
+			} else if (!tryMove(dir, dist)) {
+				moveBest(dir);
 			}
 		} catch (GameActionException e1) {
-		
 			e1.printStackTrace();
 		}
-		
-		if (rc.canMove(loc)) {
+		return false;
+	}
+	
+	public boolean tryMove(Direction dir) {
+		return tryMove(dir, rc.getType().strideRadius);
+	}
+	
+	public boolean tryMove(Direction dir, float dist) {
+		if (!rc.hasMoved() && rc.canMove(dir, dist)) {
 			try {
-				rc.move(loc);
+				rc.move(dir, dist);
+				return true;
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
 		}
+		
+		return false;
 	}
 
 	public void moveByTrees(boolean includeFriendly) {
@@ -278,7 +298,7 @@ public class Navigation {
 		}
 
 		TreeInfo[] trees = rc.senseNearbyTrees();
-		// Sort furthest first
+		// Sort farthest first
 		Arrays.sort(trees, (t1, t2) -> {
 			return Math.round(
 					t1.location.distanceSquaredTo(rc.getLocation()) - t2.location.distanceSquaredTo(rc.getLocation()));

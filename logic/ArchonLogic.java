@@ -7,7 +7,6 @@ import java.util.List;
 import RUfoo.managers.Navigation;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -15,15 +14,30 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
+/**
+ * ArchonLogic.java - Archons attempt to build bases to farm bullets,
+ * while avoiding bullets. A perfect Archon base looks like: 
+ *        
+ *             *
+ *      *            *         
+ *         
+ *    *       /\       *
+ *            \/
+ *      *            *
+ *         
+ * Each * represents a Gardener @see GardenerLogic
+ * 
+ * The Archon will rotate it's base so that the north * is facing the closest
+ * enemy initial Archon location.
+ * 
+ * @author Ben
+ * 
+ */
 public class ArchonLogic extends RobotLogic {
 
-	private static final float DONATE_AFTER = 500; // bullets
-	private static final float DONATE_PERCENTAGE = 0.10f;
-	
 	// Prioritized build directions
 	private List<Direction> buildDirs = new ArrayList<>(
-			Arrays.asList(new Direction[] { Direction.getNorth(), Navigation.NORTH_EAST, Navigation.NORTH_WEST,
-					Direction.getEast(), Direction.getWest(), Navigation.SOUTH_EAST, Navigation.SOUTH_WEST, }));
+			Arrays.asList(new Direction[] { Direction.getNorth() }));
 
 	private float buildOffset;
 	private MapLocation enemySpawn;
@@ -33,52 +47,26 @@ public class ArchonLogic extends RobotLogic {
 
 		enemySpawn = combat.getClosestEnemySpawn();
 
-		
 		Direction pointAt = rc.getLocation().directionTo(enemySpawn);
 		buildOffset = buildDirs.get(0).degreesBetween(pointAt);
 	}
 
 	@Override
 	public void logic() {
-		
-		donateToWin();
-		
-		if (rc.getLocation().distanceTo(enemySpawn) < 20){
+
+		if (rc.getLocation().distanceTo(enemySpawn) < 20) {
 			nav.moveBest(enemySpawn.directionTo(rc.getLocation()));
 		}
-		
+
 		buildBase();
 		nav.dodgeBullets();
 	}
 
-	void donateToWin() {
-		try {
-			if (rc.getRoundNum() == rc.getRoundLimit() - 1) {
-
-				// End game. Just donate all.
-				rc.donate(rc.getTeamBullets());
-
-			} else {
-				// If we can win... win.
-				if (rc.getTeamVictoryPoints()
-						+ (int) (rc.getTeamBullets() / 10) >= GameConstants.VICTORY_POINTS_TO_WIN) {
-
-					rc.donate(rc.getTeamBullets());
-
-				} else if (rc.getTeamBullets() > DONATE_AFTER) {
-					rc.donate(rc.getTeamBullets() * DONATE_PERCENTAGE);
-				}
-			}
-		} catch (GameActionException e) {
-			e.printStackTrace();
-		}
-	}
-	
 	void buildBase() {
 		Direction built = null;
 		for (Direction dir : buildDirs) {
 			Direction adjusted = dir.rotateLeftDegrees(buildOffset);
-			if (buildGardener(adjusted)) {
+			if (hireGardener(adjusted)) {
 				built = dir;
 				break;
 			}
@@ -87,32 +75,45 @@ public class ArchonLogic extends RobotLogic {
 		if (built != null) {
 			buildDirs.remove(built);
 		}
-
-		if (rc.getRoundNum() > 600 && countGardners() < 3) {		
-			buildDirs.add(nav.randomDirection());
-		}
-	}
-
-	int countGardners() {
-		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
-		int gardenerCount = 0;
-		for (RobotInfo robot : robots) {
-			if (robot.type == RobotType.GARDENER) {
-				gardenerCount++;
-			}
-		}
 		
-		return gardenerCount;
-	}
-	
-	boolean buildGardener(Direction dir) {
-		if (rc.canBuildRobot(RobotType.GARDENER, dir)) {
-			try {
-				rc.buildRobot(RobotType.GARDENER, dir);
-				return true;
-			} catch (GameActionException e) {
-				e.printStackTrace();
+		// Build orders
+		int round = rc.getRoundNum();	
+		switch (round) {
+		case 20:
+			buildDirs.add(Navigation.NORTH_EAST);
+			break;
+		case 30:
+			buildDirs.add(Navigation.NORTH_WEST);
+			break;
+		case 35:
+			buildDirs.add(Direction.getEast());
+			buildDirs.add(Direction.getWest());
+			break;
+		case 45:
+			buildDirs.add(Navigation.SOUTH_EAST);
+			buildDirs.add(Navigation.SOUTH_WEST);
+			break;
+		default:
+			Direction dir = nav.randomDirection();
+			if (round > 45 && census.count(RobotType.GARDENER) < 7 && rc.canBuildRobot(RobotType.GARDENER, dir)) {
+				buildDirs.add(dir);
 			}
+		}	
+	}
+
+	boolean hireGardener(Direction dir) {
+		try {
+			float offset = 0.0f;
+			while (offset < 360.0f) {
+				if (rc.canHireGardener(dir.rotateRightDegrees(personality.getIsLeftHanded() ? -offset : offset))) {
+					rc.hireGardener(dir.rotateRightDegrees(offset));
+					census.increment(RobotType.GARDENER);
+					return true;
+				}
+				offset += 15.0f;
+			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
 		}
 
 		return false;
