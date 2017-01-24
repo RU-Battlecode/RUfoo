@@ -66,11 +66,6 @@ public class Combat {
 		}
 	}
 
-	// TODO: Maybe shoot to the left and the right of target?
-	public void singleShotAttack() {
-		singleShotAttack(findTarget());
-	}
-
 	public void singleShotAttack(RobotInfo target) {
 		if (target != null && rc.canFireSingleShot() && !rc.hasAttacked()) {
 			try {
