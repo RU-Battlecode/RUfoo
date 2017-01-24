@@ -42,6 +42,14 @@ public class ScoutLogic extends RobotLogic {
 	@Override
 	public void logic() {	
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		
+		for (RobotInfo enemy : enemies) {
+			if (enemy.type == RobotType.ARCHON) {
+				radio.foundEnemyArchon(enemy);
+			}
+		}
+		
+		RobotInfo target = combat.findTarget(enemies);
 		attack(target);
 
 		if (target == null && !rc.hasAttacked()) {
