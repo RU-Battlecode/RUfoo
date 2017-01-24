@@ -1,5 +1,6 @@
 package RUfoo.logic;
 
+import RUfoo.managers.Census;
 import RUfoo.managers.Combat;
 import RUfoo.managers.Navigation;
 import RUfoo.managers.Personality;
@@ -27,6 +28,7 @@ public abstract class RobotLogic {
 	protected Combat combat;
 	protected Personality personality;
 	protected Radio radio;
+	protected Census census;
 	protected boolean active;
 
 	public RobotLogic(RobotController _rc) {
@@ -35,6 +37,7 @@ public abstract class RobotLogic {
 		combat = new Combat(rc);
 		personality = new Personality(rc);
 		radio = new Radio(rc);
+		census = new Census(rc, radio);
 	}
 
 	/**
@@ -44,7 +47,8 @@ public abstract class RobotLogic {
 	public void run() {
 		active = true;
 		while (active) {
-
+			census.tryTakeCensus();
+			
 			donateToWin();
 
 			logic();
