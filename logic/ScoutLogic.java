@@ -1,6 +1,5 @@
 package RUfoo.logic;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +8,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
@@ -64,10 +64,7 @@ public class ScoutLogic extends RobotLogic {
 
 	void attack(RobotInfo target) {
 		if (target != null) {
-			if (nav.isDirectionSafe(rc.getLocation().directionTo(target.location))) {
-				nav.moveAggressively(target.location);
-			}
-			
+			nav.moveAggressively(target.location);
 			combat.shoot(target);
 		}
 	}
@@ -87,18 +84,12 @@ public class ScoutLogic extends RobotLogic {
 		}
 	}
 
-	private void moveToNewTrees(TreeInfo[] trees) {
-
-		// Farthest trees first!
-		Arrays.sort(trees, (t1, t2) -> {
-			return Math.round(t2.getLocation().distanceSquaredTo(rc.getLocation()) 
-							- t1.getLocation().distanceSquaredTo(rc.getLocation()));
-		});
-		
+	private void moveToNewTrees(TreeInfo[] trees) {		
 		for(TreeInfo tree : trees) {
 			if (!treeMap.containsKey(tree.location)) {
 				treeMap.put(tree.location, tree.ID);
 				nav.moveToSafely(tree.location);
+				break;
 			}
 		}
 		
