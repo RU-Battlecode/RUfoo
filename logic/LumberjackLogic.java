@@ -50,6 +50,7 @@ public class LumberjackLogic extends RobotLogic {
 	
 	@Override
 	public void logic() {
+		TreeInfo[] trees = rc.senseNearbyTrees();
 		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 
@@ -63,37 +64,32 @@ public class LumberjackLogic extends RobotLogic {
 			moveTowards(target);
 		}
 
-		clearTreesAroundBase(robots);
+		clearTreesAroundBase(robots, trees);
 		
 		if (!rc.hasAttacked() && target == null) {
 			checkRadioTreeChannel();
 
-			nav.moveByTrees(false);
-
 			if (!rc.hasMoved()) {
-
 				if (rc.getLocation().distanceTo(enemySpawn) <= 1.0f || nothingAtEnemySpawn) {
 					nothingAtEnemySpawn = true;
-					nav.moveByTrees(false);
+					nav.moveByTrees(trees);
 					nav.moveRandom();
 				} else {
-					nav.moveBest(rc.getLocation().directionTo(enemySpawn));
+					nav.tryHardMove(rc.getLocation().directionTo(enemySpawn));
 				}
 			}
 		}
-
 	}
 
 	void moveOffSpawn() {
 		if (personality.getMother() != null) {
-			if (rc.getLocation().distanceTo(personality.getMother().location) <= rc.getType().sensorRadius) {
-				nav.moveBest(personality.getMother().location.directionTo(rc.getLocation()));
+			if (rc.getLocation().distanceTo(personality.getMother().location) <= rc.getType().sensorRadius / 2) {
+				nav.tryHardMove(personality.getMother().location.directionTo(rc.getLocation()));
 			}
 		}
 	}
 
-	void clearTreesAroundBase(RobotInfo[] robots) {
-		TreeInfo[] trees = rc.senseNearbyTrees();
+	void clearTreesAroundBase(RobotInfo[] robots, TreeInfo[] trees) {
 		final MapLocation nearest = nearestArchonOrGardener(robots);
 
 		// Closest trees first or closest tree to archon/gardener if they
@@ -120,7 +116,7 @@ public class LumberjackLogic extends RobotLogic {
 					e.printStackTrace();
 				}
 			} else {
-				nav.moveBest(rc.getLocation().directionTo(requestedTree));
+				nav.tryHardMove(rc.getLocation().directionTo(requestedTree));
 			}
 		}
 	}
@@ -170,7 +166,7 @@ public class LumberjackLogic extends RobotLogic {
 					continue;
 				}
 			
-				nav.tryMove(tree.location);
+				nav.tryMoveTo(tree.location);
 				targetTree = tree;
 				break;
 			}
@@ -189,8 +185,7 @@ public class LumberjackLogic extends RobotLogic {
 				e.printStackTrace();
 			}
 		} else {
-			nav.moveBest(rc.getLocation().directionTo(target.location));
-			//nav.moveAggressively(target.location);
+			nav.tryHardMove(rc.getLocation().directionTo(target.location));
 		}
 	}
 }

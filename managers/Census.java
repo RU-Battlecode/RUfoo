@@ -20,11 +20,11 @@ public class Census {
 	}
 
 	public void increment(RobotType type) {
-		Channel typeChannel = channelForType(rc.getType());
+		Channel typeChannel = channelForType(type);
 		int count = 1 + radio.readChannel(typeChannel);
 		radio.broadcast(typeChannel, count);
 	}
-	
+
 	public void tryTakeCensus() {
 		if (isCensusDay(rc.getRoundNum())) {
 			// Get the type channel

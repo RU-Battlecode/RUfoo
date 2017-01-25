@@ -129,6 +129,7 @@ public class Radio {
 		try {
 			msg = rc.readBroadcast(channel.ordinal());
 		} catch (GameActionException e) {
+			e.printStackTrace();
 		}
 
 		return msg;

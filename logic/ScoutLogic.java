@@ -1,11 +1,9 @@
 package RUfoo.logic;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import RUfoo.util.Util;
+import battlecode.common.BulletInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -28,20 +26,19 @@ import battlecode.common.TreeInfo;
 
 public class ScoutLogic extends RobotLogic {
 
-	private static final float LOW_HEALTH_PERCENT = 0.25f;
+	private static final float LOW_HEALTH_PERCENT = 0.15f;
 
 	private Direction exploreDir;
-	private Map<MapLocation, Integer> treeMap;
 
 	public ScoutLogic(RobotController _rc) {
 		super(_rc);
 		exploreDir = null;		
-		treeMap = new HashMap<>();
 	}
 
 	@Override
 	public void logic() {	
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		BulletInfo[] bullets = rc.senseNearbyBullets();
 		
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
@@ -50,28 +47,27 @@ public class ScoutLogic extends RobotLogic {
 		}
 		
 		RobotInfo target = combat.findTarget(enemies);
-		attack(target);
+		if (target != null) {
+			nav.moveSafelyTo(target.location, bullets, enemies);
+			combat.shoot(target, enemies);
+		}
 
 		if (target == null && !rc.hasAttacked()) {
-//			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-//			if (trees.length < 5) {
-//				moveToNewTrees(trees);
-//			}
+			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+			for (TreeInfo tree : trees) {
+				if (tree.containedBullets > 0) {
+					nav.moveAggressivelyTo(tree.location, bullets, enemies);
+					break;
+				}
+			}
 			explore();
-		}
-		// countTrees();
-	}
-
-	void attack(RobotInfo target) {
-		if (target != null) {
-			nav.moveAggressively(target.location);
-			combat.shoot(target);
 		}
 	}
 
 	void explore() {
 		if (exploreDir == null || isHome()) {
-			exploreDir = nav.randomDirection();
+			float randomDegrees = (personality.getIsLeftHanded() ? 1 : -1) * personality.random(0.0f, 180.0f);
+			exploreDir = rc.getLocation().directionTo(combat.getFurthestEnemySpawn()).rotateLeftDegrees(randomDegrees); 
 		}
 
 		boolean shouldExplore = shouldExplore();
@@ -80,19 +76,8 @@ public class ScoutLogic extends RobotLogic {
 		}
 		
 		if (exploreDir != null) {
-			nav.moveBest(exploreDir);
+			nav.tryHardMove(exploreDir);
 		}
-	}
-
-	private void moveToNewTrees(TreeInfo[] trees) {		
-		for(TreeInfo tree : trees) {
-			if (!treeMap.containsKey(tree.location)) {
-				treeMap.put(tree.location, tree.ID);
-				nav.moveToSafely(tree.location);
-				break;
-			}
-		}
-		
 	}
 
 	boolean shouldExplore() {

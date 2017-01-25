@@ -32,6 +32,10 @@ public final class Vector2f {
 		return (float) Math.sqrt(dx * dx + dy * dy);
 	}
 
+	public float cross(Vector2f other) {
+		return dx * other.dy - other.dx * dy;
+	}
+	
 	public MapLocation projectOn(Vector2f other) {
 		// ProjVonU = (u / len(u) ) * (v . u)/ len(u)
 		Vector2f projectOtherOnThis = (other.divide(other.magnitude())).multiply(this.dot(other) / other.magnitude());

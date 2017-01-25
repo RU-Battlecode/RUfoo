@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import RUfoo.managers.Navigation;
+import RUfoo.managers.Nav;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -53,13 +53,14 @@ public class ArchonLogic extends RobotLogic {
 
 	@Override
 	public void logic() {
-
+		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		if (rc.getLocation().distanceTo(enemySpawn) < 20) {
-			nav.moveBest(enemySpawn.directionTo(rc.getLocation()));
+			nav.tryHardMove(enemySpawn.directionTo(rc.getLocation()));
 		}
 
 		buildBase();
-		nav.dodgeBullets();
+		nav.dodge(rc.senseNearbyBullets());
+		moveOffOfGardeners(friends);
 	}
 
 	void buildBase() {
@@ -80,18 +81,18 @@ public class ArchonLogic extends RobotLogic {
 		int round = rc.getRoundNum();	
 		switch (round) {
 		case 20:
-			buildDirs.add(Navigation.NORTH_EAST);
+			buildDirs.add(Nav.NORTH_EAST);
 			break;
-		case 30:
-			buildDirs.add(Navigation.NORTH_WEST);
+		case 50:
+			buildDirs.add(Nav.NORTH_WEST);
 			break;
-		case 35:
+		case 70:
 			buildDirs.add(Direction.getEast());
 			buildDirs.add(Direction.getWest());
 			break;
-		case 45:
-			buildDirs.add(Navigation.SOUTH_EAST);
-			buildDirs.add(Navigation.SOUTH_WEST);
+		case 100:
+			buildDirs.add(Nav.SOUTH_EAST);
+			buildDirs.add(Nav.SOUTH_WEST);
 			break;
 		default:
 			Direction dir = nav.randomDirection();
@@ -102,11 +103,16 @@ public class ArchonLogic extends RobotLogic {
 	}
 
 	boolean hireGardener(Direction dir) {
+		if (!rc.hasRobotBuildRequirements(RobotType.GARDENER)) {
+			return false;
+		}
+		
 		try {
 			float offset = 0.0f;
 			while (offset < 360.0f) {
-				if (rc.canHireGardener(dir.rotateRightDegrees(personality.getIsLeftHanded() ? -offset : offset))) {
-					rc.hireGardener(dir.rotateRightDegrees(offset));
+				Direction hireDir = dir.rotateRightDegrees(personality.getIsLeftHanded() ? -offset : offset);
+				if (rc.canHireGardener(hireDir)) {
+					rc.hireGardener(hireDir);
 					census.increment(RobotType.GARDENER);
 					return true;
 				}
@@ -130,6 +136,15 @@ public class ArchonLogic extends RobotLogic {
 		for (TreeInfo tree : trees) {
 			radio.requestCutTreeAt(tree.location);
 			break;
+		}
+	}
+	
+	private void moveOffOfGardeners(RobotInfo[] robots) {
+		for (RobotInfo robot : robots) {
+			if (robot.type == RobotType.GARDENER && robot.location.distanceTo(rc.getLocation()) <= rc.getType().bodyRadius * 2.0f) {
+				nav.tryHardMove(robot.location.directionTo(rc.getLocation()));
+				break;
+			}
 		}
 	}
 }

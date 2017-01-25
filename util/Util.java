@@ -70,14 +70,14 @@ public final class Util {
 		return rand.nextInt(max - min + 1) + min;
 	}
 
-	public static float random(float min, float max, int seed) {
+	public static float random(float min, float max) {
 		return rand.nextFloat() * (max - min) + min;
 	}
 
 	public static boolean equals(float a, float b, float e) {
 		return Math.abs(a - b) <= e;
 	}
-	
+
 	public static boolean closeEnough(Direction dir1, Direction dir2, float degreesOk) {
 		if (dir1 == null || dir2 == null) {
 			return false;
@@ -86,5 +86,32 @@ public final class Util {
 
 		return (degreesBetween >= 0 && degreesBetween <= degreesOk)
 				|| (degreesBetween >= 360 - degreesOk && degreesBetween <= 360);
+	}
+
+	/**
+	 * Find the closest maplocation to the line segment formed by p1 and p2 from p3.
+	 * @param p1 line segment start
+	 * @param p2 line segment end
+	 * @param p3 point to find min distance to segment
+	 * @return MapLocation of the closest point on the line segment
+	 */
+	public static MapLocation distanceToSegment(MapLocation p1, MapLocation p2, MapLocation p3) {
+
+		float xDelta = p2.x - p1.x;
+		float yDelta = p2.y - p1.y;
+
+		float u = ((p3.x - p1.x) * xDelta + (p3.y - p1.y) * yDelta)
+				/ (xDelta * xDelta + yDelta * yDelta);
+
+		MapLocation closestPoint = null;
+		if (u < 0) {
+			closestPoint = p1;
+		} else if (u > 1) {
+			closestPoint = p2;
+		} else {
+			closestPoint = new MapLocation(p1.x + u * xDelta, p1.y + u * yDelta);
+		}
+
+		return closestPoint;
 	}
 }
