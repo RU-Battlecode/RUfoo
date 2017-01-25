@@ -1,5 +1,6 @@
 package RUfoo.managers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -114,17 +115,15 @@ public class Combat {
 		// Avoid hitting friends and trees because bullets buy happiness.
 		BodyInfo[] bodiesToAvoid = Util.addAll(trees, friends);
 		
-		List<RobotInfo> hittable = Arrays.asList(enemies);
-		for (RobotInfo enemy : enemies) {
-			Vector2f dirToEnemy = new Vector2f(rc.getLocation(), enemy.getLocation());
+		List<RobotInfo> hittable = new ArrayList<>(Arrays.asList(enemies));
+		for (RobotInfo enemy : enemies) {			
 			for (BodyInfo body : bodiesToAvoid) {
-				Vector2f dirToTree = new Vector2f(rc.getLocation(), body.getLocation());
-				MapLocation projection = dirToTree.projectOn(dirToEnemy);
-
-				if (projection.distanceTo(body.getLocation()) <= body.getRadius()) {
+				MapLocation closestPoint = Util.distanceToSegment(rc.getLocation(), enemy.location, body.getLocation());
+				if (closestPoint.distanceTo(body.getLocation()) <= body.getRadius()) {
 					// The bullet would just hit a tree or a friend if we fire it...
 					// Maybe we should just save ;)
 					hittable.remove(enemy);
+					break;
 				}
 			}
 		}
