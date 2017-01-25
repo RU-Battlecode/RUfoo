@@ -1,6 +1,5 @@
 package RUfoo.logic;
 
-import RUfoo.util.Util;
 import battlecode.common.BulletInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
