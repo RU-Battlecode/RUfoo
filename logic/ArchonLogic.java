@@ -53,13 +53,14 @@ public class ArchonLogic extends RobotLogic {
 
 	@Override
 	public void logic() {
-
+		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		if (rc.getLocation().distanceTo(enemySpawn) < 20) {
 			nav.tryHardMove(enemySpawn.directionTo(rc.getLocation()));
 		}
 
 		buildBase();
 		nav.dodge(rc.senseNearbyBullets());
+		moveOffOfGardeners(friends);
 	}
 
 	void buildBase() {
@@ -130,6 +131,15 @@ public class ArchonLogic extends RobotLogic {
 		for (TreeInfo tree : trees) {
 			radio.requestCutTreeAt(tree.location);
 			break;
+		}
+	}
+	
+	private void moveOffOfGardeners(RobotInfo[] robots) {
+		for (RobotInfo robot : robots) {
+			if (robot.type == RobotType.GARDENER && robot.location.distanceTo(rc.getLocation()) <= rc.getType().bodyRadius * 2.0f) {
+				nav.tryHardMove(robot.location.directionTo(rc.getLocation()));
+				break;
+			}
 		}
 	}
 }
