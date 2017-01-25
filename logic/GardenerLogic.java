@@ -80,10 +80,11 @@ public class GardenerLogic extends RobotLogic {
 			} 
 			findBaseLocation();
 		}
-		
-		if (rc.getRoundNum() == 600 && myTrees.length < 7) {
-			settled = false;
-			plantFailCount = 0;	
+
+		if (rc.getRoundNum() == 600 && myTrees.length < 10) {
+			plantFailCount = 0;
+			settled = hasPlantedFront = hasPlantedMiddle = hasFinishedPlanting = false;
+			steps = 0;
 		}
 	}
 
