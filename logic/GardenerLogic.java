@@ -100,6 +100,11 @@ public class GardenerLogic extends RobotLogic {
 			if (archon != null) {
 				nav.tryMove(archon.location.directionTo(rc.getLocation()));
 			} 
+			
+			if (gardener != null) {
+				nav.tryMove(gardener.location.directionTo(rc.getLocation()));
+			} 
+
 			nav.tryHardMove(buildDirection.opposite());
 			
 
