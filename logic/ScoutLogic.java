@@ -66,7 +66,8 @@ public class ScoutLogic extends RobotLogic {
 
 	void explore() {
 		if (exploreDir == null || isHome()) {
-			exploreDir = nav.randomDirection();
+			float randomDegrees = (personality.getIsLeftHanded() ? 1 : -1) * personality.random(0.0f, 180.0f);
+			exploreDir = rc.getLocation().directionTo(combat.getFurthestEnemySpawn()).rotateLeftDegrees(randomDegrees); 
 		}
 
 		boolean shouldExplore = shouldExplore();
