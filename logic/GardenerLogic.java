@@ -5,6 +5,7 @@ import java.util.Arrays;
 import RUfoo.managers.Nav;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -36,8 +37,9 @@ public class GardenerLogic extends RobotLogic {
 	private int stepsBeforeGiveUp = 70;
 
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
-			Nav.NORTH_WEST.rotateLeftDegrees(15), Nav.NORTH_EAST.rotateRightDegrees(15),
-			Nav.SOUTH_WEST.rotateRightDegrees(15), Nav.SOUTH_EAST.rotateLeftDegrees(15), };
+			Direction.getWest().rotateLeftDegrees(2), Nav.NORTH_WEST.rotateLeftDegrees(15),
+			Nav.NORTH_EAST.rotateRightDegrees(15), Nav.SOUTH_WEST.rotateRightDegrees(15),
+			Nav.SOUTH_EAST.rotateLeftDegrees(15), };
 
 	private float buildOffset;
 	private Direction buildDirection;
@@ -90,10 +92,11 @@ public class GardenerLogic extends RobotLogic {
 		RobotInfo archon = nearest(RobotType.ARCHON, robots);
 		RobotInfo gardener = nearest(RobotType.GARDENER, robots);
 
-		if ((archon == null || archon.location.distanceTo(rc.getLocation()) >= 3.0f)
-				&& rc.hasTreeBuildRequirements() && (rc.canPlantTree(buildDirection)
-						&& rc.canPlantTree(buildDirection.opposite()) && steps > MIN_STEPS_BEFORE_SETTLE)
-				|| (steps >= stepsBeforeGiveUp && (gardener == null || gardener.location.distanceTo(rc.getLocation()) > 1.0f))) {
+		if (((archon == null || archon.location.distanceTo(rc.getLocation()) >= 3.0f) && rc.hasTreeBuildRequirements()
+				&& isLocationFree(buildDirection) && isLocationFree(buildDirection.opposite())
+				&& steps > MIN_STEPS_BEFORE_SETTLE)
+				|| (steps >= stepsBeforeGiveUp
+						&& (gardener == null || gardener.location.distanceTo(rc.getLocation()) > 1.0f))) {
 			settled = true;
 			baseLocation = rc.getLocation();
 		} else {
@@ -106,8 +109,7 @@ public class GardenerLogic extends RobotLogic {
 				nav.tryMove(gardener.location.directionTo(rc.getLocation()));
 			}
 
-			nav.tryHardMove(buildDirection.opposite());
-			
+			nav.tryMove(buildDirection.opposite());
 
 			steps++;
 		}
@@ -119,7 +121,7 @@ public class GardenerLogic extends RobotLogic {
 			hasPlantedFront = moveAndPlant(buildDirection.opposite());
 		} else if (!hasPlantedMiddle) {
 			nav.tryMoveTo(baseLocation);
-			if (rc.getLocation().distanceTo(baseLocation) < 0.2f) {
+			if (rc.getLocation().distanceTo(baseLocation) < 0.1f) {
 				hasPlantedMiddle = true;
 				plantFailCount = 0;
 			}
@@ -191,7 +193,7 @@ public class GardenerLogic extends RobotLogic {
 
 	RobotInfo nearest(RobotType type, RobotInfo[] robots) {
 		RobotInfo archon = null;
-		
+
 		for (RobotInfo robot : robots) {
 			if (robot.getType() == type) {
 				archon = robot;
@@ -206,10 +208,10 @@ public class GardenerLogic extends RobotLogic {
 		boolean success = false;
 		// Move forward to plant.
 		final MapLocation firstThreeSteps = baseLocation.add(dir, rc.getType().strideRadius * 3.0f);
-		final MapLocation endPoint = firstThreeSteps.add(dir, rc.getType().strideRadius + 0.1f);
+		final MapLocation endPoint = firstThreeSteps.add(dir, rc.getType().strideRadius + 0.2f);
 
 		nav.tryMoveTo(endPoint);
-		if (!rc.hasMoved() && !rc.canMove(dir)) {
+		if (!isLocationFree(endPoint)) {
 			plantFailCount++;
 			return false;
 		}
@@ -253,5 +255,19 @@ public class GardenerLogic extends RobotLogic {
 		}
 
 		return false;
+	}
+
+	boolean isLocationFree(MapLocation loc) {
+		try {
+			return !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation(),
+					GameConstants.BULLET_TREE_RADIUS + GameConstants.GENERAL_SPAWN_OFFSET);
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	boolean isLocationFree(Direction dir) {
+		return isLocationFree(rc.getLocation().add(dir));
 	}
 }
