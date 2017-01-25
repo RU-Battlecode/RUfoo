@@ -1,11 +1,8 @@
 package RUfoo.logic;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import battlecode.common.BulletInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -31,17 +28,16 @@ public class ScoutLogic extends RobotLogic {
 	private static final float LOW_HEALTH_PERCENT = 0.25f;
 
 	private Direction exploreDir;
-	private Map<MapLocation, Integer> treeMap;
 
 	public ScoutLogic(RobotController _rc) {
 		super(_rc);
 		exploreDir = null;		
-		treeMap = new HashMap<>();
 	}
 
 	@Override
 	public void logic() {	
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		BulletInfo[] bullets = rc.senseNearbyBullets();
 		
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
@@ -56,10 +52,8 @@ public class ScoutLogic extends RobotLogic {
 		}
 
 		if (target == null && !rc.hasAttacked()) {
-//			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-//			if (trees.length < 5) {
-//				moveToNewTrees(trees);
-//			}
+			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+			nav.moveByTrees(trees);
 			explore();
 		}
 	}
