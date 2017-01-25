@@ -163,7 +163,9 @@ public class GardenerLogic extends RobotLogic {
 			build(RobotType.LUMBERJACK);
 		}
 		if (settled) {
-			if (census.count(RobotType.SOLDIER) < 2) {
+			if (census.count(RobotType.TANK) < 3) {
+				build(RobotType.TANK);
+			} else if (census.count(RobotType.SOLDIER) < 2) {
 				build(RobotType.SOLDIER);
 			} else if (census.count(RobotType.SCOUT) < 3) {
 				build(RobotType.SCOUT);
@@ -171,10 +173,13 @@ public class GardenerLogic extends RobotLogic {
 				build(RobotType.LUMBERJACK);
 			}
 		} else {
-			if (census.count(RobotType.SOLDIER) < 2) {
+			int soldiers = census.count(RobotType.SOLDIER);
+			if (soldiers < 1) {
 				build(RobotType.SOLDIER);
 			} else if (census.count(RobotType.SCOUT) < 1) {
 				build(RobotType.SCOUT);
+			} else if (soldiers < 2) {
+				build(RobotType.SOLDIER);
 			}
 		}
 	}
