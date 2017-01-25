@@ -1,5 +1,6 @@
 package RUfoo.logic;
 
+import RUfoo.util.Util;
 import battlecode.common.BulletInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -25,7 +26,7 @@ import battlecode.common.TreeInfo;
 
 public class ScoutLogic extends RobotLogic {
 
-	private static final float LOW_HEALTH_PERCENT = 0.25f;
+	private static final float LOW_HEALTH_PERCENT = 0.15f;
 
 	private Direction exploreDir;
 
