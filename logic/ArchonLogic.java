@@ -103,11 +103,16 @@ public class ArchonLogic extends RobotLogic {
 	}
 
 	boolean hireGardener(Direction dir) {
+		if (!rc.hasRobotBuildRequirements(RobotType.GARDENER)) {
+			return false;
+		}
+		
 		try {
 			float offset = 0.0f;
 			while (offset < 360.0f) {
-				if (rc.canHireGardener(dir.rotateRightDegrees(personality.getIsLeftHanded() ? -offset : offset))) {
-					rc.hireGardener(dir.rotateRightDegrees(offset));
+				Direction hireDir = dir.rotateRightDegrees(personality.getIsLeftHanded() ? -offset : offset);
+				if (rc.canHireGardener(hireDir)) {
+					rc.hireGardener(hireDir);
 					census.increment(RobotType.GARDENER);
 					return true;
 				}
