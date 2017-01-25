@@ -54,7 +54,12 @@ public class ScoutLogic extends RobotLogic {
 
 		if (target == null && !rc.hasAttacked()) {
 			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-			nav.moveByTrees(trees);
+			for (TreeInfo tree : trees) {
+				if (tree.containedBullets > 0) {
+					nav.moveAggressivelyTo(tree.location, bullets, enemies);
+					break;
+				}
+			}
 			explore();
 		}
 	}
