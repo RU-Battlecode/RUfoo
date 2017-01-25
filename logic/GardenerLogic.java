@@ -53,7 +53,7 @@ public class GardenerLogic extends RobotLogic {
 
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
-		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn());
+		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn()).opposite();
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
 		buildDirection = TREE_BUILD_DIRS[0].opposite().rotateLeftDegrees(buildOffset);
 		baseLocation = rc.getLocation();
@@ -72,10 +72,8 @@ public class GardenerLogic extends RobotLogic {
 		if (settled) {
 			plantTrees();
 			waterTrees(myTrees);
-			buildRobots(trees);
 			orderClearTrees(trees);
 		} else {
-			buildRobots(trees);
 			findBaseLocation();
 		}
 
