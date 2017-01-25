@@ -67,6 +67,8 @@ public class GardenerLogic extends RobotLogic {
 	public void logic() {
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
+		buildRobots(trees);
+		
 		if (settled) {
 			plantTrees();
 			waterTrees(myTrees);
