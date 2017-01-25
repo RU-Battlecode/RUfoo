@@ -50,6 +50,7 @@ public class LumberjackLogic extends RobotLogic {
 	
 	@Override
 	public void logic() {
+		TreeInfo[] trees = rc.senseNearbyTrees();
 		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 
@@ -63,7 +64,7 @@ public class LumberjackLogic extends RobotLogic {
 			moveTowards(target);
 		}
 
-		clearTreesAroundBase(robots);
+		clearTreesAroundBase(robots, trees);
 		
 		if (!rc.hasAttacked() && target == null) {
 			checkRadioTreeChannel();
@@ -92,8 +93,7 @@ public class LumberjackLogic extends RobotLogic {
 		}
 	}
 
-	void clearTreesAroundBase(RobotInfo[] robots) {
-		TreeInfo[] trees = rc.senseNearbyTrees();
+	void clearTreesAroundBase(RobotInfo[] robots, TreeInfo[] trees) {
 		final MapLocation nearest = nearestArchonOrGardener(robots);
 
 		// Closest trees first or closest tree to archon/gardener if they
