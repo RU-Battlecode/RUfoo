@@ -321,7 +321,7 @@ public class Nav {
 
 		return scariness;
 	}
-
+	
 	public void moveRandom() {
 		moveRandom(rc.getType().strideRadius);
 	}
@@ -341,5 +341,39 @@ public class Nav {
 
 	public Direction randomDirection() {
 		return new Direction(Util.random(0.0f, 1.0f), Util.random(0.0f, 1.0f));
+	}
+	
+	boolean bugging;
+	Direction bugDirection;
+	int bugFail;
+	
+	public void bug(MapLocation target) {
+		if (rc.hasMoved()) {
+			return;
+		}
+		
+		if (bugging) {
+			if (!tryMove(bugDirection)) {
+				bugFail++;
+				if (bugFail > 3) {
+					bugFail = 0;
+					bugging = false;
+				}
+			}
+			
+		} else if (!tryMoveTo(target)) {
+			bugging = true;
+		
+			float offset = 0.0f;
+			while (offset < 180.0f) {
+				bugDirection = rc.getLocation().directionTo(target).rotateRightDegrees(offset);
+				if (rc.canMove(bugDirection)) {
+					break;
+				}
+				offset += 10.0f;
+			}
+			tryHardMove(bugDirection);		
+		}
+		
 	}
 }

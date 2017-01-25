@@ -20,7 +20,6 @@ public class SoldierLogic extends RobotLogic {
 	private float prevousDistanceToTarget;
 	private List<MapLocation> moveAreas;
 
-
 	public SoldierLogic(RobotController _rc) {
 		super(_rc);
 		moveIndex = 0;
@@ -115,7 +114,8 @@ public class SoldierLogic extends RobotLogic {
 		}
 
 		
-		nav.tryHardMove(rc.getLocation().directionTo(loc));
+		//nav.tryHardMove(rc.getLocation().directionTo(loc));
+		nav.bug(loc);
 		
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 2)) {
 			moveFrustration++;
