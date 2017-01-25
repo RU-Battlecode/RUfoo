@@ -50,7 +50,10 @@ public class ScoutLogic extends RobotLogic {
 		}
 		
 		RobotInfo target = combat.findTarget(enemies);
-		attack(target);
+		if (target != null) {
+			nav.moveAggressivelyTo(target.location, bullets, enemies);
+			combat.shoot(target, enemies);
+		}
 
 		if (target == null && !rc.hasAttacked()) {
 //			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
@@ -58,14 +61,6 @@ public class ScoutLogic extends RobotLogic {
 //				moveToNewTrees(trees);
 //			}
 			explore();
-		}
-		// countTrees();
-	}
-
-	void attack(RobotInfo target) {
-		if (target != null) {
-			nav.moveAggressively(target.location);
-			combat.shoot(target);
 		}
 	}
 
@@ -80,19 +75,8 @@ public class ScoutLogic extends RobotLogic {
 		}
 		
 		if (exploreDir != null) {
-			nav.moveBest(exploreDir);
+			nav.tryHardMove(exploreDir);
 		}
-	}
-
-	private void moveToNewTrees(TreeInfo[] trees) {		
-		for(TreeInfo tree : trees) {
-			if (!treeMap.containsKey(tree.location)) {
-				treeMap.put(tree.location, tree.ID);
-				nav.moveToSafely(tree.location);
-				break;
-			}
-		}
-		
 	}
 
 	boolean shouldExplore() {

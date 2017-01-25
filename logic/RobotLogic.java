@@ -2,7 +2,7 @@ package RUfoo.logic;
 
 import RUfoo.managers.Census;
 import RUfoo.managers.Combat;
-import RUfoo.managers.Navigation;
+import RUfoo.managers.Nav;
 import RUfoo.managers.Personality;
 import RUfoo.managers.Radio;
 import battlecode.common.Clock;
@@ -24,7 +24,7 @@ public abstract class RobotLogic {
 	private static final float DONATE_PERCENTAGE = 0.10f;
 
 	protected RobotController rc;
-	protected Navigation nav;
+	protected Nav nav;
 	protected Combat combat;
 	protected Personality personality;
 	protected Radio radio;
@@ -33,7 +33,7 @@ public abstract class RobotLogic {
 
 	public RobotLogic(RobotController _rc) {
 		rc = _rc;
-		nav = new Navigation(rc);
+		nav = new Nav(rc);
 		combat = new Combat(rc);
 		personality = new Personality(rc);
 		radio = new Radio(rc);

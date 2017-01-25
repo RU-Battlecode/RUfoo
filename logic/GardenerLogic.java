@@ -2,7 +2,7 @@ package RUfoo.logic;
 
 import java.util.Arrays;
 
-import RUfoo.managers.Navigation;
+import RUfoo.managers.Nav;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -35,8 +35,8 @@ public class GardenerLogic extends RobotLogic {
 	private int stepsBeforeGiveUp = 70;
 
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
-			Navigation.NORTH_WEST.rotateLeftDegrees(15), Navigation.NORTH_EAST.rotateRightDegrees(15),
-			Navigation.SOUTH_WEST.rotateRightDegrees(15), Navigation.SOUTH_EAST.rotateLeftDegrees(15), };
+			Nav.NORTH_WEST.rotateLeftDegrees(15), Nav.NORTH_EAST.rotateRightDegrees(15),
+			Nav.SOUTH_WEST.rotateRightDegrees(15), Nav.SOUTH_EAST.rotateLeftDegrees(15), };
 
 	private float buildOffset;
 	private Direction buildDirection;
@@ -98,13 +98,12 @@ public class GardenerLogic extends RobotLogic {
 		} else {
 
 			if (archon != null) {
-				nav.moveBest(archon.location.directionTo(rc.getLocation()));
-			} else if (gardener != null) {
-				nav.moveBest(gardener.location.directionTo(rc.getLocation()));
+				nav.tryMove(archon.location.directionTo(rc.getLocation()));
 			} 
+			nav.tryHardMove(buildDirection.opposite());
+			
 
-			nav.moveBest(buildDirection.opposite());
-			steps++;
+			steps++;	
 		}
 	}
 
@@ -113,7 +112,7 @@ public class GardenerLogic extends RobotLogic {
 		if (!hasPlantedFront) {
 			hasPlantedFront = moveAndPlant(buildDirection.opposite());
 		} else if (!hasPlantedMiddle) {
-			nav.tryMove(baseLocation);
+			nav.tryMoveTo(baseLocation);
 			if (rc.getLocation().distanceTo(baseLocation) < 0.2f) {
 				hasPlantedMiddle = true;
 				plantFailCount = 0;
@@ -121,7 +120,7 @@ public class GardenerLogic extends RobotLogic {
 		} else if (!hasFinishedPlanting) {
 			hasFinishedPlanting = moveAndPlant(buildDirection);
 		} else {
-			nav.tryMove(baseLocation);
+			nav.tryMoveTo(baseLocation);
 
 			for (Direction dir : TREE_BUILD_DIRS) {
 				dir = dir.rotateLeftDegrees(buildOffset);
@@ -203,7 +202,7 @@ public class GardenerLogic extends RobotLogic {
 		final MapLocation firstThreeSteps = baseLocation.add(dir, rc.getType().strideRadius * 3.0f);
 		final MapLocation endPoint = firstThreeSteps.add(dir, rc.getType().strideRadius + 0.1f);
 
-		nav.tryMove(endPoint);
+		nav.tryMoveTo(endPoint);
 		if (!rc.hasMoved() && !rc.canMove(dir)) {
 			plantFailCount++;
 			return false;

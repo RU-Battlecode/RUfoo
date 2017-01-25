@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import RUfoo.managers.Navigation;
+import RUfoo.managers.Nav;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -55,11 +55,11 @@ public class ArchonLogic extends RobotLogic {
 	public void logic() {
 
 		if (rc.getLocation().distanceTo(enemySpawn) < 20) {
-			nav.moveBest(enemySpawn.directionTo(rc.getLocation()));
+			nav.tryHardMove(enemySpawn.directionTo(rc.getLocation()));
 		}
 
 		buildBase();
-		nav.dodgeBullets();
+		nav.dodge(rc.senseNearbyBullets());
 	}
 
 	void buildBase() {
@@ -80,18 +80,18 @@ public class ArchonLogic extends RobotLogic {
 		int round = rc.getRoundNum();	
 		switch (round) {
 		case 20:
-			buildDirs.add(Navigation.NORTH_EAST);
+			buildDirs.add(Nav.NORTH_EAST);
 			break;
-		case 30:
-			buildDirs.add(Navigation.NORTH_WEST);
+		case 50:
+			buildDirs.add(Nav.NORTH_WEST);
 			break;
-		case 35:
+		case 70:
 			buildDirs.add(Direction.getEast());
 			buildDirs.add(Direction.getWest());
 			break;
-		case 45:
-			buildDirs.add(Navigation.SOUTH_EAST);
-			buildDirs.add(Navigation.SOUTH_WEST);
+		case 100:
+			buildDirs.add(Nav.SOUTH_EAST);
+			buildDirs.add(Nav.SOUTH_WEST);
 			break;
 		default:
 			Direction dir = nav.randomDirection();

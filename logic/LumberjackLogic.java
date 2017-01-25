@@ -68,16 +68,16 @@ public class LumberjackLogic extends RobotLogic {
 		if (!rc.hasAttacked() && target == null) {
 			checkRadioTreeChannel();
 
-			nav.moveByTrees(false);
+			nav.moveByTrees(trees);
 
 			if (!rc.hasMoved()) {
 
 				if (rc.getLocation().distanceTo(enemySpawn) <= 1.0f || nothingAtEnemySpawn) {
 					nothingAtEnemySpawn = true;
-					nav.moveByTrees(false);
+					nav.moveByTrees(trees);
 					nav.moveRandom();
 				} else {
-					nav.moveBest(rc.getLocation().directionTo(enemySpawn));
+					nav.tryHardMove(rc.getLocation().directionTo(enemySpawn));
 				}
 			}
 		}
@@ -87,7 +87,7 @@ public class LumberjackLogic extends RobotLogic {
 	void moveOffSpawn() {
 		if (personality.getMother() != null) {
 			if (rc.getLocation().distanceTo(personality.getMother().location) <= rc.getType().sensorRadius) {
-				nav.moveBest(personality.getMother().location.directionTo(rc.getLocation()));
+				nav.tryHardMove(personality.getMother().location.directionTo(rc.getLocation()));
 			}
 		}
 	}
@@ -120,7 +120,7 @@ public class LumberjackLogic extends RobotLogic {
 					e.printStackTrace();
 				}
 			} else {
-				nav.moveBest(rc.getLocation().directionTo(requestedTree));
+				nav.tryHardMove(rc.getLocation().directionTo(requestedTree));
 			}
 		}
 	}
@@ -170,7 +170,7 @@ public class LumberjackLogic extends RobotLogic {
 					continue;
 				}
 			
-				nav.tryMove(tree.location);
+				nav.tryMoveTo(tree.location);
 				targetTree = tree;
 				break;
 			}
@@ -189,8 +189,7 @@ public class LumberjackLogic extends RobotLogic {
 				e.printStackTrace();
 			}
 		} else {
-			nav.moveBest(rc.getLocation().directionTo(target.location));
-			//nav.moveAggressively(target.location);
+			nav.tryHardMove(rc.getLocation().directionTo(target.location));
 		}
 	}
 }
