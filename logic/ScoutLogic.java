@@ -48,7 +48,7 @@ public class ScoutLogic extends RobotLogic {
 		
 		RobotInfo target = combat.findTarget(enemies);
 		if (target != null) {
-			nav.moveAggressivelyTo(target.location, bullets, enemies);
+			nav.moveSafelyTo(target.location, bullets, enemies);
 			combat.shoot(target, enemies);
 		}
 
