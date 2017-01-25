@@ -116,10 +116,6 @@ public class Nav {
 			return;
 		}
 
-		Arrays.sort(trees, (t1, t2) -> {
-			return t1.containedBullets - t2.containedBullets;
-		});
-
 		for (TreeInfo tree : trees) {
 			if (tryMove(rc.getLocation().directionTo(tree.location))) {
 				break;
