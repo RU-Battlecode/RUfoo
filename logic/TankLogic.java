@@ -9,6 +9,8 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
+import battlecode.common.TreeInfo;
 
 public class TankLogic extends RobotLogic {
 
@@ -31,12 +33,12 @@ public class TankLogic extends RobotLogic {
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
 			moveAreas.add(loc);
 		}
-
 	}
 
 	@Override
 	public void logic() {
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);	
 		BulletInfo[] bullets = rc.senseNearbyBullets();
 
 		lookForEnemyArchons(enemies);
@@ -58,7 +60,7 @@ public class TankLogic extends RobotLogic {
 			checkRadioForArchons();
 
 			if (moveAreas.size() > 0) {
-				move(enemies);
+				move(enemies, trees);
 			}
 		}
 
@@ -98,17 +100,24 @@ public class TankLogic extends RobotLogic {
 		}
 	}
 
-	void move(RobotInfo[] enemies) {
+	void move(RobotInfo[] enemies, TreeInfo[] trees) {
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 
-		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0
+		boolean nothingAtLocation = rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0;
+		
+		if (nothingAtLocation
 				|| moveFrustration > personality.getPatience() * PATIENCE_MULTIPLIER) {
 			moveIndex++;
 			moveFrustration = 0;
 		}
 
-		nav.tryHardMove(rc.getLocation().directionTo(loc));
+		if (moveAreas.size() == 1 && enemies.length == 0) {
+			nav.moveByTrees(trees);
+			nav.moveRandom();
+		} else {
+			nav.tryHardMove(rc.getLocation().directionTo(loc));
+		}
 
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 2)) {
 			moveFrustration++;
