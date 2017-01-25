@@ -58,7 +58,13 @@ public class ArchonLogic extends RobotLogic {
 			nav.tryHardMove(enemySpawn.directionTo(rc.getLocation()));
 		}
 
-		buildBase();
+		if (rc.getRoundNum() < 600) {
+			if (census.count(RobotType.GARDENER) < 8) {
+				buildBase();
+			}
+		} else {
+			buildBase();
+		}
 		nav.dodge(rc.senseNearbyBullets());
 		moveOffOfGardeners(friends);
 	}

@@ -19,6 +19,7 @@ public class SoldierLogic extends RobotLogic {
 	private int moveFrustration;
 	private float prevousDistanceToTarget;
 	private List<MapLocation> moveAreas;
+	boolean useBug;
 
 	public SoldierLogic(RobotController _rc) {
 		super(_rc);
@@ -103,6 +104,8 @@ public class SoldierLogic extends RobotLogic {
 		}
 	}
 
+	int bugCount;
+	
 	void move(RobotInfo[] enemies) {
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
@@ -111,11 +114,23 @@ public class SoldierLogic extends RobotLogic {
 				|| moveFrustration > personality.getPatience()) {
 			moveIndex++;
 			moveFrustration = 0;
+			useBug = true;
 		}
 
+		if (rc.getRoundNum() < 100 && !useBug) {
+			nav.tryHardMove(rc.getLocation().directionTo(loc));
+		} else if (!nav.bug(loc)) {
+			useBug = false;
+		} 
 		
-		//nav.tryHardMove(rc.getLocation().directionTo(loc));
-		nav.bug(loc);
+		if (useBug) {
+			bugCount++;
+			if (bugCount > 5) {
+				bugCount = 0;
+				moveFrustration = 0;
+				useBug = false;
+			}
+		}
 		
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 2)) {
 			moveFrustration++;

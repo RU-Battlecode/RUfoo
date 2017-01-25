@@ -343,9 +343,9 @@ public class Nav {
 	Direction bugDirection;
 	int bugFail;
 	
-	public void bug(MapLocation target) {
+	public boolean bug(MapLocation target) {
 		if (rc.hasMoved()) {
-			return;
+			return false;
 		}
 		
 		if (bugging) {
@@ -371,5 +371,6 @@ public class Nav {
 			tryHardMove(bugDirection);		
 		}
 		
+		return rc.hasMoved();
 	}
 }

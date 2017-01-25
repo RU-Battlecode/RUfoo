@@ -159,11 +159,13 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void buildRobots(TreeInfo[] trees) {
-		if (trees.length >= 8) {
+		if (treeSumRadius(trees) >= 10) {
 			build(RobotType.LUMBERJACK);
 		}
 		if (settled) {
-			if (census.count(RobotType.SOLDIER) < 2) {
+			if (census.count(RobotType.TANK) < 3) {
+				build(RobotType.TANK);
+			} else if (census.count(RobotType.SOLDIER) < 2) {
 				build(RobotType.SOLDIER);
 			} else if (census.count(RobotType.SCOUT) < 3) {
 				build(RobotType.SCOUT);
@@ -171,22 +173,36 @@ public class GardenerLogic extends RobotLogic {
 				build(RobotType.LUMBERJACK);
 			}
 		} else {
-			if (census.count(RobotType.SOLDIER) < 2) {
+			int soldiers = census.count(RobotType.SOLDIER);
+			if (soldiers < 1) {
 				build(RobotType.SOLDIER);
 			} else if (census.count(RobotType.SCOUT) < 1) {
 				build(RobotType.SCOUT);
+			} else if (soldiers < 2) {
+				build(RobotType.SOLDIER);
 			}
 		}
 	}
 
 	void build(RobotType type) {
-		if (rc.isBuildReady() && rc.hasRobotBuildRequirements(type) && rc.canBuildRobot(type, buildDirection)) {
-			try {
-				rc.buildRobot(type, buildDirection);
-				census.increment(type);
-			} catch (GameActionException e) {
-				e.printStackTrace();
+		if (!rc.isBuildReady() || !rc.hasRobotBuildRequirements(type)) {
+			return;
+		}
+		
+		float offset = 0.0f;
+		
+		while (offset < 200.0f) {
+			Direction dir = buildDirection.rotateLeftDegrees((personality.getIsLeftHanded() ? 1 : 1) * offset);
+			if (rc.canBuildRobot(type,  dir)) {
+				try {
+					rc.buildRobot(type,  dir);
+					census.increment(type);
+					break;
+				} catch (GameActionException e) {
+					e.printStackTrace();
+				}
 			}
+			offset += 15.0f;
 		}
 	}
 
@@ -275,5 +291,13 @@ public class GardenerLogic extends RobotLogic {
 
 	boolean isLocationFree(Direction dir) {
 		return isLocationFree(rc.getLocation().add(dir));
+	}
+	
+	float treeSumRadius(TreeInfo[] trees) {
+		float sum = 0.0f;
+		for (TreeInfo tree : trees) {
+			sum += tree.getRadius();
+		}
+		return sum;
 	}
 }
