@@ -56,10 +56,11 @@ public class Combat {
 		return enemySpawns[0];
 	}
 
-	public void shoot(RobotInfo target) {
-		if (shouldUsePentadShot()) {
+	public void shoot(RobotInfo target, RobotInfo[] enemies) {	
+		float distToTarget = target.location.distanceTo(rc.getLocation());
+		if (shouldUsePentadShot() && (enemies.length > 1 || distToTarget <= rc.getType().sensorRadius / 3)) {
 			pentadShot(target);
-		} else if (shouldUseTriadShot()) {
+		} else if (shouldUseTriadShot() && (enemies.length > 1 || distToTarget <= rc.getType().sensorRadius / 2)) {
 			triadShot(target);
 		} else {
 			singleShotAttack(target);
