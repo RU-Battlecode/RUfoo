@@ -14,25 +14,25 @@ import battlecode.common.RobotType;
 public class SoldierLogic extends RobotLogic {
 
 	private static final int MAX_AREAS = 15;
-	
+
 	private int moveIndex;
 	private int moveFrustration;
 	private float prevousDistanceToTarget;
 	private List<MapLocation> moveAreas;
-	
-	
+
+
 	public SoldierLogic(RobotController _rc) {
 		super(_rc);
 		moveIndex = 0;
 		moveFrustration = 0;
 		moveAreas = new ArrayList<>();
-		
+
 		// find nearest gardener.
 		if (personality.getMother() != null) {
 			Direction awayFromMom = rc.getLocation().directionTo(personality.getMother().location).opposite();
 			moveAreas.add(rc.getLocation().add(awayFromMom, 2.0f));
 		}
-		
+
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
 			moveAreas.add(loc);
 		}
@@ -65,8 +65,6 @@ public class SoldierLogic extends RobotLogic {
 
 			if (moveAreas.size() > 0) {
 				move(enemies);
-			} else {
-
 			}
 		}
 
@@ -109,19 +107,20 @@ public class SoldierLogic extends RobotLogic {
 	void move(RobotInfo[] enemies) {
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
-		
+
 		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0
 				|| moveFrustration > personality.getPatience()) {
 			moveIndex++;
 			moveFrustration = 0;
 		}
+
 		
 		nav.tryHardMove(rc.getLocation().directionTo(loc));
 		
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 2)) {
 			moveFrustration++;
 		}
-		
+
 		prevousDistanceToTarget = distToTarget;
 	}
 }
