@@ -159,7 +159,7 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void buildRobots(TreeInfo[] trees) {
-		if (trees.length >= 8) {
+		if (treeSumRadius(trees) >= 10) {
 			build(RobotType.LUMBERJACK);
 		}
 		if (settled) {
@@ -185,13 +185,24 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void build(RobotType type) {
-		if (rc.isBuildReady() && rc.hasRobotBuildRequirements(type) && rc.canBuildRobot(type, buildDirection)) {
-			try {
-				rc.buildRobot(type, buildDirection);
-				census.increment(type);
-			} catch (GameActionException e) {
-				e.printStackTrace();
+		if (!rc.isBuildReady() || !rc.hasRobotBuildRequirements(type)) {
+			return;
+		}
+		
+		float offset = 0.0f;
+		
+		while (offset < 200.0f) {
+			Direction dir = buildDirection.rotateLeftDegrees((personality.getIsLeftHanded() ? 1 : 1) * offset);
+			if (rc.canBuildRobot(type,  dir)) {
+				try {
+					rc.buildRobot(type,  dir);
+					census.increment(type);
+					break;
+				} catch (GameActionException e) {
+					e.printStackTrace();
+				}
 			}
+			offset += 15.0f;
 		}
 	}
 
@@ -280,5 +291,13 @@ public class GardenerLogic extends RobotLogic {
 
 	boolean isLocationFree(Direction dir) {
 		return isLocationFree(rc.getLocation().add(dir));
+	}
+	
+	float treeSumRadius(TreeInfo[] trees) {
+		float sum = 0.0f;
+		for (TreeInfo tree : trees) {
+			sum += tree.getRadius();
+		}
+		return sum;
 	}
 }
