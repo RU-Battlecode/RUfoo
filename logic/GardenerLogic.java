@@ -13,18 +13,19 @@ import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 /**
- * GardenerLogic.java - Gardeners will try to find a perfect base location
- * that will let them build gardens that look like:
+ * GardenerLogic.java - Gardeners will try to find a perfect base location that
+ * will let them build gardens that look like:
  * 
- *					T T T
- *					T G T
- *					T B T
- * T: Bullet tree
+ * 		T T T
+ *  	T G T
+ *   	T B T 
+ *   
+ * T: Bullet tree 
  * G: Gardener
- * B: buildLocation 
+ * B: buildLocation
  * 
- * Gardeners will rotate the north tree to always face the closest enemy
- * initial Archon location.
+ * Gardeners will rotate the north tree to always face the closest enemy initial
+ * Archon location.
  * 
  * @author Ben
  *
@@ -46,8 +47,8 @@ public class GardenerLogic extends RobotLogic {
 	private boolean hasPlantedFront;
 	private boolean hasPlantedMiddle;
 	private boolean hasFinishedPlanting;
-	private int plantFailCount;	
-	
+	private int plantFailCount;
+
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn());
@@ -99,16 +100,16 @@ public class GardenerLogic extends RobotLogic {
 
 			if (archon != null) {
 				nav.tryMove(archon.location.directionTo(rc.getLocation()));
-			} 
-			
+			}
+
 			if (gardener != null) {
 				nav.tryMove(gardener.location.directionTo(rc.getLocation()));
-			} 
+			}
 
 			nav.tryHardMove(buildDirection.opposite());
 			
 
-			steps++;	
+			steps++;
 		}
 	}
 
