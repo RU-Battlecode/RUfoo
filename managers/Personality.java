@@ -33,13 +33,23 @@ public class Personality {
 	// close. And try not to think about the Archon's mother... (null)
 	private RobotInfo mother;
 	
+	private Random rand;
+	
 	public Personality(RobotController _rc) {
 		rc = _rc;
-		Random rand = new Random(_rc.getID());
+		rand = new Random(_rc.getID());
 		isLeftHanded = rand.nextInt(101) <= PERCENT_LEFT_HANDED;
 		patience = Util.random(5, 15);
 		birthday = rc.getRoundNum();
 		mother = determineMother();
+	}
+	
+	public int random(int min, int max) {
+		return rand.nextInt(max - min + 1) + min;
+	}
+
+	public float random(float min, float max) {
+		return rand.nextFloat() * (max - min) + min;
 	}
 
 	private RobotInfo determineMother() {
