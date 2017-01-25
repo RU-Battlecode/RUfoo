@@ -6,13 +6,13 @@ import java.util.Collections;
 import java.util.List;
 
 import RUfoo.util.Util;
-import RUfoo.util.Vector2f;
 import battlecode.common.BodyInfo;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class Combat {
@@ -109,17 +109,19 @@ public class Combat {
 	}
 
 	public RobotInfo findTarget(RobotInfo[] enemies) {
-		TreeInfo[] trees = rc.senseNearbyTrees();
+		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
+		TreeInfo[] naturalTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		
-		// Avoid hitting friends and trees because bullets buy happiness.
-		BodyInfo[] bodiesToAvoid = Util.addAll(trees, friends);
+		// Avoid hitting friends and friendly trees because bullets buy happiness.
+		BodyInfo[] bodiesToAvoid = Util.addAll(Util.addAll(myTrees, friends), naturalTrees);
 		
 		List<RobotInfo> hittable = new ArrayList<>(Arrays.asList(enemies));
 		for (RobotInfo enemy : enemies) {			
 			for (BodyInfo body : bodiesToAvoid) {
 				MapLocation closestPoint = Util.distanceToSegment(rc.getLocation(), enemy.location, body.getLocation());
-				if (closestPoint.distanceTo(body.getLocation()) <= body.getRadius()) {
+				Float dist = closestPoint.distanceTo(body.getLocation());
+				if (dist < body.getRadius() - 0.01f) {
 					// The bullet would just hit a tree or a friend if we fire it...
 					// Maybe we should just save ;)
 					hittable.remove(enemy);
