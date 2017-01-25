@@ -70,7 +70,7 @@ public final class Util {
 		return rand.nextInt(max - min + 1) + min;
 	}
 
-	public static float random(float min, float max, int seed) {
+	public static float random(float min, float max) {
 		return rand.nextFloat() * (max - min) + min;
 	}
 
