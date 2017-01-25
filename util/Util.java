@@ -89,11 +89,11 @@ public final class Util {
 	}
 
 	/**
-	 * 
+	 * Find the closest maplocation to the line segment formed by p1 and p2 from p3.
 	 * @param p1 line segment start
 	 * @param p2 line segment end
 	 * @param p3 point to find min distance to segment
-	 * @return
+	 * @return MapLocation of the closest point on the line segment
 	 */
 	public static MapLocation distanceToSegment(MapLocation p1, MapLocation p2, MapLocation p3) {
 
