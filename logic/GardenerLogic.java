@@ -73,11 +73,7 @@ public class GardenerLogic extends RobotLogic {
 			buildRobots(trees);
 			orderClearTrees(trees);
 		} else {
-			if (trees.length >= 8) {
-				build(RobotType.LUMBERJACK);
-			} else if (census.count(RobotType.SOLDIER) < 2) {
-				build(RobotType.SOLDIER);
-			} 
+			buildRobots(trees);
 			findBaseLocation();
 		}
 
@@ -165,12 +161,21 @@ public class GardenerLogic extends RobotLogic {
 	void buildRobots(TreeInfo[] trees) {
 		if (trees.length >= 8) {
 			build(RobotType.LUMBERJACK);
-		} else if (census.count(RobotType.SOLDIER) < 2) {
-			build(RobotType.SOLDIER);
-		} else if (census.count(RobotType.SCOUT) < 3) {
-			build(RobotType.SCOUT);
-		} else if (census.count(RobotType.LUMBERJACK) < 5) {
-			build(RobotType.LUMBERJACK);
+		}
+		if (settled) {
+			if (census.count(RobotType.SOLDIER) < 2) {
+				build(RobotType.SOLDIER);
+			} else if (census.count(RobotType.SCOUT) < 3) {
+				build(RobotType.SCOUT);
+			} else if (census.count(RobotType.LUMBERJACK) < 5) {
+				build(RobotType.LUMBERJACK);
+			}
+		} else {
+			if (census.count(RobotType.SOLDIER) < 2) {
+				build(RobotType.SOLDIER);
+			} else if (census.count(RobotType.SCOUT) < 1) {
+				build(RobotType.SCOUT);
+			}
 		}
 	}
 
