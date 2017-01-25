@@ -69,10 +69,7 @@ public class LumberjackLogic extends RobotLogic {
 		if (!rc.hasAttacked() && target == null) {
 			checkRadioTreeChannel();
 
-			nav.moveByTrees(trees);
-
 			if (!rc.hasMoved()) {
-
 				if (rc.getLocation().distanceTo(enemySpawn) <= 1.0f || nothingAtEnemySpawn) {
 					nothingAtEnemySpawn = true;
 					nav.moveByTrees(trees);
@@ -82,12 +79,11 @@ public class LumberjackLogic extends RobotLogic {
 				}
 			}
 		}
-
 	}
 
 	void moveOffSpawn() {
 		if (personality.getMother() != null) {
-			if (rc.getLocation().distanceTo(personality.getMother().location) <= rc.getType().sensorRadius) {
+			if (rc.getLocation().distanceTo(personality.getMother().location) <= rc.getType().sensorRadius / 2) {
 				nav.tryHardMove(personality.getMother().location.directionTo(rc.getLocation()));
 			}
 		}
