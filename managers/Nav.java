@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import RUfoo.util.Circle;
 import RUfoo.util.Util;
+import battlecode.common.BodyInfo;
 import battlecode.common.BulletInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -86,13 +88,13 @@ public class Nav {
 		tryHardMove(dir, rc.getType().strideRadius);
 	}
 
-	public void tryHardMove(Direction dir, float dist) {
-		tryHardMove(dir, dist, 180.0f);
+	public boolean tryHardMove(Direction dir, float dist) {
+		return tryHardMove(dir, dist, 180.0f);
 	}
 
-	public void tryHardMove(Direction dir, float dist, float maxDegreesOff) {
+	public boolean tryHardMove(Direction dir, float dist, float maxDegreesOff) {
 		if (rc.hasMoved()) {
-			return;
+			return false;
 		}
 
 		try {
@@ -110,6 +112,7 @@ public class Nav {
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
+		return rc.hasMoved();
 	}
 
 	public void moveByTrees(TreeInfo[] trees) {
@@ -354,39 +357,98 @@ public class Nav {
 		return new Direction(Util.random(0.0f, 1.0f), Util.random(0.0f, 1.0f));
 	}
 
-	boolean bugging;
-	Direction bugDirection;
-	int bugFail;
-
-	public boolean bug(MapLocation target) {
-		if (rc.hasMoved()) {
-			return false;
+//	boolean bugging;
+//	Direction bugDirection;
+//	int bugFail;
+//
+//	public boolean bug(MapLocation target) {
+//		if (rc.hasMoved()) {
+//			return false;
+//		}
+//
+//		if (bugging) {
+//			if (!tryMove(bugDirection)) {
+//				bugFail++;
+//				if (bugFail > 3) {
+//					bugFail = 0;
+//					bugging = false;
+//				}
+//			}
+//
+//		} else if (!tryMoveTo(target)) {
+//			bugging = true;
+//
+//			float offset = 0.0f;
+//			while (offset < 180.0f) {
+//				bugDirection = rc.getLocation().directionTo(target).rotateRightDegrees(offset);
+//				if (rc.canMove(bugDirection)) {
+//					break;
+//				}
+//				offset += 10.0f;
+//			}
+//			tryHardMove(bugDirection);
+//		}
+//
+//		return rc.hasMoved();
+//	}
+		
+	boolean isBugging;
+	Direction bugDir;
+	
+	public void bug(MapLocation target, BodyInfo[] bodies) {
+		float totalDist = rc.getLocation().distanceTo(target);
+		
+		// Already there or cannot move?
+		if (rc.hasMoved() || totalDist <= 0.1f) {
+			return;
 		}
-
-		if (bugging) {
-			if (!tryMove(bugDirection)) {
-				bugFail++;
-				if (bugFail > 3) {
-					bugFail = 0;
-					bugging = false;
-				}
+		
+		// Calculate the travel distance and direction.
+		float dist = Math.min(totalDist, rc.getType().strideRadius);
+		Direction dirToTarget = rc.getLocation().directionTo(target);
+		
+		rc.setIndicatorLine(rc.getLocation(), target, 100, 0, 1);
+		rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(bugDir, 5), 0, 100, 1);
+		
+		if (!isBugging) {
+			if (!tryMove(dirToTarget, dist)) {
+				bugDir = dirToTarget;
+				isBugging = true;
+				bug(target, bodies);
 			}
-
-		} else if (!tryMoveTo(target)) {
-			bugging = true;
-
-			float offset = 0.0f;
-			while (offset < 180.0f) {
-				bugDirection = rc.getLocation().directionTo(target).rotateRightDegrees(offset);
-				if (rc.canMove(bugDirection)) {
-					break;
+		} else {
+			// Bugging means we need to follow tree tangents unless we can move in the 
+			// Bug direction.
+			
+			// Can we move straight to target?
+			if (Util.closeEnough(bugDir, dirToTarget, 3.0f) && tryMove(dirToTarget, dist)) {
+				// We were able to move to the target
+				isBugging = false;	
+			} 
+			// Try to follow body tangents.
+			else if (bodies.length > 0) {
+				for (BodyInfo body : bodies) {
+					Circle treeCircle = new Circle(body.getLocation(), body.getRadius());
+					MapLocation midPoint = Util.midPoint(rc.getLocation(), body.getLocation());
+					Circle tangetCircle = new Circle(midPoint, rc.getLocation().distanceTo(midPoint));
+					
+					MapLocation[] intersections = tangetCircle.intersections(treeCircle);
+					
+					for (MapLocation intersection : intersections) {
+						//Direction normal = body.getLocation().directionTo(intersection);
+						rc.setIndicatorLine(rc.getLocation(), intersection, 100, 100, 100);
+						tryHardMove(rc.getLocation().directionTo(intersection)); //.add(normal, rc.getType().bodyRadius)
+						if (rc.hasMoved()) {
+							return;
+						}
+					}	
 				}
-				offset += 10.0f;
+			} 
+			// No trees... move to target?
+			else {
+				tryMove(dirToTarget, dist);
 			}
-			tryHardMove(bugDirection);
 		}
-
-		return rc.hasMoved();
 	}
 	
 	public void shakeTrees() {

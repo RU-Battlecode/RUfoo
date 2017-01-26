@@ -116,7 +116,11 @@ public final class Util {
 		} else {
 			closestPoint = new MapLocation(p1.x + u * xDelta, p1.y + u * yDelta);
 		}
-
+		
 		return closestPoint;
+	}
+	
+	public static MapLocation midPoint(MapLocation a, MapLocation b) {
+		return new MapLocation((a.x + b.x) / 2, (a.y + b.y) / 2);
 	}
 }
