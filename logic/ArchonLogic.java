@@ -35,6 +35,10 @@ import battlecode.common.TreeInfo;
  */
 public class ArchonLogic extends RobotLogic {
 
+	private static final float MIN_DISTANCE_TO_ENEMY_SPAWN = 20.0f;
+	private static final int GARDENER_LIMIT_UNTIL_ROUND = 600;
+	private static final int GARDENER_LIMIT = 8;
+	
 	// Prioritized build directions
 	private List<Direction> buildDirs = new ArrayList<>(
 			Arrays.asList(new Direction[] { Direction.getNorth() }));
@@ -46,7 +50,6 @@ public class ArchonLogic extends RobotLogic {
 		super(_rc);
 
 		enemySpawn = combat.getClosestEnemySpawn();
-
 		Direction pointAt = rc.getLocation().directionTo(enemySpawn);
 		buildOffset = buildDirs.get(0).degreesBetween(pointAt);
 	}
@@ -54,19 +57,25 @@ public class ArchonLogic extends RobotLogic {
 	@Override
 	public void logic() {
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
-		if (rc.getLocation().distanceTo(enemySpawn) < 20) {
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+		
+		// Move away from enemy spawn if it is too close.
+		if (rc.getLocation().distanceTo(enemySpawn) < MIN_DISTANCE_TO_ENEMY_SPAWN) {
 			nav.tryHardMove(enemySpawn.directionTo(rc.getLocation()));
 		}
 
-		if (rc.getRoundNum() < 600) {
-			if (census.count(RobotType.GARDENER) < 8) {
+		if (rc.getRoundNum() < GARDENER_LIMIT_UNTIL_ROUND) {
+			if (census.count(RobotType.GARDENER) < GARDENER_LIMIT) {
 				buildBase();
 			}
 		} else {
 			buildBase();
 		}
+
 		nav.dodge(rc.senseNearbyBullets());
 		moveOffOfGardeners(friends);
+		
+		nav.shakeTrees(trees);
 	}
 
 	void buildBase() {
@@ -102,7 +111,7 @@ public class ArchonLogic extends RobotLogic {
 			break;
 		default:
 			Direction dir = nav.randomDirection();
-			if (round > 45 && census.count(RobotType.GARDENER) < 7 && rc.canBuildRobot(RobotType.GARDENER, dir)) {
+			if (round > 100 && census.count(RobotType.GARDENER) < GARDENER_LIMIT && rc.canBuildRobot(RobotType.GARDENER, dir)) {
 				buildDirs.add(dir);
 			}
 		}	
@@ -112,7 +121,7 @@ public class ArchonLogic extends RobotLogic {
 		if (!rc.hasRobotBuildRequirements(RobotType.GARDENER)) {
 			return false;
 		}
-		
+
 		try {
 			float offset = 0.0f;
 			while (offset < 360.0f) {
@@ -131,9 +140,7 @@ public class ArchonLogic extends RobotLogic {
 		return false;
 	}
 
-	void orderClearTrees() {
-		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-
+	void orderClearTrees(TreeInfo[] trees) {
 		// Biggest trees first!
 		Arrays.sort(trees, (t1, t2) -> {
 			return Math.round(t2.radius - t1.radius);
@@ -144,7 +151,7 @@ public class ArchonLogic extends RobotLogic {
 			break;
 		}
 	}
-	
+
 	private void moveOffOfGardeners(RobotInfo[] robots) {
 		for (RobotInfo robot : robots) {
 			if (robot.type == RobotType.GARDENER && robot.location.distanceTo(rc.getLocation()) <= rc.getType().bodyRadius * 2.0f) {
