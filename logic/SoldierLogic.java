@@ -44,7 +44,7 @@ public class SoldierLogic extends RobotLogic {
 	public void logic() {
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		BulletInfo[] bullets = rc.senseNearbyBullets();
-
+		
 		lookForEnemyArchons(enemies);
 
 		RobotInfo target = combat.findTarget(enemies);
@@ -68,6 +68,7 @@ public class SoldierLogic extends RobotLogic {
 			}
 		}
 
+		nav.shakeTrees();
 	}
 
 	void lookForEnemyArchons(RobotInfo[] enemies) {

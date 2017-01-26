@@ -11,7 +11,9 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.TreeInfo;
 
-/*
+/**
+ * LumberjackLogic.java
+ * 
  * M: mother (personality.getMother())
  * T: Base team tree.
  * S: Spawn area of base.
@@ -24,12 +26,11 @@ import battlecode.common.TreeInfo;
  * 
  * 1. Clear all trees around base.
  * 
- * 2. Go clear trees?
+ * 2. Read radio help to clear trees
  * 
  * Always: Protect the base. 
  * 
  */
-
 public class LumberjackLogic extends RobotLogic {
 
 	private static final float HOME_BASE_RADIUS = 5.0f;
@@ -47,7 +48,7 @@ public class LumberjackLogic extends RobotLogic {
 		targetTree = null;
 		treeFrustration = 0;
 	}
-	
+
 	@Override
 	public void logic() {
 		TreeInfo[] trees = rc.senseNearbyTrees();
@@ -65,7 +66,7 @@ public class LumberjackLogic extends RobotLogic {
 		}
 
 		clearTreesAroundBase(robots, trees);
-		
+
 		if (!rc.hasAttacked() && target == null) {
 			checkRadioTreeChannel();
 
@@ -79,6 +80,8 @@ public class LumberjackLogic extends RobotLogic {
 				}
 			}
 		}
+		
+		nav.shakeTrees();
 	}
 
 	void moveOffSpawn() {

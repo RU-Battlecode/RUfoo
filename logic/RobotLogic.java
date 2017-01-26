@@ -48,14 +48,10 @@ public abstract class RobotLogic {
 		active = true;
 		while (active) {
 			census.tryTakeCensus();
-			
+
 			donateToWin();
 
 			logic();
-
-			if (Clock.getBytecodesLeft() > 200) {
-				shakeTrees();
-			}
 
 			Clock.yield();
 		}
@@ -89,23 +85,5 @@ public abstract class RobotLogic {
 
 	boolean opponentAboutToWin() {
 		return rc.getOpponentVictoryPoints() > 900 && rc.getTeamVictoryPoints() > 800; 
-	}
-	
-	void shakeTrees() {
-		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius);
-		for (TreeInfo tree : trees) {
-			if (tree.getTeam().equals(rc.getTeam().opponent())) {
-				continue;
-			}
-
-			if (tree.containedBullets > 0 && rc.canShake(tree.ID)) {
-				try {
-					rc.shake(tree.ID);
-					break;
-				} catch (GameActionException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 }

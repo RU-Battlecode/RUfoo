@@ -13,6 +13,7 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class Nav {
@@ -279,6 +280,20 @@ public class Nav {
 
 	}
 
+	public boolean isLocationFree(MapLocation loc) {
+		try {
+			return !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation(),
+					GameConstants.BULLET_TREE_RADIUS + GameConstants.GENERAL_SPAWN_OFFSET);
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public boolean isLocationFree(Direction dir) {
+		return isLocationFree(rc.getLocation().add(dir));
+	}
+
 	private int scaryFactor(RobotInfo enemy) {
 		int scariness = 0;
 		switch (enemy.getType()) {
@@ -317,7 +332,7 @@ public class Nav {
 
 		return scariness;
 	}
-	
+
 	public void moveRandom() {
 		moveRandom(rc.getType().strideRadius);
 	}
@@ -338,16 +353,16 @@ public class Nav {
 	public Direction randomDirection() {
 		return new Direction(Util.random(0.0f, 1.0f), Util.random(0.0f, 1.0f));
 	}
-	
+
 	boolean bugging;
 	Direction bugDirection;
 	int bugFail;
-	
+
 	public boolean bug(MapLocation target) {
 		if (rc.hasMoved()) {
 			return false;
 		}
-		
+
 		if (bugging) {
 			if (!tryMove(bugDirection)) {
 				bugFail++;
@@ -356,10 +371,10 @@ public class Nav {
 					bugging = false;
 				}
 			}
-			
+
 		} else if (!tryMoveTo(target)) {
 			bugging = true;
-		
+
 			float offset = 0.0f;
 			while (offset < 180.0f) {
 				bugDirection = rc.getLocation().directionTo(target).rotateRightDegrees(offset);
@@ -368,9 +383,30 @@ public class Nav {
 				}
 				offset += 10.0f;
 			}
-			tryHardMove(bugDirection);		
+			tryHardMove(bugDirection);
 		}
-		
+
 		return rc.hasMoved();
+	}
+	
+	public void shakeTrees() {
+		shakeTrees(rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL));
+	}
+	
+	public void shakeTrees(TreeInfo[] trees) {
+		for (TreeInfo tree : trees) {
+			if (tree.getTeam().equals(rc.getTeam().opponent()) || tree.containedBullets == 0) {
+				continue;
+			}
+
+			if (rc.canShake(tree.ID)) {
+				try {
+					rc.shake(tree.ID);
+					break;
+				} catch (GameActionException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

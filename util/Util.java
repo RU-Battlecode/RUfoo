@@ -10,6 +10,7 @@ import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.TreeInfo;
 
 public final class Util {
 	private static final Random rand = new Random(1337);
@@ -89,10 +90,15 @@ public final class Util {
 	}
 
 	/**
-	 * Find the closest maplocation to the line segment formed by p1 and p2 from p3.
-	 * @param p1 line segment start
-	 * @param p2 line segment end
-	 * @param p3 point to find min distance to segment
+	 * Find the closest maplocation to the line segment formed by p1 and p2 from
+	 * p3.
+	 * 
+	 * @param p1
+	 *            line segment start
+	 * @param p2
+	 *            line segment end
+	 * @param p3
+	 *            point to find min distance to segment
 	 * @return MapLocation of the closest point on the line segment
 	 */
 	public static MapLocation distanceToSegment(MapLocation p1, MapLocation p2, MapLocation p3) {
@@ -100,8 +106,7 @@ public final class Util {
 		float xDelta = p2.x - p1.x;
 		float yDelta = p2.y - p1.y;
 
-		float u = ((p3.x - p1.x) * xDelta + (p3.y - p1.y) * yDelta)
-				/ (xDelta * xDelta + yDelta * yDelta);
+		float u = ((p3.x - p1.x) * xDelta + (p3.y - p1.y) * yDelta) / (xDelta * xDelta + yDelta * yDelta);
 
 		MapLocation closestPoint = null;
 		if (u < 0) {

@@ -64,6 +64,7 @@ public class TankLogic extends RobotLogic {
 			}
 		}
 
+		nav.shakeTrees(trees);
 	}
 
 	void lookForEnemyArchons(RobotInfo[] enemies) {

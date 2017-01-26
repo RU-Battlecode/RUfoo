@@ -5,7 +5,6 @@ import java.util.Arrays;
 import RUfoo.managers.Nav;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -33,9 +32,15 @@ import battlecode.common.TreeInfo;
  */
 public class GardenerLogic extends RobotLogic {
 
+	private static final float TOO_MUCH_TREE_SUM_RADIUS = 10.1f;
 	private static final int MIN_STEPS_BEFORE_SETTLE = 5;
-	private int stepsBeforeGiveUp = 70;
-
+	private static final int RESETTLE_ROUND = 600;
+	
+	private static final int MAX_SOLDIER = 2;
+	private static final int MAX_LUMBERJACK = 5;
+	private static final int MAX_TANKS = 3;
+	private static final int MAX_SCOUT = 3;
+	
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
 			Direction.getWest().rotateLeftDegrees(2), Nav.NORTH_WEST.rotateLeftDegrees(15),
 			Nav.NORTH_EAST.rotateRightDegrees(15), Nav.SOUTH_WEST.rotateRightDegrees(15),
@@ -44,6 +49,7 @@ public class GardenerLogic extends RobotLogic {
 	private float buildOffset;
 	private Direction buildDirection;
 	private int steps;
+	private int stepsBeforeGiveUp;
 	private boolean settled;
 	private MapLocation baseLocation;
 	private boolean hasPlantedFront;
@@ -68,7 +74,7 @@ public class GardenerLogic extends RobotLogic {
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
 		buildRobots(trees);
-		
+
 		if (settled) {
 			plantTrees();
 			waterTrees(myTrees);
@@ -77,11 +83,13 @@ public class GardenerLogic extends RobotLogic {
 			findBaseLocation();
 		}
 
-		if (rc.getRoundNum() == 600 && myTrees.length < 10) {
+		if (rc.getRoundNum() == RESETTLE_ROUND && myTrees.length < 10) {
 			plantFailCount = 0;
 			settled = hasPlantedFront = hasPlantedMiddle = hasFinishedPlanting = false;
 			steps = 0;
 		}
+		
+		nav.shakeTrees(trees);
 	}
 
 	void findBaseLocation() {
@@ -90,7 +98,7 @@ public class GardenerLogic extends RobotLogic {
 		RobotInfo gardener = nearest(RobotType.GARDENER, robots);
 
 		if (((archon == null || archon.location.distanceTo(rc.getLocation()) >= 3.0f) && rc.hasTreeBuildRequirements()
-				&& isLocationFree(buildDirection) && isLocationFree(buildDirection.opposite())
+				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
 				&& steps > MIN_STEPS_BEFORE_SETTLE)
 				|| (steps >= stepsBeforeGiveUp
 						&& (gardener == null || gardener.location.distanceTo(rc.getLocation()) > 1.0f))) {
@@ -159,20 +167,21 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void buildRobots(TreeInfo[] trees) {
-		if (treeSumRadius(trees) >= 10) {
+		if (treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS) {
 			build(RobotType.LUMBERJACK);
 		}
 		if (settled) {
-			if (census.count(RobotType.TANK) < 3) {
+			if (census.count(RobotType.TANK) < MAX_TANKS) {
 				build(RobotType.TANK);
-			} else if (census.count(RobotType.SOLDIER) < 2) {
+			} else if (census.count(RobotType.SOLDIER) < MAX_SOLDIER) {
 				build(RobotType.SOLDIER);
-			} else if (census.count(RobotType.SCOUT) < 3) {
+			} else if (census.count(RobotType.SCOUT) < MAX_SCOUT) {
 				build(RobotType.SCOUT);
-			} else if (census.count(RobotType.LUMBERJACK) < 5) {
+			} else if (census.count(RobotType.LUMBERJACK) < MAX_LUMBERJACK) {
 				build(RobotType.LUMBERJACK);
 			}
 		} else {
+			// We have not settled and are in the process of building trees.
 			int soldiers = census.count(RobotType.SOLDIER);
 			if (soldiers < 1) {
 				build(RobotType.SOLDIER);
@@ -233,7 +242,7 @@ public class GardenerLogic extends RobotLogic {
 		final MapLocation endPoint = firstThreeSteps.add(dir, rc.getType().strideRadius + 0.2f);
 
 		nav.tryMoveTo(endPoint);
-		if (!isLocationFree(endPoint)) {
+		if (!nav.isLocationFree(endPoint)) {
 			plantFailCount++;
 			return false;
 		}
@@ -279,20 +288,6 @@ public class GardenerLogic extends RobotLogic {
 		return false;
 	}
 
-	boolean isLocationFree(MapLocation loc) {
-		try {
-			return !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation(),
-					GameConstants.BULLET_TREE_RADIUS + GameConstants.GENERAL_SPAWN_OFFSET);
-		} catch (GameActionException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-
-	boolean isLocationFree(Direction dir) {
-		return isLocationFree(rc.getLocation().add(dir));
-	}
-	
 	float treeSumRadius(TreeInfo[] trees) {
 		float sum = 0.0f;
 		for (TreeInfo tree : trees) {

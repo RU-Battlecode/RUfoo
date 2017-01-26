@@ -38,6 +38,7 @@ public class ScoutLogic extends RobotLogic {
 	public void logic() {	
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		BulletInfo[] bullets = rc.senseNearbyBullets();
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
@@ -52,7 +53,6 @@ public class ScoutLogic extends RobotLogic {
 		}
 
 		if (target == null && !rc.hasAttacked()) {
-			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 			for (TreeInfo tree : trees) {
 				if (tree.containedBullets > 0) {
 					nav.moveAggressivelyTo(tree.location, bullets, enemies);
@@ -61,6 +61,8 @@ public class ScoutLogic extends RobotLogic {
 			}
 			explore();
 		}
+
+		nav.shakeTrees(trees);
 	}
 
 	void explore() {
