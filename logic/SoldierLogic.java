@@ -53,7 +53,11 @@ public class SoldierLogic extends RobotLogic {
 			// Attack target aggressively!
 			MapLocation closeToTarget = target.location.add(target.location.directionTo(rc.getLocation()),
 					rc.getType().bodyRadius * 2.0f);
-			nav.moveAggressivelyTo(closeToTarget, bullets, enemies);
+			if (target.getType() == RobotType.LUMBERJACK) {
+				nav.kite(target);
+			} else {
+				nav.moveAggressivelyTo(closeToTarget, bullets, enemies);
+			}
 			combat.shoot(target, enemies);
 		} else {
 			// No target.

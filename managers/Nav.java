@@ -409,4 +409,22 @@ public class Nav {
 			}
 		}
 	}
+
+	public void kite(RobotInfo target) {
+		if (rc.hasMoved()) {
+			return;
+		}
+		float delta = rc.getLocation().distanceTo(target.location) - rc.getType().sensorRadius / 2;
+		
+		if (!Util.equals(delta, 0.0f, 0.01f)) {
+			
+			Direction dir = rc.getLocation().directionTo(target.location);
+			
+			if (delta > 0) {
+				dir = dir.opposite();
+			}
+			
+			tryHardMove(dir, delta);
+		}
+	}
 }
