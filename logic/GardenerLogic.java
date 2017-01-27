@@ -122,6 +122,10 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void plantTrees() {
+		if (!rc.hasTreeBuildRequirements()) {
+			return;
+		}
+		
 		// We have to plant the front two first to maximize plants
 		if (!hasPlantedFront) {
 			hasPlantedFront = moveAndPlant(buildDirection.opposite());
@@ -135,17 +139,19 @@ public class GardenerLogic extends RobotLogic {
 			hasFinishedPlanting = moveAndPlant(buildDirection);
 		} else {
 			nav.tryMoveTo(baseLocation);
-
-			for (Direction dir : TREE_BUILD_DIRS) {
-				dir = dir.rotateLeftDegrees(buildOffset);
-				if (rc.canPlantTree(dir)) {
-					try {
+			try {
+				for (Direction dir : TREE_BUILD_DIRS) {
+					dir = dir.rotateLeftDegrees(buildOffset);
+					if (rc.canPlantTree(dir)) {
 						rc.plantTree(dir);
 						break;
-					} catch (GameActionException e) {
-						e.printStackTrace();
+					} else if (rc.canPlantTree(dir.rotateRightDegrees(2))) {
+						rc.plantTree(dir);
+						break;
 					}
 				}
+			} catch (GameActionException e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -171,22 +177,22 @@ public class GardenerLogic extends RobotLogic {
 		int lumberjacks = census.count(RobotType.LUMBERJACK);
 		int soldiers = census.count(RobotType.SOLDIER);
 		int scouts = census.count(RobotType.SCOUT);
-		
+
 		if (treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < MAX_LUMBERJACK) {
 			build(RobotType.LUMBERJACK);
 		}
-		
+
 		if (settled) {
 			if (census.count(RobotType.TANK) < MAX_TANKS) {
 				build(RobotType.TANK);
 			}
-			
+
 			if (soldiers < 1) {
 				build(RobotType.SOLDIER);
 			} else if (scouts < 1) {
 				build(RobotType.SCOUT);
 			}
-			
+
 			if (soldiers < MAX_SOLDIER) {
 				build(RobotType.SOLDIER);
 			} else if (scouts < MAX_SCOUT) {
@@ -210,14 +216,14 @@ public class GardenerLogic extends RobotLogic {
 		if (!rc.isBuildReady() || !rc.hasRobotBuildRequirements(type)) {
 			return;
 		}
-		
+
 		float offset = 0.0f;
-		
+
 		while (offset < 360.0f) {
 			Direction dir = buildDirection.rotateLeftDegrees((personality.getIsLeftHanded() ? 1 : 1) * offset);
-			if (rc.canBuildRobot(type,  dir)) {
+			if (rc.canBuildRobot(type, dir)) {
 				try {
-					rc.buildRobot(type,  dir);
+					rc.buildRobot(type, dir);
 					census.increment(type);
 					break;
 				} catch (GameActionException e) {
