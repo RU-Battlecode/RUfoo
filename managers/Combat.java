@@ -12,7 +12,6 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
-import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class Combat {
@@ -59,9 +58,9 @@ public class Combat {
 
 	public void shoot(RobotInfo target, RobotInfo[] enemies) {	
 		float distToTarget = target.location.distanceTo(rc.getLocation());
-		if (shouldUsePentadShot() && (enemies.length > 1 || distToTarget <= rc.getType().sensorRadius / 3)) {
+		if (shouldUsePentadShot() && (distToTarget <= rc.getType().sensorRadius / 1.5)) {
 			pentadShot(target);
-		} else if (shouldUseTriadShot() && (enemies.length > 1 || distToTarget <= rc.getType().sensorRadius / 2)) {
+		} else if (shouldUseTriadShot()) {
 			triadShot(target);
 		} else {
 			singleShotAttack(target);
