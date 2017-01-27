@@ -36,10 +36,10 @@ public class GardenerLogic extends RobotLogic {
 	private static final int MIN_STEPS_BEFORE_SETTLE = 5;
 	private static final int RESETTLE_ROUND = 600;
 
-	private static final int MAX_SOLDIER = 2;
+	private static final int MAX_SOLDIER = 5;
 	private static final int MAX_LUMBERJACK = 5;
-	private static final int MAX_TANKS = 3;
-	private static final int MAX_SCOUT = 3;
+	private static final int MAX_TANKS = 4;
+	private static final int MAX_SCOUT = 2;
 
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
 			Direction.getWest().rotateLeftDegrees(2), Nav.NORTH_WEST.rotateLeftDegrees(15),
