@@ -120,11 +120,11 @@ public class SoldierLogic extends RobotLogic {
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 
-//		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0
-//				|| moveFrustration > personality.getPatience()) {
-//			moveIndex++;
-//			moveFrustration = 0;
-//		}
+		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0
+				|| moveFrustration > personality.getPatience()) {
+			moveIndex++;
+			moveFrustration = 0;
+		}
 				
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 		
