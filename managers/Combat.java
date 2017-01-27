@@ -108,13 +108,10 @@ public class Combat {
 				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f;
 	}
 
-	public RobotInfo findTarget(RobotInfo[] enemies) {
-		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
-		TreeInfo[] naturalTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+	public RobotInfo findTarget(RobotInfo[] enemies, RobotInfo[] friends, TreeInfo[] myTrees, TreeInfo[] neutralTrees) {
 		
 		// Avoid hitting friends and friendly trees because bullets buy happiness.
-		BodyInfo[] bodiesToAvoid = Util.addAll(Util.addAll(myTrees, friends), naturalTrees);
+		BodyInfo[] bodiesToAvoid = Util.addAll(Util.addAll(myTrees, friends), neutralTrees);
 		
 		List<RobotInfo> hittable = new ArrayList<>(Arrays.asList(enemies));
 		for (RobotInfo enemy : enemies) {			

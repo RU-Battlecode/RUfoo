@@ -39,14 +39,16 @@ public class ScoutLogic extends RobotLogic {
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		BulletInfo[] bullets = rc.senseNearbyBullets();
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-		
+		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
+
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
 				radio.foundEnemyArchon(enemy);
 			}
 		}
 		
-		RobotInfo target = combat.findTarget(enemies);
+		RobotInfo target = combat.findTarget(enemies, friends, myTrees, trees);
 		if (target != null) {
 			nav.moveSafelyTo(target.location, bullets, enemies);
 			combat.shoot(target, enemies);

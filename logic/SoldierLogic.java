@@ -48,10 +48,12 @@ public class SoldierLogic extends RobotLogic {
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		BulletInfo[] bullets = rc.senseNearbyBullets();
 		TreeInfo[] trees = rc.senseNearbyTrees();
+		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
+		TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		
 		lookForEnemyArchons(enemies);
 
-		RobotInfo target = combat.findTarget(enemies);
+		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
 
 		if (target != null) {
 			// Attack target aggressively!

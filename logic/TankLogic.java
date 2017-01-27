@@ -38,12 +38,15 @@ public class TankLogic extends RobotLogic {
 	@Override
 	public void logic() {
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
-		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);	
+		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+		TreeInfo[] enemyTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam().opponent());
+		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
 		BulletInfo[] bullets = rc.senseNearbyBullets();
 
 		lookForEnemyArchons(enemies);
 
-		RobotInfo target = combat.findTarget(enemies);
+		RobotInfo target = combat.findTarget(enemies, friends, myTrees, trees);
 
 		if (target != null) {
 			// Attack target aggressively!
