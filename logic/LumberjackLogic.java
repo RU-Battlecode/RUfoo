@@ -55,6 +55,12 @@ public class LumberjackLogic extends RobotLogic {
 		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 
+		for (RobotInfo enemy : enemies) {
+			if (enemy.type == RobotType.ARCHON) {
+				radio.foundEnemyArchon(enemy);
+			}
+		}
+		
 		moveOffSpawn();
 
 		RobotInfo target = combat.findMeleeTarget(enemies);
