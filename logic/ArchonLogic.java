@@ -8,6 +8,7 @@ import RUfoo.managers.Channel;
 import RUfoo.managers.Nav;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -39,7 +40,7 @@ public class ArchonLogic extends RobotLogic {
 	private static final float MIN_DISTANCE_TO_ENEMY_SPAWN = 20.0f;
 	private static final int STRICT_GARDENER_LIMIT_UNTIL_ROUND = 122;
 	private static final int GARDENER_LIMIT_UNTIL_ROUND = 600;
-	private static final int GARDENER_LIMIT = 8;
+	private static int gardenerLimit;
 
 	// Prioritized build directions
 	private List<Direction> buildDirs = new ArrayList<>(Arrays.asList(new Direction[] { Direction.getNorth() }));
@@ -56,6 +57,8 @@ public class ArchonLogic extends RobotLogic {
 		buildOffset = buildDirs.get(0).degreesBetween(pointAt);
 
 		isLeader = rc.getInitialArchonLocations(rc.getTeam()).length == 1 ? true : null;
+		
+		gardenerLimit = 2 * rc.getInitialArchonLocations(rc.getTeam()).length + 6;
 	}
 
 	@Override
@@ -66,8 +69,17 @@ public class ArchonLogic extends RobotLogic {
 		}
 
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 
+		
+		// Archons can report enemies archons too!
+		for (RobotInfo enemy : enemies) {
+			if (enemy.type == RobotType.ARCHON) {
+				radio.foundEnemyArchon(enemy);
+			}
+		}
+		
 		// Move away from enemy spawn if it is too close.
 		if (rc.getLocation().distanceTo(enemySpawn) < MIN_DISTANCE_TO_ENEMY_SPAWN) {
 			nav.tryHardMove(enemySpawn.directionTo(rc.getLocation()));
@@ -78,6 +90,7 @@ public class ArchonLogic extends RobotLogic {
 		buildBase(gardeners);
 
 		nav.dodge(rc.senseNearbyBullets());
+		nav.runAway(enemies);
 		moveOffOfGardeners(friends);
 
 		orderClearTrees(trees);
@@ -117,7 +130,7 @@ public class ArchonLogic extends RobotLogic {
 			break;
 		default:
 			Direction dir = nav.randomDirection();
-			if (round > 100 && gardenersAlive < GARDENER_LIMIT && rc.canBuildRobot(RobotType.GARDENER, dir)) {
+			if (round > 100 && gardenersAlive < gardenerLimit && rc.canBuildRobot(RobotType.GARDENER, dir)) {
 				buildDirs.add(dir);
 			}
 		}
@@ -165,11 +178,11 @@ public class ArchonLogic extends RobotLogic {
 
 	boolean hireGardener(Direction dir, int gardeners) {
 
-		if (rc.getRoundNum() < STRICT_GARDENER_LIMIT_UNTIL_ROUND) {
+		if (rc.getRoundNum() < STRICT_GARDENER_LIMIT_UNTIL_ROUND && rc.getTeamBullets() < GameConstants.BULLETS_INITIAL_AMOUNT) {
 			if (gardeners >= 1) {
 				return false;
 			}
-		} else if (rc.getRoundNum() < GARDENER_LIMIT_UNTIL_ROUND && gardeners > GARDENER_LIMIT) {
+		} else if (rc.getRoundNum() < GARDENER_LIMIT_UNTIL_ROUND && gardeners > gardenerLimit) {
 			return false;
 		}
 			
