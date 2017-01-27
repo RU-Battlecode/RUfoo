@@ -144,8 +144,11 @@ public class Combat {
 
 		switch (robot.getType()) {
 		case ARCHON:
-			// TODO: only prioritize when it is alone!
-			priority += 90;
+			if (rc.getRoundNum() < 100 || rc.getRoundNum() > 300) {
+				priority += 90;
+			} else {
+				priority += 70;
+			}
 			break;
 		case GARDENER:
 			priority += 100;
