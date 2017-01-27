@@ -35,12 +35,12 @@ public class GardenerLogic extends RobotLogic {
 	private static final float TOO_MUCH_TREE_SUM_RADIUS = 10.1f;
 	private static final int MIN_STEPS_BEFORE_SETTLE = 5;
 	private static final int RESETTLE_ROUND = 600;
-	
+
 	private static final int MAX_SOLDIER = 2;
 	private static final int MAX_LUMBERJACK = 5;
 	private static final int MAX_TANKS = 3;
 	private static final int MAX_SCOUT = 3;
-	
+
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
 			Direction.getWest().rotateLeftDegrees(2), Nav.NORTH_WEST.rotateLeftDegrees(15),
 			Nav.NORTH_EAST.rotateRightDegrees(15), Nav.SOUTH_WEST.rotateRightDegrees(15),
@@ -59,7 +59,8 @@ public class GardenerLogic extends RobotLogic {
 
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
-		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn()).opposite();
+		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn()).opposite()
+				.rotateLeftDegrees(42.0f);
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
 		buildDirection = TREE_BUILD_DIRS[0].opposite().rotateLeftDegrees(buildOffset);
 		baseLocation = rc.getLocation();
@@ -88,7 +89,7 @@ public class GardenerLogic extends RobotLogic {
 			settled = hasPlantedFront = hasPlantedMiddle = hasFinishedPlanting = false;
 			steps = 0;
 		}
-		
+
 		nav.shakeTrees(trees);
 	}
 
