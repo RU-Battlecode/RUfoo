@@ -1,12 +1,20 @@
 package RUfoo.managers;
 
+import static RUfoo.managers.Channel.DEFENSE_CHANNEL;
+import static RUfoo.managers.Channel.ENEMY_ARCHON_CHANNEL1;
+import static RUfoo.managers.Channel.ENEMY_ARCHON_CHANNEL2;
+import static RUfoo.managers.Channel.ENEMY_ARCHON_CHANNEL3;
+import static RUfoo.managers.Channel.ENEMY_ARCHON_ID_CHANNEL1;
+import static RUfoo.managers.Channel.ENEMY_ARCHON_ID_CHANNEL2;
+import static RUfoo.managers.Channel.ENEMY_ARCHON_ID_CHANNEL3;
+import static RUfoo.managers.Channel.TREE_CHANNEL;
+
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
-
-import static RUfoo.managers.Channel.*;
 
 public class Radio {
 
