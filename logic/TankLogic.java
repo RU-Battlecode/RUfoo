@@ -84,6 +84,13 @@ public class TankLogic extends RobotLogic {
 			}
 		}
 
+		List<MapLocation> possibleGardenerLocs = radio.readEnemyGardenerLocations();
+		for (MapLocation gardenerLoc : possibleGardenerLocs) {
+			if (gardenerLoc != null) {
+				addNewMoveArea(gardenerLoc);
+				rc.setIndicatorDot(gardenerLoc, 200, 100, 10);
+			}
+		}
 	}
 
 	void addNewMoveArea(MapLocation location) {
