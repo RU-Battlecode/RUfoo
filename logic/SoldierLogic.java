@@ -12,6 +12,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class SoldierLogic extends RobotLogic {
@@ -59,7 +60,7 @@ public class SoldierLogic extends RobotLogic {
 			// Attack target aggressively!
 			MapLocation closeToTarget = target.location.add(target.location.directionTo(rc.getLocation()),
 					rc.getType().bodyRadius * 2.0f);
-			if (target.getType() == RobotType.LUMBERJACK) {
+			if (target.getType().canAttack() && target.getType() != RobotType.SCOUT) {
 				nav.kite(target);
 			} else {
 				nav.moveAggressivelyTo(closeToTarget, bullets, enemies);
