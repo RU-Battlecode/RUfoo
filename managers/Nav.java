@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import RUfoo.util.Circle;
 import RUfoo.util.Util;
+import battlecode.common.BodyInfo;
 import battlecode.common.BulletInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -13,6 +15,7 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class Nav {
@@ -81,17 +84,17 @@ public class Nav {
 		return false;
 	}
 
-	public void tryHardMove(Direction dir) {
-		tryHardMove(dir, rc.getType().strideRadius);
+	public boolean tryHardMove(Direction dir) {
+		return tryHardMove(dir, rc.getType().strideRadius);
 	}
 
-	public void tryHardMove(Direction dir, float dist) {
-		tryHardMove(dir, dist, 180.0f);
+	public boolean tryHardMove(Direction dir, float dist) {
+		return tryHardMove(dir, dist, 180.0f);
 	}
 
-	public void tryHardMove(Direction dir, float dist, float maxDegreesOff) {
+	public boolean tryHardMove(Direction dir, float dist, float maxDegreesOff) {
 		if (rc.hasMoved()) {
-			return;
+			return false;
 		}
 
 		try {
@@ -109,6 +112,32 @@ public class Nav {
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
+		return rc.hasMoved();
+	}
+
+	public boolean tryHardMoveClosestTo(Direction dir, float dist, float maxDegreesOff, Direction targetDir) {
+		if (rc.hasMoved()) {
+			return false;
+		}
+
+		boolean isLeft = dir.rotateRightDegrees(10).degreesBetween(targetDir) < dir.rotateLeftDegrees(10)
+				.degreesBetween(targetDir);
+		try {
+			float offset = 0.0f;
+			while (offset < maxDegreesOff) {
+
+				if (rc.canMove(dir.rotateRightDegrees((isLeft ? -1 : 1) * offset), dist)) {
+					rc.move(dir.rotateRightDegrees((isLeft ? -1 : 1) * offset), dist);
+					break;
+				}
+
+				offset += 10.0f;
+			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
+
+		return rc.hasMoved();
 	}
 
 	public void moveByTrees(TreeInfo[] trees) {
@@ -279,6 +308,20 @@ public class Nav {
 
 	}
 
+	public boolean isLocationFree(MapLocation loc) {
+		try {
+			return !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation(),
+					GameConstants.BULLET_TREE_RADIUS + GameConstants.GENERAL_SPAWN_OFFSET);
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public boolean isLocationFree(Direction dir) {
+		return isLocationFree(rc.getLocation().add(dir));
+	}
+
 	private int scaryFactor(RobotInfo enemy) {
 		int scariness = 0;
 		switch (enemy.getType()) {
@@ -317,7 +360,7 @@ public class Nav {
 
 		return scariness;
 	}
-	
+
 	public void moveRandom() {
 		moveRandom(rc.getType().strideRadius);
 	}
@@ -338,39 +381,171 @@ public class Nav {
 	public Direction randomDirection() {
 		return new Direction(Util.random(0.0f, 1.0f), Util.random(0.0f, 1.0f));
 	}
-	
-	boolean bugging;
-	Direction bugDirection;
-	int bugFail;
-	
-	public boolean bug(MapLocation target) {
+
+	boolean isBugging;
+	Direction bugDir;
+	Direction lastDir;
+	float bugDistance;
+	int bugFrustration;
+	final int bugPatience = 3;
+
+	public void bug(MapLocation target, BodyInfo[] bodies) {
+		MapLocation location = rc.getLocation();
+		float totalDist = location.distanceTo(target);
+
+		// Already there or cannot move?
+		if (rc.hasMoved() || totalDist <= 0.1f) {
+			return;
+		}
+
+		// Calculate the travel distance and direction.
+		float dist = Math.min(totalDist, rc.getType().strideRadius);
+		Direction dirToTarget = location.directionTo(target);
+
+		rc.setIndicatorLine(location, target, 100, 0, 1);
+		rc.setIndicatorLine(location, location.add(bugDir, 5), 0, 100, 1);
+
+
+		if (!isBugging) {
+			if (!tryHardMove(dirToTarget, dist, 90.0f)) {
+				bugDistance = totalDist;
+				bugDir = dirToTarget;
+				isBugging = true;
+				bugFrustration = 0;
+				bug(target, bodies);
+			}
+		} else {
+			// Bugging means we need to follow tree tangents unless we can move
+			// in the stored bugDir.
+
+			// Can we move straight to target?
+			if (Util.closeEnough(bugDir, dirToTarget, 5.0f) && totalDist < bugDistance && tryMove(dirToTarget, dist)) {
+				// We were able to move to the target
+				bugDistance = totalDist;
+				isBugging = false;
+				lastDir = dirToTarget;
+				bugFrustration = 0;
+
+			} else if (handleEdgeOfMap()) {
+			}
+			// Try to follow body tangents.
+			else if (handleBodies(bodies, dist)) {
+			}
+			// No trees... move to target?
+			else {
+				tryMove(dirToTarget, dist);
+			}
+		}
+
 		if (rc.hasMoved()) {
-			return false;
+			lastDir = location.directionTo(rc.getLocation());
+			rc.setIndicatorLine(location, rc.getLocation(), 0, 0, 100);
+
 		}
-		
-		if (bugging) {
-			if (!tryMove(bugDirection)) {
-				bugFail++;
-				if (bugFail > 3) {
-					bugFail = 0;
-					bugging = false;
+	}
+
+	boolean handleBodies(BodyInfo[] bodies, float dist) {
+		for (BodyInfo body : bodies) {
+			Circle treeCircle = new Circle(body.getLocation(), body.getRadius());
+			MapLocation midPoint = Util.midPoint(rc.getLocation(), body.getLocation());
+			Circle tangetCircle = new Circle(midPoint, rc.getLocation().distanceTo(midPoint));
+
+			MapLocation[] intersections = tangetCircle.intersections(treeCircle);
+
+			Arrays.sort(intersections, (i1, i2) -> {
+				return Math.round(rc.getLocation().directionTo(i1).degreesBetween(lastDir != null ? lastDir : bugDir)
+						- rc.getLocation().directionTo(i2).degreesBetween(lastDir != null ? lastDir : bugDir));
+			});
+
+			for (MapLocation intersection : intersections) {
+				// Direction normal =
+				// body.getLocation().directionTo(intersection);
+				rc.setIndicatorLine(rc.getLocation(), intersection, 100, 100, 100);
+				Direction dir = rc.getLocation().directionTo(intersection);
+				tryHardMoveClosestTo(dir, dist, 90.0f, lastDir != null ? lastDir : bugDir);
+				if (rc.hasMoved()) {
+					return true;
 				}
 			}
-			
-		} else if (!tryMoveTo(target)) {
-			bugging = true;
-		
-			float offset = 0.0f;
-			while (offset < 180.0f) {
-				bugDirection = rc.getLocation().directionTo(target).rotateRightDegrees(offset);
-				if (rc.canMove(bugDirection)) {
-					break;
-				}
-				offset += 10.0f;
-			}
-			tryHardMove(bugDirection);		
 		}
-		
+
+		return false;
+	}
+
+	boolean handleEdgeOfMap() {
+		Direction comparedTo = lastDir == null ? bugDir : lastDir;
+		Direction best = null;
+		for (Direction dir : DIRECTIONS) {
+			try {
+				MapLocation checkLoc = rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius);
+
+				if (!rc.onTheMap(checkLoc)) {
+
+					Direction tangent = rc.getLocation().directionTo(checkLoc).rotateLeftDegrees(90);
+
+					if (!tryHardMoveClosestTo(tangent.opposite(), rc.getType().strideRadius, 180.0f, bugDir)) {
+						
+					}
+
+					if (best == null) {
+						best = tangent;
+					}
+
+					if (tangent.degreesBetween(comparedTo) < best.degreesBetween(comparedTo)) {
+						best = tangent;
+					} else if (tangent.opposite().degreesBetween(comparedTo) < best.degreesBetween(comparedTo)) {
+						best = tangent.opposite();
+					}
+				}
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+		}
+
+		if (best != null) {
+			if (tryHardMove(best)) {
+
+			}
+		}
 		return rc.hasMoved();
+	}
+
+	public void shakeTrees() {
+		shakeTrees(rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL));
+	}
+
+	public void shakeTrees(TreeInfo[] trees) {
+		for (TreeInfo tree : trees) {
+			if (tree.getTeam().equals(rc.getTeam().opponent()) || tree.containedBullets == 0) {
+				continue;
+			}
+
+			if (rc.canShake(tree.ID)) {
+				try {
+					rc.shake(tree.ID);
+					break;
+				} catch (GameActionException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public void kite(RobotInfo target) {
+		if (rc.hasMoved()) {
+			return;
+		}
+		float delta = rc.getLocation().distanceTo(target.location) - rc.getType().sensorRadius / 2;
+
+		if (!Util.equals(delta, 0.0f, 0.01f)) {
+
+			Direction dir = rc.getLocation().directionTo(target.location);
+
+			if (delta > 0) {
+				dir = dir.opposite();
+			}
+
+			tryHardMove(dir, delta);
+		}
 	}
 }

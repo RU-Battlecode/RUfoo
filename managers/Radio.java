@@ -1,12 +1,15 @@
 package RUfoo.managers;
 
+import static RUfoo.managers.Channel.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
-
-import static RUfoo.managers.Channel.*;
 
 public class Radio {
 
@@ -26,6 +29,49 @@ public class Radio {
 			e.printStackTrace();
 		}
 		return freeIndex;
+	}
+	
+	// ENEMY_GARDENER
+	
+	public void foundEnemyGardener(RobotInfo robot) {
+		Channel freeIdChannel = null;
+		Channel freeLocChannel = null;
+		boolean isAlreadyFound = false;
+		for (int i = 0; i < ENEMY_GARDENER_ID_END.ordinal() - ENEMY_GARDENER_ID_START.ordinal(); i++) {
+			Channel enemyIDChannel = Channel.values()[ENEMY_GARDENER_ID_START.ordinal() + i];
+			Channel enemyLocChannel = Channel.values()[ENEMY_GARDENER_ID_END.ordinal() + i];
+			int msg = readChannel(enemyIDChannel);
+			
+			// find  free channel
+			if (msg == 0) {
+				freeIdChannel = enemyIDChannel;
+				freeLocChannel = enemyLocChannel;
+			} else if (msg == robot.ID) {
+				isAlreadyFound = true;
+				System.out.println("updating garden loc");
+				broadcast(enemyLocChannel, mapLocationToInt(robot.location));
+				break;
+			}
+		}
+		
+		
+		if (!isAlreadyFound) {
+			System.out.println("found a new gardener");
+			broadcast(freeIdChannel, robot.ID);
+			broadcast(freeLocChannel, mapLocationToInt(robot.location));
+		}
+		
+	}
+	
+	public List<MapLocation> readEnemyGardenerLocations() {
+		List<MapLocation> locs = new ArrayList<>();
+		
+		for (int i = ENEMY_GARDENER_LOC_START.ordinal(); i <= ENEMY_GARDENER_ID_END.ordinal(); i++) {
+			int msg = readChannel(Channel.values()[i]);
+			locs.add(msg == 0 ? null : intToMapLocation(msg));
+		}
+		
+		return locs;
 	}
 	
 	// ENEMY_ARCHON_CHANNEL

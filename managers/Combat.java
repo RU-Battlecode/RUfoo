@@ -12,7 +12,6 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
-import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class Combat {
@@ -59,9 +58,9 @@ public class Combat {
 
 	public void shoot(RobotInfo target, RobotInfo[] enemies) {	
 		float distToTarget = target.location.distanceTo(rc.getLocation());
-		if (shouldUsePentadShot() && (enemies.length > 1 || distToTarget <= rc.getType().sensorRadius / 3)) {
+		if (shouldUsePentadShot() && (distToTarget <= rc.getType().sensorRadius / 1.5)) {
 			pentadShot(target);
-		} else if (shouldUseTriadShot() && (enemies.length > 1 || distToTarget <= rc.getType().sensorRadius / 2)) {
+		} else if (shouldUseTriadShot()) {
 			triadShot(target);
 		} else {
 			singleShotAttack(target);
@@ -108,13 +107,10 @@ public class Combat {
 				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f;
 	}
 
-	public RobotInfo findTarget(RobotInfo[] enemies) {
-		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
-		TreeInfo[] naturalTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
-		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+	public RobotInfo findTarget(RobotInfo[] enemies, RobotInfo[] friends, TreeInfo[] myTrees, TreeInfo[] neutralTrees) {
 		
 		// Avoid hitting friends and friendly trees because bullets buy happiness.
-		BodyInfo[] bodiesToAvoid = Util.addAll(Util.addAll(myTrees, friends), naturalTrees);
+		BodyInfo[] bodiesToAvoid = Util.addAll(Util.addAll(myTrees, friends), neutralTrees);
 		
 		List<RobotInfo> hittable = new ArrayList<>(Arrays.asList(enemies));
 		for (RobotInfo enemy : enemies) {			
@@ -148,8 +144,11 @@ public class Combat {
 
 		switch (robot.getType()) {
 		case ARCHON:
-			// TODO: only prioritize when it is alone!
-			priority += 90;
+			if (rc.getRoundNum() < 100 || rc.getRoundNum() > 300) {
+				priority += 90;
+			} else {
+				priority += 70;
+			}
 			break;
 		case GARDENER:
 			priority += 100;

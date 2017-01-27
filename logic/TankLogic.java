@@ -38,12 +38,15 @@ public class TankLogic extends RobotLogic {
 	@Override
 	public void logic() {
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
-		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);	
+		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+		TreeInfo[] enemyTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam().opponent());
+		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
 		BulletInfo[] bullets = rc.senseNearbyBullets();
 
 		lookForEnemyArchons(enemies);
 
-		RobotInfo target = combat.findTarget(enemies);
+		RobotInfo target = combat.findTarget(enemies, friends, myTrees, trees);
 
 		if (target != null) {
 			// Attack target aggressively!
@@ -51,12 +54,10 @@ public class TankLogic extends RobotLogic {
 					rc.getType().bodyRadius * 2.0f);
 			nav.moveAggressivelyTo(closeToTarget, bullets, enemies);
 			combat.shoot(target, enemies);
+		} else if (enemyTrees.length > 0) {
+			nav.moveByTrees(enemyTrees);
 		} else {
-			// No target.
-
-			// Dodge any bullets
-			nav.dodge(bullets);
-
+			// No target or enemy trees.
 			checkRadioForArchons();
 
 			if (moveAreas.size() > 0) {
@@ -64,6 +65,7 @@ public class TankLogic extends RobotLogic {
 			}
 		}
 
+		nav.shakeTrees(trees);
 	}
 
 	void lookForEnemyArchons(RobotInfo[] enemies) {
@@ -82,12 +84,19 @@ public class TankLogic extends RobotLogic {
 			}
 		}
 
+		List<MapLocation> possibleGardenerLocs = radio.readEnemyGardenerLocations();
+		for (MapLocation gardenerLoc : possibleGardenerLocs) {
+			if (gardenerLoc != null) {
+				addNewMoveArea(gardenerLoc);
+				rc.setIndicatorDot(gardenerLoc, 200, 100, 10);
+			}
+		}
 	}
 
 	void addNewMoveArea(MapLocation location) {
 		boolean isNew = true;
 		for (MapLocation loc : moveAreas) {
-			if (loc.distanceSquaredTo(location) < 2.0f) {
+			if (loc.distanceSquaredTo(location) < 3.0f) {
 				isNew = false;
 			}
 		}
@@ -112,10 +121,11 @@ public class TankLogic extends RobotLogic {
 			moveFrustration = 0;
 		}
 
-		if (moveAreas.size() == 1 && enemies.length == 0) {
+		if (moveAreas.size() == 1 && nothingAtLocation) {
 			nav.moveByTrees(trees);
 			nav.moveRandom();
 		} else {
+			//nav.bug(loc, Util.addAll(trees, friends));
 			nav.tryHardMove(rc.getLocation().directionTo(loc));
 		}
 

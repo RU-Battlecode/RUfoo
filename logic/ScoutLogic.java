@@ -3,6 +3,7 @@ package RUfoo.logic;
 import battlecode.common.BulletInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -28,6 +29,7 @@ public class ScoutLogic extends RobotLogic {
 	private static final float LOW_HEALTH_PERCENT = 0.15f;
 
 	private Direction exploreDir;
+	private MapLocation home;
 
 	public ScoutLogic(RobotController _rc) {
 		super(_rc);
@@ -36,23 +38,31 @@ public class ScoutLogic extends RobotLogic {
 
 	@Override
 	public void logic() {	
+		if (home == null) {
+			home = rc.getLocation();
+		}
+		
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		BulletInfo[] bullets = rc.senseNearbyBullets();
-		
+		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
+		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
+		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
+
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
 				radio.foundEnemyArchon(enemy);
+			} else if (enemy.type == RobotType.GARDENER) {
+				radio.foundEnemyGardener(enemy);
 			}
 		}
 		
-		RobotInfo target = combat.findTarget(enemies);
+		RobotInfo target = combat.findTarget(enemies, friends, myTrees, trees);
 		if (target != null) {
 			nav.moveSafelyTo(target.location, bullets, enemies);
 			combat.shoot(target, enemies);
 		}
 
 		if (target == null && !rc.hasAttacked()) {
-			TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 			for (TreeInfo tree : trees) {
 				if (tree.containedBullets > 0) {
 					nav.moveAggressivelyTo(tree.location, bullets, enemies);
@@ -61,6 +71,8 @@ public class ScoutLogic extends RobotLogic {
 			}
 			explore();
 		}
+
+		nav.shakeTrees(trees);
 	}
 
 	void explore() {
@@ -90,6 +102,6 @@ public class ScoutLogic extends RobotLogic {
 	}
 
 	boolean isHome() {
-		return rc.getLocation().distanceTo(personality.getHome()) <= rc.getType().bodyRadius * 3;
+		return rc.getLocation().distanceTo(home) <= rc.getType().bodyRadius * 3;
 	}
 }
