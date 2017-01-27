@@ -114,10 +114,11 @@ public class TankLogic extends RobotLogic {
 			moveFrustration = 0;
 		}
 
-		if (moveAreas.size() == 1 && enemies.length == 0) {
+		if (moveAreas.size() == 1 && nothingAtLocation) {
 			nav.moveByTrees(trees);
 			nav.moveRandom();
 		} else {
+			//nav.bug(loc, Util.addAll(trees, friends));
 			nav.tryHardMove(rc.getLocation().directionTo(loc));
 		}
 
