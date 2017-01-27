@@ -54,12 +54,10 @@ public class TankLogic extends RobotLogic {
 					rc.getType().bodyRadius * 2.0f);
 			nav.moveAggressivelyTo(closeToTarget, bullets, enemies);
 			combat.shoot(target, enemies);
+		} else if (enemyTrees.length > 0) {
+			nav.moveByTrees(enemyTrees);
 		} else {
-			// No target.
-
-			// Dodge any bullets
-			nav.dodge(bullets);
-
+			// No target or enemy trees.
 			checkRadioForArchons();
 
 			if (moveAreas.size() > 0) {
