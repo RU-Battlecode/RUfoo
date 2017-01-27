@@ -84,8 +84,8 @@ public class Nav {
 		return false;
 	}
 
-	public void tryHardMove(Direction dir) {
-		tryHardMove(dir, rc.getType().strideRadius);
+	public boolean tryHardMove(Direction dir) {
+		return tryHardMove(dir, rc.getType().strideRadius);
 	}
 
 	public boolean tryHardMove(Direction dir, float dist) {
