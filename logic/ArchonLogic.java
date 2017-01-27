@@ -46,6 +46,7 @@ public class ArchonLogic extends RobotLogic {
 
 	private float buildOffset;
 	private MapLocation enemySpawn;
+	private Boolean isLeader;
 
 	public ArchonLogic(RobotController _rc) {
 		super(_rc);
@@ -53,10 +54,17 @@ public class ArchonLogic extends RobotLogic {
 		enemySpawn = combat.getClosestEnemySpawn();
 		Direction pointAt = rc.getLocation().directionTo(enemySpawn);
 		buildOffset = buildDirs.get(0).degreesBetween(pointAt);
+
+		isLeader = rc.getInitialArchonLocations(rc.getTeam()).length == 1 ? true : null;
 	}
 
 	@Override
 	public void logic() {
+
+		if (isLeader == null) {
+			castArchonVote();
+		}
+
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 
@@ -113,6 +121,46 @@ public class ArchonLogic extends RobotLogic {
 				buildDirs.add(dir);
 			}
 		}
+	}
+
+	public void castArchonVote() {
+		int votes = 0;
+		for (Direction dir : Nav.DIRECTIONS) {
+			try {
+				if (rc.isLocationOccupied(rc.getLocation().add(dir, rc.getType().strideRadius))) {
+					votes++;
+				}
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+		}
+
+		int leaderId = radio.readChannel(Channel.ARCHON_LEADER_ID);
+		// Get the votes for the highest archon
+		int votesForOther = radio.readChannel(Channel.ARCHON_LEADER_POLL);
+
+		if (leaderId == 0) {
+			// There is no archon... so take leadership
+			radio.broadcast(Channel.ARCHON_LEADER_ID, rc.getID());
+			radio.broadcast(Channel.ARCHON_LEADER_POLL, votes);
+			// Can't tell if I am leader yet... tho
+
+		} else if (votes > votesForOther) {
+			// I am better than the first at least (maybe better than both if
+			// there are 3).
+			radio.broadcast(Channel.ARCHON_LEADER_ID, rc.getID());
+			radio.broadcast(Channel.ARCHON_LEADER_POLL, votes);
+		} else {
+			isLeader = false;
+		}
+
+		if (leaderId == rc.getID()) {
+			// Boom
+			isLeader = true;
+		} else if (leaderId != 0 && votes <= votesForOther) {
+			isLeader = false;
+		}
+
 	}
 
 	boolean hireGardener(Direction dir, int gardeners) {
