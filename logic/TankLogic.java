@@ -89,7 +89,7 @@ public class TankLogic extends RobotLogic {
 	void addNewMoveArea(MapLocation location) {
 		boolean isNew = true;
 		for (MapLocation loc : moveAreas) {
-			if (loc.distanceSquaredTo(location) < 2.0f) {
+			if (loc.distanceSquaredTo(location) < 3.0f) {
 				isNew = false;
 			}
 		}
