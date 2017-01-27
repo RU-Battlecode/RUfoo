@@ -61,7 +61,7 @@ public class SoldierLogic extends RobotLogic {
 			MapLocation closeToTarget = target.location.add(target.location.directionTo(rc.getLocation()),
 					rc.getType().bodyRadius * 2.0f);
 			if ((target.getType().canAttack() && target.getType() != RobotType.SCOUT) && friends.length <= 2) {
-				nav.kite(target);
+				nav.kite(target, bullets);
 			} else {
 				nav.moveAggressivelyTo(closeToTarget, bullets, enemies);
 			}

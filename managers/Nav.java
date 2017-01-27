@@ -531,12 +531,12 @@ public class Nav {
 		}
 	}
 
-	public void kite(RobotInfo target) {
+	public void kite(RobotInfo target, BulletInfo[] bullets) {
 		if (rc.hasMoved()) {
 			return;
 		}
 		float delta = rc.getLocation().distanceTo(target.location) - rc.getType().sensorRadius / 2;
-
+		
 		if (!Util.equals(delta, 0.0f, 0.01f)) {
 
 			Direction dir = rc.getLocation().directionTo(target.location);
@@ -545,7 +545,20 @@ public class Nav {
 				dir = dir.opposite();
 			}
 
-			tryHardMove(dir, delta);
+			boolean isSafeFromBullets = bullets.length == 0;
+			for (BulletInfo bullet : bullets) {
+				// This is where the bullet will be!
+				MapLocation futureBulletLoc = bullet.getLocation().add(bullet.getDir(), bullet.getSpeed());
+				// Check if that bullet is in our body radius of our futureLocation.
+				if (futureBulletLoc.isWithinDistance(rc.getLocation().add(delta, delta), rc.getType().bodyRadius)) {
+					isSafeFromBullets = false;
+				}
+			}
+			if (isSafeFromBullets) {
+				tryHardMove(dir, delta);
+			} else {
+				dodge(bullets);
+			}
 		}
 	}
 }
