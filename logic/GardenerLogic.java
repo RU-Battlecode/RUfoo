@@ -167,25 +167,37 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	void buildRobots(TreeInfo[] trees) {
-		if (treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS) {
+		int lumberjacks = census.count(RobotType.LUMBERJACK);
+		int soldiers = census.count(RobotType.SOLDIER);
+		int scouts = census.count(RobotType.SCOUT);
+		
+		if (treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < MAX_LUMBERJACK) {
 			build(RobotType.LUMBERJACK);
 		}
+		
 		if (settled) {
 			if (census.count(RobotType.TANK) < MAX_TANKS) {
 				build(RobotType.TANK);
-			} else if (census.count(RobotType.SOLDIER) < MAX_SOLDIER) {
+			}
+			
+			if (soldiers < 1) {
 				build(RobotType.SOLDIER);
-			} else if (census.count(RobotType.SCOUT) < MAX_SCOUT) {
+			} else if (scouts < 1) {
 				build(RobotType.SCOUT);
-			} else if (census.count(RobotType.LUMBERJACK) < MAX_LUMBERJACK) {
+			}
+			
+			if (soldiers < MAX_SOLDIER) {
+				build(RobotType.SOLDIER);
+			} else if (scouts < MAX_SCOUT) {
+				build(RobotType.SCOUT);
+			} else if (lumberjacks < MAX_LUMBERJACK) {
 				build(RobotType.LUMBERJACK);
 			}
 		} else {
 			// We have not settled and are in the process of building trees.
-			int soldiers = census.count(RobotType.SOLDIER);
 			if (soldiers < 1) {
 				build(RobotType.SOLDIER);
-			} else if (census.count(RobotType.SCOUT) < 1) {
+			} else if (scouts < 1) {
 				build(RobotType.SCOUT);
 			} else if (soldiers < 2) {
 				build(RobotType.SOLDIER);
@@ -200,7 +212,7 @@ public class GardenerLogic extends RobotLogic {
 		
 		float offset = 0.0f;
 		
-		while (offset < 200.0f) {
+		while (offset < 360.0f) {
 			Direction dir = buildDirection.rotateLeftDegrees((personality.getIsLeftHanded() ? 1 : 1) * offset);
 			if (rc.canBuildRobot(type,  dir)) {
 				try {
@@ -211,7 +223,7 @@ public class GardenerLogic extends RobotLogic {
 					e.printStackTrace();
 				}
 			}
-			offset += 15.0f;
+			offset += 10.0f;
 		}
 	}
 
