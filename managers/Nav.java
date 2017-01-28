@@ -387,8 +387,6 @@ public class Nav {
 	Direction bugDir;
 	Direction lastDir;
 	float bugDistance;
-	int bugFrustration;
-	final int bugPatience = 3;
 
 	public void bug(MapLocation target, BodyInfo[] bodies) {
 		MapLocation location = rc.getLocation();
@@ -404,7 +402,7 @@ public class Nav {
 		float dist = Math.min(totalDist, rc.getType().strideRadius);
 		Direction dirToTarget = location.directionTo(target);
 
-		rc.setIndicatorLine(location, rc.getLocation().add(dirToTarget, 5), 100, 0, 1);
+		//rc.setIndicatorLine(location, target, 100, 0, 1);
 		rc.setIndicatorLine(location, location.add(bugDir, 5), 0, 100, 1);
 
 		if (!isBugging) {
@@ -412,7 +410,6 @@ public class Nav {
 				bugDistance = totalDist;
 				bugDir = dirToTarget;
 				isBugging = true;
-				bugFrustration = 0;
 				bug(target, bodies);
 			}
 		} else {
@@ -425,7 +422,6 @@ public class Nav {
 				// We were able to move to the target
 				bugDistance = totalDist;
 				lastDir = dirToTarget;
-				bugFrustration = 0;
 
 			} else if (handleEdgeOfMap()) {
 				
