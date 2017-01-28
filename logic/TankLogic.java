@@ -33,6 +33,9 @@ public class TankLogic extends RobotLogic {
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
 			moveAreas.add(loc);
 		}
+		
+		MapLocation mid = Util.midPoint(rc.getInitialArchonLocations(rc.getTeam())[0], combat.getFurthestEnemySpawn());
+		moveAreas.add(mid);
 	}
 
 	@Override
@@ -62,6 +65,12 @@ public class TankLogic extends RobotLogic {
 
 			if (moveAreas.size() > 0) {
 				move(enemies, trees);
+			} else {
+				moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
+				for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
+					moveAreas.add(loc);
+				}
+				nav.moveRandom();
 			}
 		}
 
