@@ -441,8 +441,6 @@ public class Nav {
 
 		if (rc.hasMoved()) {
 			lastDir = location.directionTo(rc.getLocation());
-			rc.setIndicatorLine(location, rc.getLocation(), 0, 0, 100);
-
 		}
 	}
 
@@ -469,7 +467,7 @@ public class Nav {
 					best = dir;
 				}
 			}
-			
+
 			bodiesCalculated++;
 			if (bodiesCalculated > 5) {
 				break;
