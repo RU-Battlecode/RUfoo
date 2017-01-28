@@ -124,7 +124,7 @@ public class TankLogic extends RobotLogic {
 		boolean nothingAtLocation = rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0;
 		
 		if (nothingAtLocation) {
-			if (!nav.closeToArchonLocation(loc) && moveAreas.size() > 1) {
+			if (!nav.closeToArchonLocation(loc)) {
 				moveAreas.remove(moveIndex % moveAreas.size());
 			}
 			moveFrustration++;
