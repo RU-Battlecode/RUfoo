@@ -48,14 +48,12 @@ public class Radio {
 				freeLocChannel = enemyLocChannel;
 			} else if (msg == robot.ID) {
 				isAlreadyFound = true;
-				System.out.println("updating garden loc");
 				broadcast(enemyLocChannel, mapLocationToInt(robot.location));
 				break;
 			}
 		}
 
 		if (!isAlreadyFound && freeIdChannel != null && freeLocChannel != null) {
-			System.out.println("found a new gardener");
 			broadcast(freeIdChannel, robot.ID);
 			broadcast(freeLocChannel, mapLocationToInt(robot.location));
 		}
@@ -65,7 +63,6 @@ public class Radio {
 		List<MapLocation> locs = new ArrayList<>();
 		
 		for (int i = ENEMY_GARDENER_LOC_START.ordinal(); i <= ENEMY_GARDENER_LOC_END.ordinal(); i++) {
-			System.out.println("reading " + Channel.values()[i]);
 			int msg = readChannel(Channel.values()[i]);
 			if (msg != 0) {
 				locs.add(intToMapLocation(msg));
