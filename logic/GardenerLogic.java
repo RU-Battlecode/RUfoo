@@ -35,7 +35,7 @@ import battlecode.common.TreeInfo;
 public class GardenerLogic extends RobotLogic {
 
 	private static final float TOO_MUCH_TREE_SUM_RADIUS = 10.1f;
-	private static final int MIN_STEPS_BEFORE_SETTLE = 5;
+	private static final int MIN_STEPS_BEFORE_SETTLE = 6;
 	private static final int RESETTLE_ROUND = 600;
 
 	private static final int MAX_SOLDIER = 10;
@@ -116,7 +116,7 @@ public class GardenerLogic extends RobotLogic {
 				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
 				&& steps > MIN_STEPS_BEFORE_SETTLE)
 				|| (steps >= stepsBeforeGiveUp
-						&& (gardener == null || gardener.location.distanceTo(rc.getLocation()) > 1.0f))) {
+						&& (gardener == null || gardener.location.distanceTo(rc.getLocation()) > 3.0f))) {
 			settled = true;
 			baseLocation = rc.getLocation();
 		} else {
@@ -251,7 +251,7 @@ public class GardenerLogic extends RobotLogic {
 					e.printStackTrace();
 				}
 			}
-			offset += 10.0f;
+			offset += 5.0f;
 		}
 	}
 
