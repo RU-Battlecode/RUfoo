@@ -108,7 +108,6 @@ public class SoldierLogic extends RobotLogic {
 		for (MapLocation gardenerLoc : possibleGardenerLocs) {
 			if (gardenerLoc != null) {
 				addNewMoveArea(gardenerLoc);
-				rc.setIndicatorDot(gardenerLoc, 200, 100, 10);
 			}
 		}
 
