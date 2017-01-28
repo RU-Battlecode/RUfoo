@@ -216,7 +216,8 @@ public class Nav {
 			// This is where the bullet will be!
 			MapLocation futureBulletLoc = bullet.getLocation().add(bullet.getDir(), bullet.getSpeed());
 			// Check if that bullet is in our body radius of our futureLocation.
-			if (futureBulletLoc.isWithinDistance(targetPosition, rc.getType().bodyRadius + 0.01f) || Util.closeEnough(bullet.getDir(), dir, 4.0f)) {
+			if (futureBulletLoc.isWithinDistance(targetPosition, rc.getType().bodyRadius + 0.01f)
+					|| Util.closeEnough(bullet.getDir(), dir, 4.0f)) {
 				safeSoFar = false;
 				break;
 			}
@@ -402,8 +403,8 @@ public class Nav {
 		float dist = Math.min(totalDist, rc.getType().strideRadius);
 		Direction dirToTarget = location.directionTo(target);
 
-		//rc.setIndicatorLine(location, target, 100, 0, 1);
-		rc.setIndicatorLine(location, location.add(bugDir, 5), 0, 100, 1);
+		// rc.setIndicatorLine(location, target, 100, 0, 1);
+		// rc.setIndicatorLine(location, location.add(bugDir, 5), 0, 100, 1);
 
 		if (!isBugging) {
 			if (!tryHardMove(dirToTarget, dist, 90.0f)) {
@@ -417,14 +418,16 @@ public class Nav {
 			// in the stored bugDir.
 
 			// Can we move straight to target?
-			//System.out.println("test : " + lastDir.opposite().degreesBetween(dirToTarget));
-			if (Util.closeEnough(bugDir, dirToTarget, 5.0f) && totalDist < bugDistance && tryHardMove(dirToTarget, dist)) {
+			// System.out.println("test : " +
+			// lastDir.opposite().degreesBetween(dirToTarget));
+			if (Util.closeEnough(bugDir, dirToTarget, 5.0f) && totalDist < bugDistance
+					&& tryHardMove(dirToTarget, dist)) {
 				// We were able to move to the target
 				bugDistance = totalDist;
 				lastDir = dirToTarget;
 
 			} else if (handleEdgeOfMap()) {
-				
+
 			}
 			// Try to follow body tangents.
 			else if (handleBodies(bodies, dist)) {
@@ -465,10 +468,6 @@ public class Nav {
 				if (best == null || Math.abs(dir.degreesBetween(lastDir != null ? lastDir : bugDir)) < Math.abs(best.degreesBetween(lastDir != null ? lastDir : bugDir))) {
 					best = dir;
 				}
-//				tryHardMoveClosestTo(dir, dist, 90.0f, lastDir != null ? lastDir : bugDir);
-//				if (rc.hasMoved()) {
-//					return true;
-//				}
 			}
 			
 			bodiesCalculated++;
@@ -481,7 +480,7 @@ public class Nav {
 			rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(best, 5), 200, 200, 200);
 			tryHardMoveClosestTo(best, dist, 90.0f, bugDir);
 		}
-		
+
 		return rc.hasMoved();
 	}
 
@@ -497,7 +496,7 @@ public class Nav {
 					Direction tangent = rc.getLocation().directionTo(checkLoc).rotateLeftDegrees(90);
 
 					if (!tryHardMoveClosestTo(tangent.opposite(), rc.getType().strideRadius, 180.0f, bugDir)) {
-						
+
 					}
 
 					if (best == null) {
@@ -549,7 +548,7 @@ public class Nav {
 			return;
 		}
 		float delta = rc.getLocation().distanceTo(target.location) - rc.getType().sensorRadius / 2;
-		
+
 		if (!Util.equals(delta, 0.0f, 0.01f)) {
 
 			Direction dir = rc.getLocation().directionTo(target.location);
@@ -562,7 +561,8 @@ public class Nav {
 			for (BulletInfo bullet : bullets) {
 				// This is where the bullet will be!
 				MapLocation futureBulletLoc = bullet.getLocation().add(bullet.getDir(), bullet.getSpeed());
-				// Check if that bullet is in our body radius of our futureLocation.
+				// Check if that bullet is in our body radius of our
+				// futureLocation.
 				if (futureBulletLoc.isWithinDistance(rc.getLocation().add(delta, delta), rc.getType().bodyRadius)) {
 					isSafeFromBullets = false;
 				}
@@ -574,7 +574,7 @@ public class Nav {
 			}
 		}
 	}
-	
+
 	public boolean closeToArchonLocation(MapLocation target) {
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
 			if (loc.distanceTo(target) < 0.1f) {
