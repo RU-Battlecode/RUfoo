@@ -56,8 +56,6 @@ public class SoldierLogic extends RobotLogic {
 			}
 		}
 		
-		lookForEnemyArchons(enemies);
-
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
 
 		if (target != null) {
@@ -73,6 +71,8 @@ public class SoldierLogic extends RobotLogic {
 		} else {
 			// No target.
 
+			lookForEnemyArchons(enemies);
+			
 			// Dodge any bullets
 			nav.dodge(bullets);
 
