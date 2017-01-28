@@ -135,7 +135,7 @@ public class SoldierLogic extends RobotLogic {
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 		
 		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
-			if (!closeToArchonLocation(loc) && moveAreas.size() > 1) {
+			if (!nav.closeToArchonLocation(loc) && moveAreas.size() > 1) {
 				moveAreas.remove(moveIndex % moveAreas.size());
 			}
 			moveFrustration++;
@@ -158,14 +158,5 @@ public class SoldierLogic extends RobotLogic {
 		}
 
 		prevousDistanceToTarget = distToTarget;
-	}
-	
-	boolean closeToArchonLocation(MapLocation target) {
-		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
-			if (loc.distanceTo(target) < 0.1f) {
-				return true;
-			}
-		}
-		return false;
 	}
 }

@@ -88,7 +88,6 @@ public class TankLogic extends RobotLogic {
 		for (MapLocation gardenerLoc : possibleGardenerLocs) {
 			if (gardenerLoc != null) {
 				addNewMoveArea(gardenerLoc);
-				rc.setIndicatorDot(gardenerLoc, 200, 100, 10);
 			}
 		}
 	}
@@ -115,8 +114,14 @@ public class TankLogic extends RobotLogic {
 
 		boolean nothingAtLocation = rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0;
 		
-		if (nothingAtLocation
-				|| moveFrustration > personality.getPatience() * PATIENCE_MULTIPLIER) {
+		if (nothingAtLocation) {
+			if (!nav.closeToArchonLocation(loc) && moveAreas.size() > 1) {
+				moveAreas.remove(moveIndex % moveAreas.size());
+			}
+			moveFrustration++;
+		}
+		
+		if (moveFrustration > personality.getPatience()) {
 			moveIndex++;
 			moveFrustration = 0;
 		}
@@ -125,7 +130,6 @@ public class TankLogic extends RobotLogic {
 			nav.moveByTrees(trees);
 			nav.moveRandom();
 		} else {
-			//nav.bug(loc, Util.addAll(trees, friends));
 			nav.tryHardMove(rc.getLocation().directionTo(loc));
 		}
 
