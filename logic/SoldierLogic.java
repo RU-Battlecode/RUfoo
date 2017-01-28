@@ -153,7 +153,7 @@ public class SoldierLogic extends RobotLogic {
 
 		nav.bug(loc, obstacles);
 			
-		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 2)) {
+		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius - 0.1f)) {
 			moveFrustration++;
 		}
 
