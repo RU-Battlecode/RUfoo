@@ -32,7 +32,7 @@ import battlecode.common.TreeInfo;
  * 
  * 2. Read radio help to clear trees
  * 
- * Always: Protect the base. 
+ * Always: Protect the base.
  * 
  */
 public class LumberjackLogic extends RobotLogic {
@@ -41,7 +41,7 @@ public class LumberjackLogic extends RobotLogic {
 
 	private TreeInfo targetTree;
 	private int treeFrustration;
-	
+
 	private int moveIndex;
 	private List<MapLocation> moveAreas;
 	private int moveFrustration;
@@ -53,11 +53,11 @@ public class LumberjackLogic extends RobotLogic {
 		moveIndex = 0;
 		moveFrustration = 0;
 		prevousDistanceToTarget = 0.0f;
-		
+
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
 			moveAreas.add(loc);
 		}
-		
+
 		targetTree = null;
 		treeFrustration = 0;
 	}
@@ -73,7 +73,7 @@ public class LumberjackLogic extends RobotLogic {
 				radio.foundEnemyArchon(enemy);
 			}
 		}
-		
+
 		moveOffSpawn();
 
 		RobotInfo target = combat.findMeleeTarget(enemies);
@@ -102,7 +102,7 @@ public class LumberjackLogic extends RobotLogic {
 				}
 			}
 		}
-		
+
 		nav.shakeTrees();
 	}
 
@@ -185,18 +185,18 @@ public class LumberjackLogic extends RobotLogic {
 				if (tree.team == rc.getTeam()) {
 					continue;
 				}
-				
+
 				if (treeFrustration > personality.getPatience() && targetTree == tree) {
 					treeFrustration = 0;
 					continue;
 				}
-			
+
 				nav.tryMoveTo(tree.location);
 				targetTree = tree;
 				break;
 			}
 		}
-		
+
 		if (targetTree != null && !rc.hasAttacked()) {
 			treeFrustration++;
 		}
@@ -213,12 +213,12 @@ public class LumberjackLogic extends RobotLogic {
 			nav.tryHardMove(rc.getLocation().directionTo(target.location));
 		}
 	}
-	
+
 	void move(RobotInfo[] enemies, TreeInfo[] trees, RobotInfo[] friends) {
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
-		
+
 		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
 			if (!nav.closeToArchonLocation(loc)) {
 				moveAreas.remove(moveIndex % moveAreas.size());
@@ -226,7 +226,7 @@ public class LumberjackLogic extends RobotLogic {
 			}
 			moveFrustration++;
 		}
-		
+
 		if (moveFrustration > personality.getPatience()) {
 			moveIndex++;
 			moveFrustration = 0;
@@ -238,7 +238,7 @@ public class LumberjackLogic extends RobotLogic {
 		}); 
 
 		nav.bug(loc, obstacles);
-			
+
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius - 0.1f)) {
 			moveFrustration++;
 		}
