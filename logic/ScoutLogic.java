@@ -99,6 +99,6 @@ public class ScoutLogic extends RobotLogic {
 	}
 
 	boolean isHome() {
-		return rc.getLocation().distanceTo(home) <= rc.getType().bodyRadius * 3;
+		return rc.getLocation().distanceTo(home) <= rc.getType().sensorRadius / 3;
 	}
 }
