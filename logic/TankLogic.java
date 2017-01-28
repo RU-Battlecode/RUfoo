@@ -126,6 +126,8 @@ public class TankLogic extends RobotLogic {
 		if (nothingAtLocation) {
 			if (!nav.closeToArchonLocation(loc)) {
 				moveAreas.remove(moveIndex % moveAreas.size());
+				MapLocation mid = Util.midPoint(rc.getInitialArchonLocations(rc.getTeam())[0], combat.getFurthestEnemySpawn());
+				addNewMoveArea(mid);
 			}
 			moveFrustration++;
 		}
