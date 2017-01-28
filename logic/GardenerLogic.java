@@ -59,7 +59,7 @@ public class GardenerLogic extends RobotLogic {
 	private boolean hasFinishedPlanting;
 	private int plantFailCount;
 	
-	private static final float SMALL_MAP_SIZE = 65.0f; 
+	private static final float SMALL_MAP_SIZE = 69.0f; 
 	private boolean smallMap = false;
 
 	public GardenerLogic(RobotController _rc) {
