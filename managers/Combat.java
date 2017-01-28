@@ -12,6 +12,7 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import battlecode.common.TreeInfo;
 
 public class Combat {
@@ -144,7 +145,7 @@ public class Combat {
 
 		switch (robot.getType()) {
 		case ARCHON:
-			if (rc.getRoundNum() < 100 || rc.getRoundNum() > 300) {
+			if (rc.getRoundNum() < 100 || rc.getRoundNum() > 300 || rc.getType() == RobotType.LUMBERJACK) {
 				priority += 90;
 			} else {
 				priority += 70;
