@@ -159,4 +159,13 @@ public class SoldierLogic extends RobotLogic {
 
 		prevousDistanceToTarget = distToTarget;
 	}
+	
+	boolean closeToArchonLocation(MapLocation target) {
+		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
+			if (loc.distanceTo(target) < 0.1f) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
