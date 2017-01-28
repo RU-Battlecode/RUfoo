@@ -137,6 +137,7 @@ public class SoldierLogic extends RobotLogic {
 		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
 			if (!nav.closeToArchonLocation(loc) && moveAreas.size() > 1) {
 				moveAreas.remove(moveIndex % moveAreas.size());
+				moveIndex++;
 			}
 			moveFrustration++;
 		}
