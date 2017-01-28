@@ -72,14 +72,13 @@ public class ArchonLogic extends RobotLogic {
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 
-		
 		// Archons can report enemies archons too!
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
 				radio.foundEnemyArchon(enemy);
 			}
 		}
-		
+
 		// Move away from enemy spawn if it is too close.
 		if (rc.getLocation().distanceTo(enemySpawn) < MIN_DISTANCE_TO_ENEMY_SPAWN) {
 			nav.tryHardMove(enemySpawn.directionTo(rc.getLocation()));
@@ -178,14 +177,15 @@ public class ArchonLogic extends RobotLogic {
 
 	boolean hireGardener(Direction dir, int gardeners) {
 
-		if (rc.getRoundNum() < STRICT_GARDENER_LIMIT_UNTIL_ROUND && rc.getTeamBullets() < GameConstants.BULLETS_INITIAL_AMOUNT) {
+		if (rc.getRoundNum() < STRICT_GARDENER_LIMIT_UNTIL_ROUND
+				&& rc.getTeamBullets() < GameConstants.BULLETS_INITIAL_AMOUNT) {
 			if (gardeners >= 1) {
 				return false;
 			}
 		} else if (rc.getRoundNum() < GARDENER_LIMIT_UNTIL_ROUND && gardeners > gardenerLimit) {
 			return false;
 		}
-			
+
 		if (!rc.hasRobotBuildRequirements(RobotType.GARDENER)) {
 			return false;
 		}

@@ -39,8 +39,6 @@ public class SoldierLogic extends RobotLogic {
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
 			moveAreas.add(loc);
 		}
-
-		moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
 	}
 
 	@Override
@@ -52,6 +50,12 @@ public class SoldierLogic extends RobotLogic {
 		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
 		TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		
+		if (rc.getRoundNum() == 600) {
+			for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
+				addNewMoveArea(loc);
+			}
+		}
+		
 		lookForEnemyArchons(enemies);
 
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
@@ -61,7 +65,7 @@ public class SoldierLogic extends RobotLogic {
 			MapLocation closeToTarget = target.location.add(target.location.directionTo(rc.getLocation()),
 					rc.getType().bodyRadius * 2.0f);
 			if ((target.getType().canAttack() && target.getType() != RobotType.SCOUT) && friends.length <= 2) {
-				nav.kite(target);
+				nav.kite(target, bullets);
 			} else {
 				nav.moveAggressivelyTo(closeToTarget, bullets, enemies);
 			}
@@ -76,6 +80,12 @@ public class SoldierLogic extends RobotLogic {
 
 			if (moveAreas.size() > 0) {
 				move(enemies, trees, friends);
+			} else {
+				moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
+				for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
+					moveAreas.add(loc);
+				}
+				nav.moveRandom();
 			}
 		}
 
@@ -86,6 +96,8 @@ public class SoldierLogic extends RobotLogic {
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
 				radio.foundEnemyArchon(enemy);
+			} else if (enemy.type == RobotType.GARDENER) {
+				radio.foundEnemyGardener(enemy);
 			}
 		}
 	}
@@ -102,7 +114,6 @@ public class SoldierLogic extends RobotLogic {
 		for (MapLocation gardenerLoc : possibleGardenerLocs) {
 			if (gardenerLoc != null) {
 				addNewMoveArea(gardenerLoc);
-				rc.setIndicatorDot(gardenerLoc, 200, 100, 10);
 			}
 		}
 
@@ -127,22 +138,29 @@ public class SoldierLogic extends RobotLogic {
 	void move(RobotInfo[] enemies, TreeInfo[] trees, RobotInfo[] friends) {
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
-
-		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0
-				|| moveFrustration > personality.getPatience()) {
+		BodyInfo[] obstacles = Util.addAll(friends, trees);
+		
+		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
+			if (!nav.closeToArchonLocation(loc)) {
+				moveAreas.remove(moveIndex % moveAreas.size());
+				moveIndex++;
+			}
+			moveFrustration++;
+		}
+		
+		if (moveFrustration > personality.getPatience()) {
 			moveIndex++;
 			moveFrustration = 0;
 		}
-				
-		BodyInfo[] obstacles = Util.addAll(friends, trees);
-		
+
 		Arrays.sort( obstacles, (b1, b2) -> {
-			return Math.round(b1.getLocation().distanceSquaredTo(rc.getLocation()) - b2.getLocation().distanceSquaredTo(rc.getLocation()));
+			return Math.round(b1.getLocation().distanceSquaredTo(rc.getLocation())
+							- b2.getLocation().distanceSquaredTo(rc.getLocation()));
 		}); 
 
 		nav.bug(loc, obstacles);
 			
-		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 2)) {
+		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius - 0.1f)) {
 			moveFrustration++;
 		}
 

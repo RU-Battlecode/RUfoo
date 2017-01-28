@@ -154,7 +154,10 @@ public class Combat {
 			priority += 100;
 			break;
 		case LUMBERJACK:
-			priority += 80;
+			priority += 90;
+			if (rc.getLocation().distanceTo(robot.location) <= GameConstants.LUMBERJACK_STRIKE_RADIUS + 1.0f) {
+				priority += 10;
+			}
 			break;
 		case SCOUT:
 			priority += 80;
@@ -183,7 +186,7 @@ public class Combat {
 			// This bot has moved already so may not be able to dodge.
 			priority += 9;
 		}
-
+		
 		return priority;
 	}
 

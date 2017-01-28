@@ -33,6 +33,9 @@ public class TankLogic extends RobotLogic {
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
 			moveAreas.add(loc);
 		}
+		
+		MapLocation mid = Util.midPoint(rc.getInitialArchonLocations(rc.getTeam())[0], combat.getFurthestEnemySpawn());
+		moveAreas.add(mid);
 	}
 
 	@Override
@@ -62,6 +65,12 @@ public class TankLogic extends RobotLogic {
 
 			if (moveAreas.size() > 0) {
 				move(enemies, trees);
+			} else {
+				moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
+				for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
+					moveAreas.add(loc);
+				}
+				nav.moveRandom();
 			}
 		}
 
@@ -88,7 +97,6 @@ public class TankLogic extends RobotLogic {
 		for (MapLocation gardenerLoc : possibleGardenerLocs) {
 			if (gardenerLoc != null) {
 				addNewMoveArea(gardenerLoc);
-				rc.setIndicatorDot(gardenerLoc, 200, 100, 10);
 			}
 		}
 	}
@@ -115,8 +123,16 @@ public class TankLogic extends RobotLogic {
 
 		boolean nothingAtLocation = rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0;
 		
-		if (nothingAtLocation
-				|| moveFrustration > personality.getPatience() * PATIENCE_MULTIPLIER) {
+		if (nothingAtLocation) {
+			if (!nav.closeToArchonLocation(loc)) {
+				moveAreas.remove(moveIndex % moveAreas.size());
+				MapLocation mid = Util.midPoint(rc.getInitialArchonLocations(rc.getTeam())[0], combat.getFurthestEnemySpawn());
+				addNewMoveArea(mid);
+			}
+			moveFrustration++;
+		}
+		
+		if (moveFrustration > personality.getPatience()) {
 			moveIndex++;
 			moveFrustration = 0;
 		}
@@ -125,7 +141,6 @@ public class TankLogic extends RobotLogic {
 			nav.moveByTrees(trees);
 			nav.moveRandom();
 		} else {
-			//nav.bug(loc, Util.addAll(trees, friends));
 			nav.tryHardMove(rc.getLocation().directionTo(loc));
 		}
 
