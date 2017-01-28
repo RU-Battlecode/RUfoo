@@ -26,8 +26,6 @@ import battlecode.common.TreeInfo;
 
 public class ScoutLogic extends RobotLogic {
 
-	private static final float LOW_HEALTH_PERCENT = 0.15f;
-
 	private Direction exploreDir;
 	private MapLocation home;
 
@@ -93,8 +91,7 @@ public class ScoutLogic extends RobotLogic {
 
 	boolean shouldExplore() {
 		try {
-			return rc.onTheMap(rc.getLocation().add(exploreDir, rc.getType().sensorRadius / 2))
-					&& rc.getHealth() / rc.getType().maxHealth > LOW_HEALTH_PERCENT;
+			return rc.onTheMap(rc.getLocation().add(exploreDir, rc.getType().sensorRadius / 2));
 		} catch (GameActionException e) {
 			e.printStackTrace();
 			return true;
