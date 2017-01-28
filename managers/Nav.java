@@ -485,8 +485,8 @@ public class Nav {
 	}
 
 	boolean handleEdgeOfMap() {
-		Direction comparedTo = lastDir == null ? bugDir : lastDir;
-		Direction best = null;
+//		Direction comparedTo = lastDir == null ? bugDir : lastDir;
+//		Direction best = null;
 		for (Direction dir : DIRECTIONS) {
 			try {
 				MapLocation checkLoc = rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius);
@@ -499,26 +499,26 @@ public class Nav {
 
 					}
 
-					if (best == null) {
-						best = tangent;
-					}
-
-					if (tangent.degreesBetween(comparedTo) < best.degreesBetween(comparedTo)) {
-						best = tangent;
-					} else if (tangent.opposite().degreesBetween(comparedTo) < best.degreesBetween(comparedTo)) {
-						best = tangent.opposite();
-					}
+//					if (best == null) {
+//						best = tangent;
+//					}
+//
+//					if (tangent.degreesBetween(comparedTo) < best.degreesBetween(comparedTo)) {
+//						best = tangent;
+//					} else if (tangent.opposite().degreesBetween(comparedTo) < best.degreesBetween(comparedTo)) {
+//						best = tangent.opposite();
+//					}
 				}
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
 		}
 
-		if (best != null) {
-			if (tryHardMove(best)) {
-
-			}
-		}
+//		if (best != null) {
+//			if (tryHardMove(best)) {
+//
+//			}
+//		}
 		return rc.hasMoved();
 	}
 
