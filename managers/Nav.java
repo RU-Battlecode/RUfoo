@@ -463,7 +463,8 @@ public class Nav {
 				// Direction normal =
 				// body.getLocation().directionTo(intersection);
 				Direction dir = rc.getLocation().directionTo(intersection);
-				if (best == null || Math.abs(dir.degreesBetween(lastDir != null ? lastDir : bugDir)) < Math.abs(best.degreesBetween(lastDir != null ? lastDir : bugDir))) {
+				if (best == null || Math.abs(dir.degreesBetween(lastDir != null ? lastDir : bugDir)) < Math
+						.abs(best.degreesBetween(lastDir != null ? lastDir : bugDir))) {
 					best = dir;
 				}
 			}
