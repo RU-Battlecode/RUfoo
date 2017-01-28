@@ -476,7 +476,8 @@ public class Nav {
 		}
 
 		if (best != null) {
-			rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(best, 5), 200, 200, 200);
+			// rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(best,
+			// 5), 200, 200, 200);
 			tryHardMoveClosestTo(best, dist, 90.0f, bugDir);
 		}
 
