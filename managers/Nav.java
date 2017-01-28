@@ -215,7 +215,7 @@ public class Nav {
 			// This is where the bullet will be!
 			MapLocation futureBulletLoc = bullet.getLocation().add(bullet.getDir(), bullet.getSpeed());
 			// Check if that bullet is in our body radius of our futureLocation.
-			if (futureBulletLoc.isWithinDistance(targetPosition, rc.getType().bodyRadius)) {
+			if (futureBulletLoc.isWithinDistance(targetPosition, rc.getType().bodyRadius + 0.01f) || Util.closeEnough(bullet.getDir(), dir, 4.0f)) {
 				safeSoFar = false;
 				break;
 			}
