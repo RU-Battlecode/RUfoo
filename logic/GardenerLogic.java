@@ -3,6 +3,8 @@ package RUfoo.logic;
 import java.util.Arrays;
 
 import RUfoo.managers.Nav;
+import RUfoo.util.Util;
+import battlecode.common.BodyInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -62,8 +64,15 @@ public class GardenerLogic extends RobotLogic {
 
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
+		
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn()).opposite()
 				.rotateLeftDegrees(20.0f);
+		
+		RobotInfo archon = nearest(RobotType.ARCHON, rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam()));
+		if (archon != null) {
+			pointAt = archon.location.directionTo(rc.getLocation()).opposite();
+		}
+		
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
 		buildDirection = TREE_BUILD_DIRS[0].opposite().rotateLeftDegrees(buildOffset);
 		baseLocation = rc.getLocation();
@@ -112,17 +121,22 @@ public class GardenerLogic extends RobotLogic {
 			baseLocation = rc.getLocation();
 		} else {
 
+			BodyInfo[] obstacles = Util.addAll(robots, rc.senseNearbyTrees());
 			if (archon != null) {
-				nav.tryMove(archon.location.directionTo(rc.getLocation()));
+				Direction awayFromArchon = rc.getLocation().directionTo(archon.location).opposite();
+				nav.bug(rc.getLocation().add(awayFromArchon, stepsBeforeGiveUp * rc.getType().strideRadius), obstacles);
+				steps++;
 			}
 
 			if (gardener != null) {
-				nav.tryMove(gardener.location.directionTo(rc.getLocation()));
+				Direction awayFromGardener = rc.getLocation().directionTo(gardener.location).opposite();
+				nav.bug(rc.getLocation().add(awayFromGardener, stepsBeforeGiveUp * rc.getType().strideRadius), obstacles);
+				steps++;
 			}
 
 			nav.tryMove(buildDirection.opposite());
 
-			steps++;
+			
 		}
 	}
 
