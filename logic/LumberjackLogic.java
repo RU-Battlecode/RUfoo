@@ -1,6 +1,8 @@
 package RUfoo.logic;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import RUfoo.managers.Channel;
 import RUfoo.util.Util;
@@ -37,15 +39,24 @@ public class LumberjackLogic extends RobotLogic {
 
 	private static final float HOME_BASE_RADIUS = 5.0f;
 
-	private boolean nothingAtEnemySpawn;
-	private MapLocation enemySpawn;
 	private TreeInfo targetTree;
 	private int treeFrustration;
+	
+	private int moveIndex;
+	private List<MapLocation> moveAreas;
+	private int moveFrustration;
+	private float prevousDistanceToTarget;
 
 	public LumberjackLogic(RobotController _rc) {
 		super(_rc);
-		enemySpawn = combat.getClosestEnemySpawn();
-		nothingAtEnemySpawn = false;
+		moveAreas = new ArrayList<>();
+		moveIndex = 0;
+		moveFrustration = 0;
+		prevousDistanceToTarget = 0.0f;
+		
+		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
+			moveAreas.add(loc);
+		}
 		
 		targetTree = null;
 		treeFrustration = 0;
@@ -80,12 +91,14 @@ public class LumberjackLogic extends RobotLogic {
 			checkRadioTreeChannel(obstacles);
 
 			if (!rc.hasMoved()) {
-				if (rc.getLocation().distanceTo(enemySpawn) <= 1.0f || nothingAtEnemySpawn) {
-					nothingAtEnemySpawn = true;
-					nav.moveByTrees(trees);
-					nav.moveRandom();
+				if (moveAreas.size() > 0) {
+					move(enemies, trees, friends);
 				} else {
-					nav.tryHardMove(rc.getLocation().directionTo(enemySpawn));
+					moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
+					for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
+						moveAreas.add(loc);
+					}
+					nav.moveRandom();
 				}
 			}
 		}
@@ -199,5 +212,37 @@ public class LumberjackLogic extends RobotLogic {
 		} else {
 			nav.tryHardMove(rc.getLocation().directionTo(target.location));
 		}
+	}
+	
+	void move(RobotInfo[] enemies, TreeInfo[] trees, RobotInfo[] friends) {
+		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
+		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
+		BodyInfo[] obstacles = Util.addAll(friends, trees);
+		
+		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
+			if (!nav.closeToArchonLocation(loc)) {
+				moveAreas.remove(moveIndex % moveAreas.size());
+				moveIndex++;
+			}
+			moveFrustration++;
+		}
+		
+		if (moveFrustration > personality.getPatience()) {
+			moveIndex++;
+			moveFrustration = 0;
+		}
+
+		Arrays.sort( obstacles, (b1, b2) -> {
+			return Math.round(b1.getLocation().distanceSquaredTo(rc.getLocation())
+							- b2.getLocation().distanceSquaredTo(rc.getLocation()));
+		}); 
+
+		nav.bug(loc, obstacles);
+			
+		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius - 0.1f)) {
+			moveFrustration++;
+		}
+
+		prevousDistanceToTarget = distToTarget;
 	}
 }
