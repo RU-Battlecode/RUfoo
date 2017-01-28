@@ -50,6 +50,12 @@ public class SoldierLogic extends RobotLogic {
 		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
 		TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		
+		if (rc.getRoundNum() == 600) {
+			for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
+				addNewMoveArea(loc);
+			}
+		}
+		
 		lookForEnemyArchons(enemies);
 
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
@@ -135,7 +141,7 @@ public class SoldierLogic extends RobotLogic {
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 		
 		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
-			if (!nav.closeToArchonLocation(loc) && moveAreas.size() > 1) {
+			if (!nav.closeToArchonLocation(loc)) {
 				moveAreas.remove(moveIndex % moveAreas.size());
 				moveIndex++;
 			}
