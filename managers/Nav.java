@@ -434,7 +434,7 @@ public class Nav {
 			}
 			// No trees... move to target?
 			else {
-				tryHardMoveClosestTo(dirToTarget, dist, 180.0f, bugDir);
+				tryHardMoveClosestTo(dirToTarget, dist, 360.0f, bugDir);
 				isBugging = false;
 			}
 		}
@@ -470,7 +470,7 @@ public class Nav {
 			}
 
 			bodiesCalculated++;
-			if (bodiesCalculated > 5) {
+			if (bodiesCalculated > 3) {
 				break;
 			}
 		}
@@ -577,7 +577,7 @@ public class Nav {
 
 	public boolean closeToArchonLocation(MapLocation target) {
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
-			if (loc.distanceTo(target) < 0.1f) {
+			if (loc.distanceTo(target) < 1.0f) {
 				return true;
 			}
 		}
