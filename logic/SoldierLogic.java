@@ -132,17 +132,23 @@ public class SoldierLogic extends RobotLogic {
 	void move(RobotInfo[] enemies, TreeInfo[] trees, RobotInfo[] friends) {
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
-
-		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0
-				|| moveFrustration > personality.getPatience()) {
+		BodyInfo[] obstacles = Util.addAll(friends, trees);
+		
+		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
+			if (!closeToArchonLocation(loc) && moveAreas.size() > 1) {
+				moveAreas.remove(moveIndex % moveAreas.size());
+			}
+			moveFrustration++;
+		}
+		
+		if (moveFrustration > personality.getPatience()) {
 			moveIndex++;
 			moveFrustration = 0;
 		}
-				
-		BodyInfo[] obstacles = Util.addAll(friends, trees);
-		
+
 		Arrays.sort( obstacles, (b1, b2) -> {
-			return Math.round(b1.getLocation().distanceSquaredTo(rc.getLocation()) - b2.getLocation().distanceSquaredTo(rc.getLocation()));
+			return Math.round(b1.getLocation().distanceSquaredTo(rc.getLocation())
+							- b2.getLocation().distanceSquaredTo(rc.getLocation()));
 		}); 
 
 		nav.bug(loc, obstacles);
