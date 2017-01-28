@@ -39,8 +39,6 @@ public class SoldierLogic extends RobotLogic {
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
 			moveAreas.add(loc);
 		}
-
-		moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
 	}
 
 	@Override
