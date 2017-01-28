@@ -112,6 +112,7 @@ public class Nav {
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
+
 		return rc.hasMoved();
 	}
 
@@ -395,6 +396,7 @@ public class Nav {
 
 		// Already there or cannot move?
 		if (rc.hasMoved() || totalDist <= 0.1f) {
+			isBugging = false;
 			return;
 		}
 
@@ -402,9 +404,8 @@ public class Nav {
 		float dist = Math.min(totalDist, rc.getType().strideRadius);
 		Direction dirToTarget = location.directionTo(target);
 
-		rc.setIndicatorLine(location, target, 100, 0, 1);
+		rc.setIndicatorLine(location, rc.getLocation().add(dirToTarget, 5), 100, 0, 1);
 		rc.setIndicatorLine(location, location.add(bugDir, 5), 0, 100, 1);
-
 
 		if (!isBugging) {
 			if (!tryHardMove(dirToTarget, dist, 90.0f)) {
@@ -419,21 +420,23 @@ public class Nav {
 			// in the stored bugDir.
 
 			// Can we move straight to target?
-			if (Util.closeEnough(bugDir, dirToTarget, 5.0f) && totalDist < bugDistance && tryMove(dirToTarget, dist)) {
+			//System.out.println("test : " + lastDir.opposite().degreesBetween(dirToTarget));
+			if (Util.closeEnough(bugDir, dirToTarget, 5.0f) && totalDist < bugDistance && tryHardMove(dirToTarget, dist)) {
 				// We were able to move to the target
 				bugDistance = totalDist;
-				isBugging = false;
 				lastDir = dirToTarget;
 				bugFrustration = 0;
 
 			} else if (handleEdgeOfMap()) {
+				
 			}
 			// Try to follow body tangents.
 			else if (handleBodies(bodies, dist)) {
 			}
 			// No trees... move to target?
 			else {
-				tryMove(dirToTarget, dist);
+				tryHardMoveClosestTo(dirToTarget, dist, 180.0f, bugDir);
+				isBugging = false;
 			}
 		}
 
@@ -445,6 +448,8 @@ public class Nav {
 	}
 
 	boolean handleBodies(BodyInfo[] bodies, float dist) {
+		int bodiesCalculated = 0;
+		Direction best = null;
 		for (BodyInfo body : bodies) {
 			Circle treeCircle = new Circle(body.getLocation(), body.getRadius());
 			MapLocation midPoint = Util.midPoint(rc.getLocation(), body.getLocation());
@@ -460,16 +465,28 @@ public class Nav {
 			for (MapLocation intersection : intersections) {
 				// Direction normal =
 				// body.getLocation().directionTo(intersection);
-				rc.setIndicatorLine(rc.getLocation(), intersection, 100, 100, 100);
 				Direction dir = rc.getLocation().directionTo(intersection);
-				tryHardMoveClosestTo(dir, dist, 90.0f, lastDir != null ? lastDir : bugDir);
-				if (rc.hasMoved()) {
-					return true;
+				if (best == null || Math.abs(dir.degreesBetween(lastDir != null ? lastDir : bugDir)) < Math.abs(best.degreesBetween(lastDir != null ? lastDir : bugDir))) {
+					best = dir;
 				}
+//				tryHardMoveClosestTo(dir, dist, 90.0f, lastDir != null ? lastDir : bugDir);
+//				if (rc.hasMoved()) {
+//					return true;
+//				}
+			}
+			
+			bodiesCalculated++;
+			if (bodiesCalculated > 5) {
+				break;
 			}
 		}
 
-		return false;
+		if (best != null) {
+			rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(best, 5), 200, 200, 200);
+			tryHardMoveClosestTo(best, dist, 90.0f, bugDir);
+		}
+		
+		return rc.hasMoved();
 	}
 
 	boolean handleEdgeOfMap() {
