@@ -37,12 +37,12 @@ public class Radio {
 		Channel freeIdChannel = null;
 		Channel freeLocChannel = null;
 		boolean isAlreadyFound = false;
-		for (int i = 0; i < ENEMY_GARDENER_ID_END.ordinal() - ENEMY_GARDENER_ID_START.ordinal(); i++) {
+		for (int i = 0; i < ENEMY_GARDENER_ID_END.ordinal() - ENEMY_GARDENER_ID_START.ordinal() + 1; i++) {
 			Channel enemyIDChannel = Channel.values()[ENEMY_GARDENER_ID_START.ordinal() + i];
 			Channel enemyLocChannel = Channel.values()[ENEMY_GARDENER_ID_END.ordinal() + i];
 			int msg = readChannel(enemyIDChannel);
 			
-			// find  free channel
+			// find free channel
 			if (msg == 0) {
 				freeIdChannel = enemyIDChannel;
 				freeLocChannel = enemyLocChannel;
@@ -53,22 +53,23 @@ public class Radio {
 				break;
 			}
 		}
-		
-		
-		if (!isAlreadyFound) {
+
+		if (!isAlreadyFound && freeIdChannel != null && freeLocChannel != null) {
 			System.out.println("found a new gardener");
 			broadcast(freeIdChannel, robot.ID);
 			broadcast(freeLocChannel, mapLocationToInt(robot.location));
 		}
-		
 	}
 	
 	public List<MapLocation> readEnemyGardenerLocations() {
 		List<MapLocation> locs = new ArrayList<>();
 		
-		for (int i = ENEMY_GARDENER_LOC_START.ordinal(); i <= ENEMY_GARDENER_ID_END.ordinal(); i++) {
+		for (int i = ENEMY_GARDENER_LOC_START.ordinal(); i <= ENEMY_GARDENER_LOC_END.ordinal(); i++) {
+			System.out.println("reading " + Channel.values()[i]);
 			int msg = readChannel(Channel.values()[i]);
-			locs.add(msg == 0 ? null : intToMapLocation(msg));
+			if (msg != 0) {
+				locs.add(intToMapLocation(msg));
+			}
 		}
 		
 		return locs;
