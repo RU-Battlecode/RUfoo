@@ -168,10 +168,10 @@ public class Combat {
 			priority += 80;
 			break;
 		case SOLDIER:
-			priority += 90;
+			priority += 100;
 			break;
 		case TANK:
-			priority += 100;
+			priority += 110;
 			break;
 		default:
 			System.out.println("Missing robot type in switch.");
