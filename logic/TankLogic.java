@@ -57,6 +57,7 @@ public class TankLogic extends RobotLogic {
 		} else if (enemyTrees.length > 0) {
 			nav.moveByTrees(enemyTrees);
 		} else {
+			
 			// No target or enemy trees.
 			checkRadioForArchons();
 
@@ -69,9 +70,33 @@ public class TankLogic extends RobotLogic {
 				}
 				nav.moveRandom();
 			}
+			
+			RobotInfo scout = Util.findType(friends, RobotType.SCOUT);
+			
+			if (scout != null && scout.location.distanceTo(rc.getLocation()) < rc.getType().sensorRadius) {
+				fireAtScoutTargets(enemies, friends);
+			}
 		}
 
 		nav.shakeTrees(trees);
+	}
+	
+	void fireAtScoutTargets(RobotInfo[] enemies, RobotInfo[] friends) {
+		
+		List<MapLocation> locs = radio.readScoutTargetsNearMe();
+		for (MapLocation target : locs) {
+			
+			for (RobotInfo friend : friends) {
+				MapLocation closestPoint = Util.distanceToSegment(rc.getLocation(), target, friend.location);
+				if (friend.location.distanceTo(closestPoint) <= friend.type.bodyRadius) {
+					return; // This would hit my friend
+				}
+			}
+			
+			combat.shoot(target, enemies);
+			break;
+		}
+		
 	}
 
 	void lookForEnemyArchons(RobotInfo[] enemies) {
