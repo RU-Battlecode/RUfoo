@@ -31,6 +31,23 @@ public class Radio {
 		return freeIndex;
 	}
 	
+	// SCOUT TARGETS
+	public List<MapLocation> readScoutTargetsNearMe() {
+		List<MapLocation> locs = new ArrayList<>();
+		for (int i = SCOUT_TARGET_LOCATION_START.ordinal(); i <= SCOUT_TARGET_LOCATION_END.ordinal(); i++) {
+			int target = readChannel(Channel.values()[i]);
+			if (target != -1 && target != 0) {
+				MapLocation location = intToMapLocation(target);
+				if (rc.getLocation().distanceTo(location) < rc.getType().sensorRadius) {
+					locs.add(location);
+				}
+			}
+		}
+		
+		return locs;
+	}
+	
+	
 	// DEFENSE 
 	public void requestDefense(MapLocation loc, int numUnits) {
 		for (int i = 0; i < DEFENSE_NEEDED_LOCATION_END.ordinal() - DEFENSE_NEEDED_LOCATION_START.ordinal() + 1; i++) {
@@ -212,11 +229,11 @@ public class Radio {
 		return msg;
 	}
 
-	int mapLocationToInt(MapLocation loc) {
+	public int mapLocationToInt(MapLocation loc) {
 		return Math.round(loc.x) << 16 | Math.round(loc.y);
 	}
 
-	MapLocation intToMapLocation(int data) {
+	public MapLocation intToMapLocation(int data) {
 		return new MapLocation(data >> 16, data & 0xffff);
 	}
 }
