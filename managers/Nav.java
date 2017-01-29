@@ -580,11 +580,6 @@ public class Nav {
 			}
 		}
 
-		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
-			if (loc.distanceTo(target) < 0.1f) {
-				return true;
-			}
-		}
 		return false;
 	}
 }
