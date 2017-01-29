@@ -7,12 +7,18 @@ public enum Channel {
 	
 	// The area that needs protection
 	DEFENSE_NEEDED_LOCATION_START,
-	DNL,
+	DNL1,
+	DNL2,
+	DNL3,
+	DNL4,
 	DEFENSE_NEEDED_LOCATION_END,
 	
 	// The count of attack units the defense location needs
 	DEFENSE_NEEDED_COUNT_START,
-	DNC,
+	DNC1,
+	DNC2,
+	DNC3,
+	DNC4,
 	DEFENSE_NEEDED_COUNT_END,
 	
 	
@@ -67,4 +73,10 @@ public enum Channel {
 	EGL8,
 	EGL9,
 	ENEMY_GARDENER_LOC_END,
+	
+	// Can scouts share there target?
+	SCOUT_TARGET_LOCATION_START,
+	ST1,
+	ST2,
+	SCOUT_TARGET_LOCATION_END,
 }
