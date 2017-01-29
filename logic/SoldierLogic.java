@@ -191,13 +191,15 @@ public class SoldierLogic extends RobotLogic {
 			moveFrustration = 0;
 		}
 
-		Arrays.sort( obstacles, (b1, b2) -> {
-			return Math.round(b1.getLocation().distanceSquaredTo(rc.getLocation())
-							- b2.getLocation().distanceSquaredTo(rc.getLocation()));
-		}); 
-
+		if (obstacles.length > 1) {
+			Arrays.sort(obstacles, (b1, b2) -> {
+				return Math.round(b1.getLocation().distanceSquaredTo(rc.getLocation())
+						- b2.getLocation().distanceSquaredTo(rc.getLocation()));
+			});
+		}
+		
 		nav.bug(loc, obstacles);
-			
+
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius - 0.1f)) {
 			moveFrustration++;
 		}
