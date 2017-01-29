@@ -2,6 +2,7 @@ package RUfoo.logic;
 
 import java.util.Arrays;
 
+import RUfoo.managers.DefenseInfo;
 import RUfoo.managers.Nav;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
@@ -38,7 +39,7 @@ public class GardenerLogic extends RobotLogic {
 	private static final int MIN_STEPS_BEFORE_SETTLE = 6;
 	private static final int RESETTLE_ROUND = 600;
 
-	private static final int MAX_SOLDIER = 12;
+	private static final int MAX_SOLDIER = 8;
 	private static final int MAX_LUMBERJACK = 5;
 	private static final int MAX_TANKS = 4;
 	private static final int MAX_SCOUT = 2;
@@ -58,21 +59,22 @@ public class GardenerLogic extends RobotLogic {
 	private boolean hasPlantedMiddle;
 	private boolean hasFinishedPlanting;
 	private int plantFailCount;
-	
-	private static final float SMALL_MAP_SIZE = 69.0f; 
+	private boolean hasCalledForDefense;
+
+	private static final float SMALL_MAP_SIZE = 69.0f;
 	private boolean smallMap = false;
 
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
-		
+
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn()).opposite()
 				.rotateLeftDegrees(20.0f);
-		
+
 		RobotInfo archon = nearest(RobotType.ARCHON, rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam()));
 		if (archon != null) {
 			pointAt = archon.location.directionTo(rc.getLocation()).opposite();
 		}
-		
+
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
 		buildDirection = TREE_BUILD_DIRS[0].opposite().rotateLeftDegrees(buildOffset);
 		baseLocation = rc.getLocation();
@@ -80,23 +82,27 @@ public class GardenerLogic extends RobotLogic {
 		plantFailCount = 0;
 
 		stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.6f);
-		
-		smallMap = rc.getInitialArchonLocations(rc.getTeam())[0].distanceTo(combat.getFurthestEnemySpawn()) <= SMALL_MAP_SIZE;
+
+		smallMap = rc.getInitialArchonLocations(rc.getTeam())[0]
+				.distanceTo(combat.getFurthestEnemySpawn()) <= SMALL_MAP_SIZE;
 	}
 
 	@Override
 	public void logic() {
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
 		buildRobots(trees);
 
 		if (settled) {
 			plantTrees();
-			waterTrees(myTrees);
 			orderClearTrees(trees);
 		} else {
-			findBaseLocation();
+			findBaseLocation(enemies);
 		}
+
+		waterTrees(myTrees);
 
 		if (rc.getRoundNum() == RESETTLE_ROUND && myTrees.length < 10) {
 			plantFailCount = 0;
@@ -105,18 +111,36 @@ public class GardenerLogic extends RobotLogic {
 		}
 
 		nav.shakeTrees(trees);
+		
+		// Archons can report enemies archons too!
+		int defenseNeed = 0;
+		for (RobotInfo enemy : enemies) {
+			if (enemy.type == RobotType.ARCHON) {
+				radio.foundEnemyArchon(enemy);
+			}
+
+			defenseNeed += DefenseInfo.unitValue(enemy.type);
+		}
+
+		for (RobotInfo friend : friends) {
+			defenseNeed -= DefenseInfo.unitValue(friend.type);
+		}
+
+		if (defenseNeed > 0) {
+			if (!hasCalledForDefense) {
+				radio.requestDefense(rc.getLocation(), defenseNeed);
+				hasCalledForDefense = true;
+			}
+		}
+
 	}
 
-	void findBaseLocation() {
+	void findBaseLocation(RobotInfo[] enemies) {
 		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		RobotInfo archon = nearest(RobotType.ARCHON, robots);
 		RobotInfo gardener = nearest(RobotType.GARDENER, robots);
 
-		if (((archon == null || archon.location.distanceTo(rc.getLocation()) >= 3.0f) && rc.hasTreeBuildRequirements()
-				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
-				&& steps > MIN_STEPS_BEFORE_SETTLE)
-				|| (steps >= stepsBeforeGiveUp
-						&& (gardener == null || gardener.location.distanceTo(rc.getLocation()) > 3.0f))) {
+		if (shouldSettle(archon, gardener, enemies)) {
 			settled = true;
 			baseLocation = rc.getLocation();
 		} else {
@@ -130,27 +154,33 @@ public class GardenerLogic extends RobotLogic {
 
 			if (gardener != null) {
 				Direction awayFromGardener = rc.getLocation().directionTo(gardener.location).opposite();
-				nav.bug(rc.getLocation().add(awayFromGardener, stepsBeforeGiveUp * rc.getType().strideRadius), obstacles);
+				nav.bug(rc.getLocation().add(awayFromGardener, stepsBeforeGiveUp * rc.getType().strideRadius),
+						obstacles);
 				steps++;
 			}
 
 			nav.tryMove(buildDirection.opposite());
 
-			
 		}
+	}
+
+	boolean shouldSettle(RobotInfo archon, RobotInfo gardener, RobotInfo[] enemies) {
+		return ((gardener == null || gardener.location.distanceTo(rc.getLocation()) >= 7.0f)
+				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
+				&& steps > MIN_STEPS_BEFORE_SETTLE);
 	}
 
 	void plantTrees() {
 		if (!rc.hasTreeBuildRequirements()) {
 			return;
 		}
-		
+
 		// We have to plant the front two first to maximize plants
 		if (!hasPlantedFront) {
 			hasPlantedFront = moveAndPlant(buildDirection.opposite());
 		} else if (!hasPlantedMiddle) {
 			nav.tryMoveTo(baseLocation);
-			if (rc.getLocation().distanceTo(baseLocation) < 0.1f) {
+			if (rc.getLocation().distanceTo(baseLocation) < 0.05f) {
 				hasPlantedMiddle = true;
 				plantFailCount = 0;
 			}
@@ -158,19 +188,21 @@ public class GardenerLogic extends RobotLogic {
 			hasFinishedPlanting = moveAndPlant(buildDirection);
 		} else {
 			nav.tryMoveTo(baseLocation);
-			try {
-				for (Direction dir : TREE_BUILD_DIRS) {
-					dir = dir.rotateLeftDegrees(buildOffset);
-					if (rc.canPlantTree(dir)) {
-						rc.plantTree(dir);
-						break;
-					} else if (rc.canPlantTree(dir.rotateRightDegrees(2))) {
-						rc.plantTree(dir);
-						break;
+			if (rc.getLocation().distanceTo(baseLocation) < 0.1f) {
+				try {
+					for (Direction dir : TREE_BUILD_DIRS) {
+						dir = dir.rotateLeftDegrees(buildOffset);
+						if (rc.canPlantTree(dir)) {
+							rc.plantTree(dir);
+							break;
+						} else if (rc.canPlantTree(dir.rotateRightDegrees(2))) {
+							rc.plantTree(dir);
+							break;
+						}
 					}
+				} catch (GameActionException e) {
+					e.printStackTrace();
 				}
-			} catch (GameActionException e) {
-				e.printStackTrace();
 			}
 		}
 	}

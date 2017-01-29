@@ -1,5 +1,7 @@
 package RUfoo.logic;
 
+import RUfoo.managers.Channel;
+import RUfoo.util.Util;
 import battlecode.common.BulletInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -28,14 +30,24 @@ public class ScoutLogic extends RobotLogic {
 
 	private Direction exploreDir;
 	private MapLocation home;
-
+	private Channel shareTargetChannel;
+	private int failChannelCount;
+	
 	public ScoutLogic(RobotController _rc) {
 		super(_rc);
-		exploreDir = null;		
+		exploreDir = null;
+		shareTargetChannel = null;
+		failChannelCount = 0;
 	}
 
 	@Override
 	public void logic() {	
+		
+		if (shareTargetChannel == null && failChannelCount < 4) {
+			findChannel();
+			failChannelCount++;
+		}
+		
 		if (home == null) {
 			home = rc.getLocation();
 		}
@@ -55,11 +67,19 @@ public class ScoutLogic extends RobotLogic {
 		}
 		
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, trees);
+	
 		if (target != null) {
+			
+			broadcastTargetToFriends(target.location, friends);
+			
 			nav.moveSafelyTo(target.location, bullets, enemies);
 			combat.shoot(target, enemies);
+		} else {
+			if (shareTargetChannel != null) {
+				radio.broadcast(shareTargetChannel, -1);
+			}
 		}
-
+		
 		if (target == null && !rc.hasAttacked()) {
 			for (TreeInfo tree : trees) {
 				if (tree.containedBullets > 0) {
@@ -67,10 +87,25 @@ public class ScoutLogic extends RobotLogic {
 					break;
 				}
 			}
-			explore();
+			
+			RobotInfo friendlyTank = Util.findType(friends, RobotType.TANK);
+			if (friendlyTank == null) {
+				explore();
+			} else {
+				nav.bug(friendlyTank.location, friends);
+				//nav.tryHardMove(rc.getLocation().directionTo(friendlyTank.location));
+			}
 		}
 
 		nav.shakeTrees(trees);
+	}
+
+	private void broadcastTargetToFriends(MapLocation target, RobotInfo[] friends) {
+		if (shareTargetChannel != null) {
+			if (friends.length > 0) {
+				radio.broadcast(shareTargetChannel, radio.mapLocationToInt(target));
+			}
+		}
 	}
 
 	void explore() {
@@ -104,5 +139,14 @@ public class ScoutLogic extends RobotLogic {
 
 	boolean isHome() {
 		return rc.getLocation().distanceTo(home) <= rc.getType().sensorRadius / 3;
+	}
+	
+	void findChannel() {
+		for (int i = Channel.SCOUT_TARGET_LOCATION_START.ordinal(); i <= Channel.SCOUT_TARGET_LOCATION_END.ordinal(); i++) {
+			if (radio.readChannel(Channel.values()[i]) == 0) {
+				shareTargetChannel = Channel.values()[i];
+				break;
+			}
+		}
 	}
 }

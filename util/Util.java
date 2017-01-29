@@ -59,6 +59,15 @@ public final class Util {
 		}
 		return false;
 	}
+	
+	public static RobotInfo findType(RobotInfo[] robots, RobotType type) {
+		for (RobotInfo r : robots) {
+			if (r.getType() == type) {
+				return r;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Random number in range [min, max]

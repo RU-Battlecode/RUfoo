@@ -156,8 +156,12 @@ public class ArchonLogic extends RobotLogic {
 			break;
 		default:
 			Direction dir = nav.randomDirection();
-			if (round > 100 && gardenersAlive < gardenerLimit && rc.canBuildRobot(RobotType.GARDENER, dir)) {
+			if (round > 120 && gardenersAlive < gardenerLimit && rc.canBuildRobot(RobotType.GARDENER, dir)) {
 				buildDirs.add(dir);
+			}
+			
+			if (round == 1000) {
+				gardenerLimit += 5;
 			}
 		}
 	}

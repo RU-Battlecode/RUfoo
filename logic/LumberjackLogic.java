@@ -37,7 +37,7 @@ import battlecode.common.TreeInfo;
  */
 public class LumberjackLogic extends RobotLogic {
 
-	private static final float HOME_BASE_RADIUS = 5.0f;
+	private static final float HOME_BASE_RADIUS = 10.0f;
 
 	private TreeInfo targetTree;
 	private int treeFrustration;
@@ -71,10 +71,10 @@ public class LumberjackLogic extends RobotLogic {
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
 				radio.foundEnemyArchon(enemy);
+			} else if (enemy.type == RobotType.GARDENER) {
+				radio.foundEnemyGardener(enemy);
 			}
 		}
-
-		moveOffSpawn();
 
 		RobotInfo target = combat.findMeleeTarget(enemies);
 
@@ -106,20 +106,12 @@ public class LumberjackLogic extends RobotLogic {
 		nav.shakeTrees();
 	}
 
-	void moveOffSpawn() {
-		if (personality.getMother() != null) {
-			if (rc.getLocation().distanceTo(personality.getMother().location) <= rc.getType().sensorRadius / 2) {
-				nav.tryHardMove(personality.getMother().location.directionTo(rc.getLocation()));
-			}
-		}
-	}
-
 	void clearTreesAroundBase(RobotInfo[] robots, TreeInfo[] trees) {
 		final MapLocation nearest = nearestArchonOrGardener(robots);
 
 		// Closest trees first or closest tree to archon/gardener if they
 		// are near!
-		if (nearest != null) {
+		if (nearest != null && trees.length > 1) {
 			Arrays.sort(trees, (t1, t2) -> {
 				return Math.round(t1.location.distanceSquaredTo(nearest) - t2.location.distanceSquaredTo(nearest));
 			});

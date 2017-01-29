@@ -42,8 +42,8 @@ public class DefenseInfo implements Comparable<DefenseInfo> {
 		switch (robot) {
 		case ARCHON:
 		case GARDENER:
-		case SCOUT:
 			break;
+		case SCOUT:
 		case LUMBERJACK:
 			defValue = 1;
 			break;
