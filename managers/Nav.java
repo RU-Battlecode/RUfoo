@@ -93,10 +93,10 @@ public class Nav {
 	}
 
 	public boolean tryHardMove(Direction dir, float dist, float maxDegreesOff) {
-		if (rc.hasMoved()) {
+		if (rc.hasMoved() || dist <= 0.1f) {
 			return false;
 		}
-
+		
 		try {
 			float offset = 0.0f;
 			while (offset < maxDegreesOff) {
@@ -107,38 +107,49 @@ public class Nav {
 					rc.move(dir.rotateRightDegrees(-offset), dist);
 					break;
 				}
-				offset += 15.0f;
-			}
-		} catch (GameActionException e) {
-			e.printStackTrace();
-		}
-
-		return rc.hasMoved();
-	}
-
-	public boolean tryHardMoveClosestTo(Direction dir, float dist, float maxDegreesOff, Direction targetDir) {
-		if (rc.hasMoved()) {
-			return false;
-		}
-
-		boolean isLeft = dir.rotateRightDegrees(10).degreesBetween(targetDir) < dir.rotateLeftDegrees(10)
-				.degreesBetween(targetDir);
-		try {
-			float offset = 0.0f;
-			while (offset < maxDegreesOff) {
-
-				if (rc.canMove(dir.rotateRightDegrees((isLeft ? -1 : 1) * offset), dist)) {
-					rc.move(dir.rotateRightDegrees((isLeft ? -1 : 1) * offset), dist);
-					break;
-				}
-
 				offset += 10.0f;
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
 
-		return rc.hasMoved();
+		if (rc.hasMoved()) {
+			return true;
+		} else {
+			return tryHardMove(dir, dist / 2, maxDegreesOff);
+		}
+	}
+
+	public boolean tryHardMoveClosestTo(Direction dir, float dist, float maxDegreesOff, Direction targetDir) {
+		if (rc.hasMoved() || dist <= 0.1f) {
+			return false;
+		}
+
+		boolean isLeft = dir.rotateRightDegrees(1).degreesBetween(targetDir) < dir.rotateLeftDegrees(1)
+				.degreesBetween(targetDir);
+
+		int sign = isLeft ? -1 : 1;
+		try {
+			float offset = 0.0f;
+			while (offset < maxDegreesOff) {
+
+				if (rc.canMove(dir.rotateRightDegrees(sign * offset), dist)) {
+					rc.move(dir.rotateRightDegrees(sign * offset), dist);
+					//rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(dir, 20), 10, 200, 200);
+					break;
+				}
+
+				offset += 5.0f;
+			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
+
+		if (rc.hasMoved()) {
+			return true;
+		} else {
+			return tryHardMoveClosestTo(dir, dist / 2, maxDegreesOff, targetDir);
+		}
 	}
 
 	public void moveByTrees(TreeInfo[] trees) {
@@ -384,7 +395,7 @@ public class Nav {
 		return new Direction(Util.random(0.0f, 1.0f), Util.random(0.0f, 1.0f));
 	}
 
-	boolean isBugging;
+	public boolean isBugging;
 	Direction bugDir;
 	Direction lastDir;
 	float bugDistance;
@@ -404,7 +415,7 @@ public class Nav {
 		Direction dirToTarget = location.directionTo(target);
 
 		// rc.setIndicatorLine(location, target, 100, 0, 1);
-		// rc.setIndicatorLine(location, location.add(bugDir, 5), 0, 100, 1);
+		//rc.setIndicatorLine(location, location.add(bugDir, 5), 0, 100, 1);
 
 		if (!isBugging) {
 			if (!tryHardMove(dirToTarget, dist, 90.0f)) {
@@ -434,7 +445,7 @@ public class Nav {
 			}
 			// No trees... move to target?
 			else {
-				tryHardMoveClosestTo(dirToTarget, dist, 360.0f, bugDir);
+				tryHardMoveClosestTo(dirToTarget, dist, 180.0f, bugDir);
 				isBugging = false;
 			}
 		}
@@ -447,6 +458,7 @@ public class Nav {
 	boolean handleBodies(BodyInfo[] bodies, float dist) {
 		int bodiesCalculated = 0;
 		Direction best = null;
+		Direction direction = lastDir != null ? lastDir : bugDir;
 		for (BodyInfo body : bodies) {
 			Circle treeCircle = new Circle(body.getLocation(), body.getRadius());
 			MapLocation midPoint = Util.midPoint(rc.getLocation(), body.getLocation());
@@ -455,40 +467,41 @@ public class Nav {
 			MapLocation[] intersections = tangetCircle.intersections(treeCircle);
 
 			Arrays.sort(intersections, (i1, i2) -> {
-				return Math.round(rc.getLocation().directionTo(i1).degreesBetween(lastDir != null ? lastDir : bugDir)
-						- rc.getLocation().directionTo(i2).degreesBetween(lastDir != null ? lastDir : bugDir));
+				return Math.round(rc.getLocation().directionTo(i1).degreesBetween(direction)
+						- rc.getLocation().directionTo(i2).degreesBetween(direction));
 			});
 
 			for (MapLocation intersection : intersections) {
 				// Direction normal =
 				// body.getLocation().directionTo(intersection);
 				Direction dir = rc.getLocation().directionTo(intersection);
-				if (best == null || Math.abs(dir.degreesBetween(lastDir != null ? lastDir : bugDir)) < Math
-						.abs(best.degreesBetween(lastDir != null ? lastDir : bugDir))) {
+				if (best == null || Math.abs(dir.degreesBetween(direction)) < Math
+						.abs(best.degreesBetween(direction))) {
 					best = dir;
 				}
 			}
 
 			bodiesCalculated++;
-			if (bodiesCalculated > 3) {
+			if (bodiesCalculated > 5) {
 				break;
 			}
 		}
 
 		if (best != null) {
-			// rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(best,
-			// 5), 200, 200, 200);
-			tryHardMoveClosestTo(best, dist, 90.0f, bugDir);
+			//rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(best, 5), 200, 200, 200);
+			tryHardMoveClosestTo(best, dist, 180.0f, direction);
 		}
 
 		return rc.hasMoved();
 	}
 
 	boolean handleEdgeOfMap() {
-//		Direction comparedTo = lastDir == null ? bugDir : lastDir;
-//		Direction best = null;
-		for (Direction dir : DIRECTIONS) {
-			try {
+		if (rc.canSenseAllOfCircle(rc.getLocation(), rc.getType().sensorRadius)) {
+			return false;
+		}
+		
+		try {
+			for (Direction dir : DIRECTIONS) {
 				MapLocation checkLoc = rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius);
 
 				if (!rc.onTheMap(checkLoc)) {
@@ -498,27 +511,12 @@ public class Nav {
 					if (!tryHardMoveClosestTo(tangent.opposite(), rc.getType().strideRadius, 180.0f, bugDir)) {
 
 					}
-
-//					if (best == null) {
-//						best = tangent;
-//					}
-//
-//					if (tangent.degreesBetween(comparedTo) < best.degreesBetween(comparedTo)) {
-//						best = tangent;
-//					} else if (tangent.opposite().degreesBetween(comparedTo) < best.degreesBetween(comparedTo)) {
-//						best = tangent.opposite();
-//					}
 				}
-			} catch (GameActionException e) {
-				e.printStackTrace();
 			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
 		}
 
-//		if (best != null) {
-//			if (tryHardMove(best)) {
-//
-//			}
-//		}
 		return rc.hasMoved();
 	}
 
@@ -581,7 +579,7 @@ public class Nav {
 				return true;
 			}
 		}
-		
+
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
 			if (loc.distanceTo(target) < 0.1f) {
 				return true;

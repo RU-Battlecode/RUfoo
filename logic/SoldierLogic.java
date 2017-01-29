@@ -2,8 +2,10 @@ package RUfoo.logic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import RUfoo.managers.DefenseInfo;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.BulletInfo;
@@ -56,8 +58,6 @@ public class SoldierLogic extends RobotLogic {
 			}
 		}
 		
-		lookForEnemyArchons(enemies);
-
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
 
 		if (target != null) {
@@ -73,6 +73,9 @@ public class SoldierLogic extends RobotLogic {
 		} else {
 			// No target.
 
+			lookForEnemyArchons(enemies);
+			respondToDefenseCalls();
+			
 			// Dodge any bullets
 			nav.dodge(bullets);
 
@@ -90,6 +93,21 @@ public class SoldierLogic extends RobotLogic {
 		}
 
 		nav.shakeTrees(trees);
+	}
+
+	void respondToDefenseCalls() {
+		List<DefenseInfo> defenseNeeds = radio.readLocationsThatNeedDefense();
+		
+		if (defenseNeeds.size() > 0) {
+			System.out.println("trying to respond to defense needs");
+			DefenseInfo mostNeedy = Collections.max(defenseNeeds);
+			// Try to add the location to our moveAreas with interrupt
+			if (addNewMoveArea(mostNeedy.getLocation(), true)) {
+				// Let everyone know we got it!
+				System.out.println("heading there maybe?");
+				radio.respondToDefenseCall(mostNeedy, 1);
+			}
+		}
 	}
 
 	void lookForEnemyArchons(RobotInfo[] enemies) {
@@ -119,7 +137,11 @@ public class SoldierLogic extends RobotLogic {
 
 	}
 
-	void addNewMoveArea(MapLocation location) {
+	boolean addNewMoveArea(MapLocation location) {
+		return addNewMoveArea(location, false);
+	}
+	
+	boolean addNewMoveArea(MapLocation location, boolean interrupt) {
 		boolean isNew = true;
 		for (MapLocation loc : moveAreas) {
 			if (loc.distanceSquaredTo(location) < 2.0f) {
@@ -127,12 +149,20 @@ public class SoldierLogic extends RobotLogic {
 			}
 		}
 
-		if (isNew) {
+		if (isNew || interrupt) {
 			moveAreas.add(location);
 			if (moveAreas.size() > MAX_AREAS) {
 				moveAreas.remove(0);
 			}
 		}
+		
+		if (interrupt) {
+			nav.isBugging = false;
+			moveFrustration = 0;
+			moveIndex = moveAreas.size() - 1;
+		}
+		
+		return isNew || interrupt;
 	}
 	
 	void move(RobotInfo[] enemies, TreeInfo[] trees, RobotInfo[] friends) {
@@ -143,12 +173,14 @@ public class SoldierLogic extends RobotLogic {
 		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
 			if (!nav.closeToArchonLocation(loc)) {
 				moveAreas.remove(moveIndex % moveAreas.size());
+				nav.isBugging = false;
 				moveIndex++;
 			}
 			moveFrustration++;
 		}
 		
 		if (moveFrustration > personality.getPatience()) {
+			nav.isBugging = false;
 			moveIndex++;
 			moveFrustration = 0;
 		}

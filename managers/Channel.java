@@ -2,10 +2,21 @@ package RUfoo.managers;
 
 public enum Channel {
 	
+	// Holds tree locations that are annoying
 	TREE_CHANNEL,
 	
-	DEFENSE_CHANNEL,
+	// The area that needs protection
+	DEFENSE_NEEDED_LOCATION_START,
+	DNL,
+	DEFENSE_NEEDED_LOCATION_END,
 	
+	// The count of attack units the defense location needs
+	DEFENSE_NEEDED_COUNT_START,
+	DNC,
+	DEFENSE_NEEDED_COUNT_END,
+	
+	
+	// Where is the enemy Archon and what is its id?
 	ENEMY_ARCHON_CHANNEL1,
 	ENEMY_ARCHON_ID_CHANNEL1,
 	ENEMY_ARCHON_CHANNEL2,
@@ -13,6 +24,7 @@ public enum Channel {
 	ENEMY_ARCHON_CHANNEL3,
 	ENEMY_ARCHON_ID_CHANNEL3,
 	
+	// Counting team robot types that are alive.
 	CENSUS_ARCHON,
 	CENSUS_FIRST_ARCHON,
 	CENSUS_GARDENER,
@@ -26,9 +38,12 @@ public enum Channel {
 	CENSUS_TANK,
 	CENSUS_FIRST_TANK,
 	
+	
+	// Determining the archon leader.
 	ARCHON_LEADER_ID,
 	ARCHON_LEADER_POLL,
 	
+	// Location and IDs of all the spotted gardeners
 	ENEMY_GARDENER_ID_START,
 	EG1,
 	EG2,

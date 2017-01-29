@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import RUfoo.managers.Channel;
+import RUfoo.managers.DefenseInfo;
 import RUfoo.managers.Nav;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -48,6 +49,7 @@ public class ArchonLogic extends RobotLogic {
 	private float buildOffset;
 	private MapLocation enemySpawn;
 	private Boolean isLeader;
+	private boolean hasCalledForDefense;
 
 	public ArchonLogic(RobotController _rc) {
 		super(_rc);
@@ -59,6 +61,7 @@ public class ArchonLogic extends RobotLogic {
 		isLeader = rc.getInitialArchonLocations(rc.getTeam()).length == 1 ? true : null;
 		
 		gardenerLimit = 2 * rc.getInitialArchonLocations(rc.getTeam()).length + 6;
+		hasCalledForDefense = false;
 	}
 
 	@Override
@@ -73,12 +76,26 @@ public class ArchonLogic extends RobotLogic {
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 
 		// Archons can report enemies archons too!
+		int defenseNeed = 0;
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
 				radio.foundEnemyArchon(enemy);
 			}
+			
+			defenseNeed += DefenseInfo.unitValue(enemy.type);
 		}
-
+		
+		for (RobotInfo friend : friends) {
+			defenseNeed -= DefenseInfo.unitValue(friend.type);
+		}
+		
+		if (defenseNeed > 0) {
+			if (!hasCalledForDefense) {
+				radio.requestDefense(rc.getLocation(), defenseNeed);
+				hasCalledForDefense = true;
+			}
+		}
+		
 		// Move away from enemy spawn if it is too close.
 		if (rc.getLocation().distanceTo(enemySpawn) < MIN_DISTANCE_TO_ENEMY_SPAWN) {
 			nav.tryHardMove(enemySpawn.directionTo(rc.getLocation()));
@@ -94,6 +111,16 @@ public class ArchonLogic extends RobotLogic {
 
 		orderClearTrees(trees);
 		nav.shakeTrees(trees);
+		
+		//readBroadCastingRobots();
+	}
+
+	void readBroadCastingRobots() {
+		MapLocation[] locations = rc.senseBroadcastingRobotLocations();
+		for (MapLocation loc : locations) {
+			rc.setIndicatorLine(rc.getLocation(), loc, 100, 0, 0);
+		}
+		
 	}
 
 	void buildBase(int gardenersAlive) {

@@ -84,6 +84,6 @@ public abstract class RobotLogic {
 	}
 
 	boolean opponentAboutToWin() {
-		return rc.getOpponentVictoryPoints() > 900 && rc.getTeamVictoryPoints() > 800; 
+		return rc.getOpponentVictoryPoints() > 900 && rc.getTeamVictoryPoints() > 800;
 	}
 }

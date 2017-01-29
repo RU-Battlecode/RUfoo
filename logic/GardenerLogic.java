@@ -34,11 +34,11 @@ import battlecode.common.TreeInfo;
  */
 public class GardenerLogic extends RobotLogic {
 
-	private static final float TOO_MUCH_TREE_SUM_RADIUS = 10.1f;
-	private static final int MIN_STEPS_BEFORE_SETTLE = 5;
+	private static final float TOO_MUCH_TREE_SUM_RADIUS = 10.0f;
+	private static final int MIN_STEPS_BEFORE_SETTLE = 6;
 	private static final int RESETTLE_ROUND = 600;
 
-	private static final int MAX_SOLDIER = 10;
+	private static final int MAX_SOLDIER = 12;
 	private static final int MAX_LUMBERJACK = 5;
 	private static final int MAX_TANKS = 4;
 	private static final int MAX_SCOUT = 2;
@@ -59,7 +59,7 @@ public class GardenerLogic extends RobotLogic {
 	private boolean hasFinishedPlanting;
 	private int plantFailCount;
 	
-	private static final float SMALL_MAP_SIZE = 65.0f; 
+	private static final float SMALL_MAP_SIZE = 69.0f; 
 	private boolean smallMap = false;
 
 	public GardenerLogic(RobotController _rc) {
@@ -116,7 +116,7 @@ public class GardenerLogic extends RobotLogic {
 				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
 				&& steps > MIN_STEPS_BEFORE_SETTLE)
 				|| (steps >= stepsBeforeGiveUp
-						&& (gardener == null || gardener.location.distanceTo(rc.getLocation()) > 1.0f))) {
+						&& (gardener == null || gardener.location.distanceTo(rc.getLocation()) > 3.0f))) {
 			settled = true;
 			baseLocation = rc.getLocation();
 		} else {
@@ -251,7 +251,7 @@ public class GardenerLogic extends RobotLogic {
 					e.printStackTrace();
 				}
 			}
-			offset += 10.0f;
+			offset += 5.0f;
 		}
 	}
 
