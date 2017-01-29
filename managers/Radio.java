@@ -31,6 +31,49 @@ public class Radio {
 		return freeIndex;
 	}
 	
+	// DEFENSE 
+	public void requestDefense(MapLocation loc, int numUnits) {
+		for (int i = 0; i < DEFENSE_NEEDED_LOCATION_END.ordinal() - DEFENSE_NEEDED_LOCATION_START.ordinal() + 1; i++) {
+			Channel defenseNeededLocation = Channel.values()[DEFENSE_NEEDED_LOCATION_START.ordinal() + i];
+			Channel numUnitsChannel = Channel.values()[DEFENSE_NEEDED_COUNT_START.ordinal() + i];
+			int msg = readChannel(defenseNeededLocation);
+			
+			if (msg == 0) {
+				broadcast(defenseNeededLocation, mapLocationToInt(loc));
+				broadcast(numUnitsChannel, numUnits);
+			}
+		}
+	}
+	
+	public List<DefenseInfo> readLocationsThatNeedDefense() {
+		List<DefenseInfo> locs = new ArrayList<>();
+		
+		// Read each location channel
+		for (int i = 0; i < DEFENSE_NEEDED_LOCATION_END.ordinal() - DEFENSE_NEEDED_LOCATION_START.ordinal() + 1; i++) {
+			Channel defenseNeededLocation = Channel.values()[DEFENSE_NEEDED_LOCATION_START.ordinal() + i];
+			Channel numUnitsChannel = Channel.values()[DEFENSE_NEEDED_COUNT_START.ordinal() + i];
+			
+			// Check if there is a maplocation
+			int mapLocation = readChannel(defenseNeededLocation);
+			if (mapLocation != 0) {
+				// See if they need more defense
+				int numUnitsNeeded = readChannel(numUnitsChannel);
+				if (numUnitsNeeded > 0) {
+					// Defense is needed!!
+					DefenseInfo defInfo = new DefenseInfo(intToMapLocation(mapLocation), numUnitsNeeded, numUnitsChannel);
+					locs.add(defInfo);
+				}	
+			}
+		}
+		
+		return locs;
+	}
+	
+	public void respondToDefenseCall(DefenseInfo defInfo, int defenseValue) {
+		broadcast(defInfo.getUnitsChannel(), defInfo.getUnitsNeeded() - defenseValue);
+	}
+	
+	
 	// ENEMY_GARDENER
 	
 	public void foundEnemyGardener(RobotInfo robot) {
@@ -120,16 +163,6 @@ public class Radio {
 			}
 		}
 		
-	}
-
-	// Defense channel
-	public MapLocation readDefenseChannel() {
-		int msg = readChannel(DEFENSE_CHANNEL);
-		return msg == 0 ? null : intToMapLocation(msg);
-	}
-
-	public void requestDefense(MapLocation loc) {
-		broadcast(DEFENSE_CHANNEL, mapLocationToInt(loc));
 	}
 
 	// Tree channel

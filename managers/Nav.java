@@ -393,7 +393,7 @@ public class Nav {
 		return new Direction(Util.random(0.0f, 1.0f), Util.random(0.0f, 1.0f));
 	}
 
-	boolean isBugging;
+	public boolean isBugging;
 	Direction bugDir;
 	Direction lastDir;
 	float bugDistance;
