@@ -34,7 +34,7 @@ import battlecode.common.TreeInfo;
  */
 public class GardenerLogic extends RobotLogic {
 
-	private static final float TOO_MUCH_TREE_SUM_RADIUS = 10.1f;
+	private static final float TOO_MUCH_TREE_SUM_RADIUS = 10.0f;
 	private static final int MIN_STEPS_BEFORE_SETTLE = 6;
 	private static final int RESETTLE_ROUND = 600;
 
