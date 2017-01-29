@@ -38,7 +38,7 @@ public class GardenerLogic extends RobotLogic {
 	private static final int MIN_STEPS_BEFORE_SETTLE = 6;
 	private static final int RESETTLE_ROUND = 600;
 
-	private static final int MAX_SOLDIER = 10;
+	private static final int MAX_SOLDIER = 12;
 	private static final int MAX_LUMBERJACK = 5;
 	private static final int MAX_TANKS = 4;
 	private static final int MAX_SCOUT = 2;
