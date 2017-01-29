@@ -76,8 +76,6 @@ public class LumberjackLogic extends RobotLogic {
 			}
 		}
 
-		moveOffSpawn();
-
 		RobotInfo target = combat.findMeleeTarget(enemies);
 
 		combat.meleeAttack(enemies);
@@ -106,14 +104,6 @@ public class LumberjackLogic extends RobotLogic {
 		}
 
 		nav.shakeTrees();
-	}
-
-	void moveOffSpawn() {
-		if (personality.getMother() != null) {
-			if (rc.getLocation().distanceTo(personality.getMother().location) <= rc.getType().sensorRadius / 2) {
-				nav.tryHardMove(personality.getMother().location.directionTo(rc.getLocation()));
-			}
-		}
 	}
 
 	void clearTreesAroundBase(RobotInfo[] robots, TreeInfo[] trees) {
