@@ -184,11 +184,27 @@ public class GardenerLogic extends RobotLogic {
 	}
 
 	boolean shouldSettle(RobotInfo archon, RobotInfo gardener, RobotInfo[] enemies) {
-		return ((gardener == null || gardener.location.distanceTo(rc.getLocation()) >= 7.0f)
+		return ((gardener == null || gardener.location.distanceTo(rc.getLocation()) >= MIN_DIST_TO_GARDENERS)
 				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
-				&& steps > MIN_STEPS_BEFORE_SETTLE);
+				&& steps > MIN_STEPS_BEFORE_SETTLE && farEnoughFromEdge());
 	}
 
+	boolean farEnoughFromEdge() {
+		boolean farEnough = true;
+		for (Direction dir : Nav.DIRECTIONS) {	
+			try {
+				if (!rc.onTheMap(rc.getLocation().add(dir, rc.getType().bodyRadius * 2.1f))) {
+					farEnough = false;
+					break;
+				}
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}	
+		}
+		
+		return farEnough;
+	}
+	
 	void plantTrees() {
 		if (!rc.hasTreeBuildRequirements()) {
 			return;
