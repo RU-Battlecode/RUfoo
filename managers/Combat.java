@@ -58,7 +58,11 @@ public class Combat {
 	}
 
 	public void shoot(RobotInfo target, RobotInfo[] enemies) {	
-		float distToTarget = target.location.distanceTo(rc.getLocation());
+		shoot(target.location, enemies);
+	}
+	
+	public void shoot(MapLocation target, RobotInfo[] enemies) {	
+		float distToTarget = target.distanceTo(rc.getLocation());
 		if (shouldUsePentadShot() && (distToTarget <= rc.getType().sensorRadius / 1.5)) {
 			pentadShot(target);
 		} else if (shouldUseTriadShot()) {
@@ -68,30 +72,30 @@ public class Combat {
 		}
 	}
 
-	public void singleShotAttack(RobotInfo target) {
+	public void singleShotAttack(MapLocation target) {
 		if (target != null && rc.canFireSingleShot() && !rc.hasAttacked()) {
 			try {
-				rc.fireSingleShot(rc.getLocation().directionTo(target.location));
+				rc.fireSingleShot(rc.getLocation().directionTo(target));
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void pentadShot(RobotInfo target) {
+	public void pentadShot(MapLocation target) {
 		if (target != null && rc.canFirePentadShot() && !rc.hasAttacked()) {
 			try {
-				rc.firePentadShot(rc.getLocation().directionTo(target.location));
+				rc.firePentadShot(rc.getLocation().directionTo(target));
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void triadShot(RobotInfo target) {
+	public void triadShot(MapLocation target) {
 		if (target != null && rc.canFireTriadShot() && !rc.hasAttacked()) {
 			try {
-				rc.fireTriadShot(rc.getLocation().directionTo(target.location));
+				rc.fireTriadShot(rc.getLocation().directionTo(target));
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
