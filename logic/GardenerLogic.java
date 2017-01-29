@@ -2,6 +2,7 @@ package RUfoo.logic;
 
 import java.util.Arrays;
 
+import RUfoo.managers.DefenseInfo;
 import RUfoo.managers.Nav;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
@@ -64,15 +65,15 @@ public class GardenerLogic extends RobotLogic {
 
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
-		
+
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn()).opposite()
 				.rotateLeftDegrees(20.0f);
-		
+
 		RobotInfo archon = nearest(RobotType.ARCHON, rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam()));
 		if (archon != null) {
 			pointAt = archon.location.directionTo(rc.getLocation()).opposite();
 		}
-		
+
 		buildOffset = TREE_BUILD_DIRS[0].degreesBetween(pointAt);
 		buildDirection = TREE_BUILD_DIRS[0].opposite().rotateLeftDegrees(buildOffset);
 		baseLocation = rc.getLocation();
@@ -80,8 +81,9 @@ public class GardenerLogic extends RobotLogic {
 		plantFailCount = 0;
 
 		stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.6f);
-		
-		smallMap = rc.getInitialArchonLocations(rc.getTeam())[0].distanceTo(combat.getFurthestEnemySpawn()) <= SMALL_MAP_SIZE;
+
+		smallMap = rc.getInitialArchonLocations(rc.getTeam())[0]
+				.distanceTo(combat.getFurthestEnemySpawn()) <= SMALL_MAP_SIZE;
 	}
 
 	@Override
@@ -136,7 +138,6 @@ public class GardenerLogic extends RobotLogic {
 
 			nav.tryMove(buildDirection.opposite());
 
-			
 		}
 	}
 
@@ -144,7 +145,7 @@ public class GardenerLogic extends RobotLogic {
 		if (!rc.hasTreeBuildRequirements()) {
 			return;
 		}
-		
+
 		// We have to plant the front two first to maximize plants
 		if (!hasPlantedFront) {
 			hasPlantedFront = moveAndPlant(buildDirection.opposite());
@@ -158,19 +159,21 @@ public class GardenerLogic extends RobotLogic {
 			hasFinishedPlanting = moveAndPlant(buildDirection);
 		} else {
 			nav.tryMoveTo(baseLocation);
-			try {
-				for (Direction dir : TREE_BUILD_DIRS) {
-					dir = dir.rotateLeftDegrees(buildOffset);
-					if (rc.canPlantTree(dir)) {
-						rc.plantTree(dir);
-						break;
-					} else if (rc.canPlantTree(dir.rotateRightDegrees(2))) {
-						rc.plantTree(dir);
-						break;
+			if (rc.getLocation().distanceTo(baseLocation) < 0.1f) {
+				try {
+					for (Direction dir : TREE_BUILD_DIRS) {
+						dir = dir.rotateLeftDegrees(buildOffset);
+						if (rc.canPlantTree(dir)) {
+							rc.plantTree(dir);
+							break;
+						} else if (rc.canPlantTree(dir.rotateRightDegrees(2))) {
+							rc.plantTree(dir);
+							break;
+						}
 					}
+				} catch (GameActionException e) {
+					e.printStackTrace();
 				}
-			} catch (GameActionException e) {
-				e.printStackTrace();
 			}
 		}
 	}
