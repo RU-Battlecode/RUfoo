@@ -16,9 +16,6 @@ public class TankLogic extends RobotLogic {
 
 	private static final int MAX_AREAS = 15;
 	
-	// Tanks can be more patient because they do body damage to trees.
-	private static final int PATIENCE_MULTIPLIER = 10;
-
 	private int moveIndex;
 	private int moveFrustration;
 	private float prevousDistanceToTarget;

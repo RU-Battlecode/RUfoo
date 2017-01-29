@@ -118,12 +118,10 @@ public class Nav {
 		} else {
 			return tryHardMove(dir, dist / 2, maxDegreesOff);
 		}
-		
-		//return rc.hasMoved();
 	}
 
 	public boolean tryHardMoveClosestTo(Direction dir, float dist, float maxDegreesOff, Direction targetDir) {
-		if (rc.hasMoved()) {
+		if (rc.hasMoved() || dist <= 0.1f) {
 			return false;
 		}
 
@@ -137,7 +135,7 @@ public class Nav {
 
 				if (rc.canMove(dir.rotateRightDegrees(sign * offset), dist)) {
 					rc.move(dir.rotateRightDegrees(sign * offset), dist);
-					rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(dir, 20), 10, 200, 200);
+					//rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(dir, 20), 10, 200, 200);
 					break;
 				}
 
@@ -147,7 +145,11 @@ public class Nav {
 			e.printStackTrace();
 		}
 
-		return rc.hasMoved();
+		if (rc.hasMoved()) {
+			return true;
+		} else {
+			return tryHardMoveClosestTo(dir, dist / 2, maxDegreesOff, targetDir);
+		}
 	}
 
 	public void moveByTrees(TreeInfo[] trees) {
@@ -413,7 +415,7 @@ public class Nav {
 		Direction dirToTarget = location.directionTo(target);
 
 		// rc.setIndicatorLine(location, target, 100, 0, 1);
-		rc.setIndicatorLine(location, location.add(bugDir, 5), 0, 100, 1);
+		//rc.setIndicatorLine(location, location.add(bugDir, 5), 0, 100, 1);
 
 		if (!isBugging) {
 			if (!tryHardMove(dirToTarget, dist, 90.0f)) {
@@ -486,7 +488,7 @@ public class Nav {
 		}
 
 		if (best != null) {
-			rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(best, 5), 200, 200, 200);
+			//rc.setIndicatorLine(rc.getLocation(), rc.getLocation().add(best, 5), 200, 200, 200);
 			tryHardMoveClosestTo(best, dist, 180.0f, direction);
 		}
 
