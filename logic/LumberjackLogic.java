@@ -71,6 +71,8 @@ public class LumberjackLogic extends RobotLogic {
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
 				radio.foundEnemyArchon(enemy);
+			} else if (enemy.type == RobotType.GARDENER) {
+				radio.foundEnemyGardener(enemy);
 			}
 		}
 
