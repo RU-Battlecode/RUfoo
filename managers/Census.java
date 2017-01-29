@@ -9,7 +9,7 @@ import battlecode.common.RobotType;
 
 public class Census {
 
-	private static final int[] CENSUS_DAYS = { 100, 200, 400, 500, 600, 700, 800, 1000, 1100, 1500, 2000, 2500 };
+	private static final int[] CENSUS_DAYS = { 100, 200, 250, 300, 400, 500, 600, 700, 800, 1000, 1100, 1500, 2000, 2500 };
 
 	private RobotController rc;
 	private Radio radio;
