@@ -111,7 +111,7 @@ public class LumberjackLogic extends RobotLogic {
 
 		// Closest trees first or closest tree to archon/gardener if they
 		// are near!
-		if (nearest != null) {
+		if (nearest != null && trees.length > 1) {
 			Arrays.sort(trees, (t1, t2) -> {
 				return Math.round(t1.location.distanceSquaredTo(nearest) - t2.location.distanceSquaredTo(nearest));
 			});
