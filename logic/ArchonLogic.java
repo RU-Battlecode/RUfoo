@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import RUfoo.managers.Channel;
+import RUfoo.managers.DefenseInfo;
 import RUfoo.managers.Nav;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -73,12 +74,19 @@ public class ArchonLogic extends RobotLogic {
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 
 		// Archons can report enemies archons too!
+		int defenseNeed = 0;
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
 				radio.foundEnemyArchon(enemy);
 			}
+			
+			defenseNeed += DefenseInfo.unitValue(enemy.type);
 		}
-
+		
+		if (defenseNeed > 0) {
+			radio.requestDefense(rc.getLocation(), defenseNeed);
+		}
+		
 		// Move away from enemy spawn if it is too close.
 		if (rc.getLocation().distanceTo(enemySpawn) < MIN_DISTANCE_TO_ENEMY_SPAWN) {
 			nav.tryHardMove(enemySpawn.directionTo(rc.getLocation()));
