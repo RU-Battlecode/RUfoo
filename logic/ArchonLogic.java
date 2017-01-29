@@ -111,6 +111,16 @@ public class ArchonLogic extends RobotLogic {
 
 		orderClearTrees(trees);
 		nav.shakeTrees(trees);
+		
+		//readBroadCastingRobots();
+	}
+
+	private void readBroadCastingRobots() {
+		MapLocation[] locations = rc.senseBroadcastingRobotLocations();
+		for (MapLocation loc : locations) {
+			rc.setIndicatorLine(rc.getLocation(), loc, 100, 0, 0);
+		}
+		
 	}
 
 	void buildBase(int gardenersAlive) {
