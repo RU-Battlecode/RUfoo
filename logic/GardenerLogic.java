@@ -97,11 +97,12 @@ public class GardenerLogic extends RobotLogic {
 
 		if (settled) {
 			plantTrees();
-			waterTrees(myTrees);
 			orderClearTrees(trees);
 		} else {
 			findBaseLocation(enemies);
 		}
+
+		waterTrees(myTrees);
 
 		if (rc.getRoundNum() == RESETTLE_ROUND && myTrees.length < 10) {
 			plantFailCount = 0;
