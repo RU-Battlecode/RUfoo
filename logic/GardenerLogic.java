@@ -93,6 +93,11 @@ public class GardenerLogic extends RobotLogic {
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
+		
+		if (rc.getHealth() / rc.getType().maxHealth < 0.50f && Util.contains(enemies, RobotType.SOLDIER) && !Util.contains(enemies, RobotType.TANK)) {
+			tryHardPlant(buildDirection);
+		}
+		
 		buildRobots(trees);
 
 		if (settled) {
@@ -133,6 +138,20 @@ public class GardenerLogic extends RobotLogic {
 			}
 		}
 
+	}
+
+	void tryHardPlant(Direction dir) {
+		float offset = 0.0f;
+		while (offset < 360.0f) {
+			if (rc.canPlantTree(dir.rotateRightDegrees(offset))) {
+				try {
+					rc.plantTree(dir.rotateRightDegrees(offset));
+					break;
+				} catch (GameActionException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	void findBaseLocation(RobotInfo[] enemies) {
