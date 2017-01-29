@@ -140,11 +140,7 @@ public class GardenerLogic extends RobotLogic {
 		RobotInfo archon = nearest(RobotType.ARCHON, robots);
 		RobotInfo gardener = nearest(RobotType.GARDENER, robots);
 
-		if (((archon == null || archon.location.distanceTo(rc.getLocation()) >= 3.0f) && rc.hasTreeBuildRequirements()
-				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
-				&& steps > MIN_STEPS_BEFORE_SETTLE)
-				|| (steps >= stepsBeforeGiveUp
-						&& (gardener == null || gardener.location.distanceTo(rc.getLocation()) > 3.0f))) {
+		if (shouldSettle(archon, gardener, enemies)) {
 			settled = true;
 			baseLocation = rc.getLocation();
 		} else {
@@ -158,13 +154,20 @@ public class GardenerLogic extends RobotLogic {
 
 			if (gardener != null) {
 				Direction awayFromGardener = rc.getLocation().directionTo(gardener.location).opposite();
-				nav.bug(rc.getLocation().add(awayFromGardener, stepsBeforeGiveUp * rc.getType().strideRadius), obstacles);
+				nav.bug(rc.getLocation().add(awayFromGardener, stepsBeforeGiveUp * rc.getType().strideRadius),
+						obstacles);
 				steps++;
 			}
 
 			nav.tryMove(buildDirection.opposite());
 
 		}
+	}
+
+	boolean shouldSettle(RobotInfo archon, RobotInfo gardener, RobotInfo[] enemies) {
+		return ((gardener == null || gardener.location.distanceTo(rc.getLocation()) >= 7.0f)
+				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
+				&& steps > MIN_STEPS_BEFORE_SETTLE);
 	}
 
 	void plantTrees() {
