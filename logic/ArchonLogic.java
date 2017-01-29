@@ -49,6 +49,7 @@ public class ArchonLogic extends RobotLogic {
 	private float buildOffset;
 	private MapLocation enemySpawn;
 	private Boolean isLeader;
+	private boolean hasCalledForDefense;
 
 	public ArchonLogic(RobotController _rc) {
 		super(_rc);
@@ -60,6 +61,7 @@ public class ArchonLogic extends RobotLogic {
 		isLeader = rc.getInitialArchonLocations(rc.getTeam()).length == 1 ? true : null;
 		
 		gardenerLimit = 2 * rc.getInitialArchonLocations(rc.getTeam()).length + 6;
+		hasCalledForDefense = false;
 	}
 
 	@Override
@@ -83,8 +85,15 @@ public class ArchonLogic extends RobotLogic {
 			defenseNeed += DefenseInfo.unitValue(enemy.type);
 		}
 		
+		for (RobotInfo friend : friends) {
+			defenseNeed -= DefenseInfo.unitValue(friend.type);
+		}
+		
 		if (defenseNeed > 0) {
-			radio.requestDefense(rc.getLocation(), defenseNeed);
+			if (!hasCalledForDefense) {
+				radio.requestDefense(rc.getLocation(), defenseNeed);
+				hasCalledForDefense = true;
+			}
 		}
 		
 		// Move away from enemy spawn if it is too close.
