@@ -59,8 +59,9 @@ public class GardenerLogic extends RobotLogic {
 	private boolean hasPlantedMiddle;
 	private boolean hasFinishedPlanting;
 	private int plantFailCount;
-	
-	private static final float SMALL_MAP_SIZE = 69.0f; 
+	private boolean hasCalledForDefense;
+
+	private static final float SMALL_MAP_SIZE = 69.0f;
 	private boolean smallMap = false;
 
 	public GardenerLogic(RobotController _rc) {
@@ -88,6 +89,8 @@ public class GardenerLogic extends RobotLogic {
 
 	@Override
 	public void logic() {
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
 		buildRobots(trees);
@@ -97,7 +100,7 @@ public class GardenerLogic extends RobotLogic {
 			waterTrees(myTrees);
 			orderClearTrees(trees);
 		} else {
-			findBaseLocation();
+			findBaseLocation(enemies);
 		}
 
 		if (rc.getRoundNum() == RESETTLE_ROUND && myTrees.length < 10) {
@@ -107,9 +110,31 @@ public class GardenerLogic extends RobotLogic {
 		}
 
 		nav.shakeTrees(trees);
+		
+		// Archons can report enemies archons too!
+		int defenseNeed = 0;
+		for (RobotInfo enemy : enemies) {
+			if (enemy.type == RobotType.ARCHON) {
+				radio.foundEnemyArchon(enemy);
+			}
+
+			defenseNeed += DefenseInfo.unitValue(enemy.type);
+		}
+
+		for (RobotInfo friend : friends) {
+			defenseNeed -= DefenseInfo.unitValue(friend.type);
+		}
+
+		if (defenseNeed > 0) {
+			if (!hasCalledForDefense) {
+				radio.requestDefense(rc.getLocation(), defenseNeed);
+				hasCalledForDefense = true;
+			}
+		}
+
 	}
 
-	void findBaseLocation() {
+	void findBaseLocation(RobotInfo[] enemies) {
 		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		RobotInfo archon = nearest(RobotType.ARCHON, robots);
 		RobotInfo gardener = nearest(RobotType.GARDENER, robots);
