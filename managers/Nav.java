@@ -275,7 +275,7 @@ public class Nav {
 				if (prioritizeSafety) {
 					// Obvious choice. Be safe.
 					rc.move(best, dist);
-				} else if ((degrees <= 30 || (degrees >= 330 && degrees <= 360)) && rc.canMove(direct, dist)) {
+				} else if (Math.abs(degrees) <= 30 && rc.canMove(direct, dist)) {
 					// The safest is to far off course for someone who
 					// does not care about safety. Just take the bullet.
 					rc.move(direct, dist);
