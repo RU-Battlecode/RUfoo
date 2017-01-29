@@ -180,7 +180,7 @@ public class GardenerLogic extends RobotLogic {
 			hasPlantedFront = moveAndPlant(buildDirection.opposite());
 		} else if (!hasPlantedMiddle) {
 			nav.tryMoveTo(baseLocation);
-			if (rc.getLocation().distanceTo(baseLocation) < 0.1f) {
+			if (rc.getLocation().distanceTo(baseLocation) < 0.05f) {
 				hasPlantedMiddle = true;
 				plantFailCount = 0;
 			}
