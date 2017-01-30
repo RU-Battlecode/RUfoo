@@ -93,7 +93,7 @@ public class TankLogic extends RobotLogic {
 			
 			for (RobotInfo friend : friends) {
 				MapLocation closestPoint = Util.distanceToSegment(rc.getLocation(), target, friend.location);
-				if (friend.location.distanceTo(closestPoint) <= friend.type.bodyRadius) {
+				if (friend.location.distanceTo(closestPoint) < friend.type.bodyRadius) {
 					return null; // This would hit my friend
 				}
 			}
