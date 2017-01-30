@@ -61,7 +61,11 @@ public class TankLogic extends RobotLogic {
 			// No target or enemy trees.
 			checkRadioForArchons();
 
-			if (moveAreas.size() > 0) {
+			RobotInfo scout = Util.findType(friends, RobotType.SCOUT);
+			if (scout != null && scout.location.distanceTo(rc.getLocation()) < rc.getType().sensorRadius) {
+				MapLocation targetLocation = fireAtScoutTargets(enemies, friends);
+				combat.shoot(targetLocation, enemies);
+			} else if (moveAreas.size() > 0) {
 				move(enemies, trees, myTrees, friends);
 			} else {
 				moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
@@ -69,19 +73,13 @@ public class TankLogic extends RobotLogic {
 					moveAreas.add(loc);
 				}
 				nav.moveRandom();
-			}
-			
-			RobotInfo scout = Util.findType(friends, RobotType.SCOUT);
-			
-			if (scout != null && scout.location.distanceTo(rc.getLocation()) < rc.getType().sensorRadius) {
-				fireAtScoutTargets(enemies, friends);
-			}
+			}			
 		}
 
 		nav.shakeTrees(trees);
 	}
 	
-	void fireAtScoutTargets(RobotInfo[] enemies, RobotInfo[] friends) {
+	MapLocation fireAtScoutTargets(RobotInfo[] enemies, RobotInfo[] friends) {
 		
 		List<MapLocation> locs = radio.readScoutTargetsNearMe();
 		for (MapLocation target : locs) {
@@ -89,14 +87,14 @@ public class TankLogic extends RobotLogic {
 			for (RobotInfo friend : friends) {
 				MapLocation closestPoint = Util.distanceToSegment(rc.getLocation(), target, friend.location);
 				if (friend.location.distanceTo(closestPoint) <= friend.type.bodyRadius) {
-					return; // This would hit my friend
+					return null; // This would hit my friend
 				}
 			}
 			
-			combat.shoot(target, enemies);
-			break;
+			return target;
 		}
 		
+		return null;
 	}
 
 	void lookForEnemyArchons(RobotInfo[] enemies) {
