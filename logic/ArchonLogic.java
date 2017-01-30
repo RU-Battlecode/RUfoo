@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import RUfoo.managers.Channel;
-import RUfoo.managers.DefenseInfo;
 import RUfoo.managers.Nav;
+import RUfoo.model.Channel;
+import RUfoo.model.DefenseInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
@@ -247,9 +247,8 @@ public class ArchonLogic extends RobotLogic {
 					rc.hireGardener(hireDir);
 					census.increment(RobotType.GARDENER);
 					return true;
-				} else {
-					System.out.println("can't build");
 				}
+				
 				offset += 10.0f;
 			}
 		} catch (GameActionException e) {
