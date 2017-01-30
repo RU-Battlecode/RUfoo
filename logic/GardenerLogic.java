@@ -1,6 +1,8 @@
 package RUfoo.logic;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import RUfoo.managers.Nav;
 import RUfoo.model.DefenseInfo;
@@ -8,6 +10,7 @@ import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -37,7 +40,6 @@ public class GardenerLogic extends RobotLogic {
 
 	private static final float TOO_MUCH_TREE_SUM_RADIUS = 10.0f;
 	private static final int MIN_STEPS_BEFORE_SETTLE = 6;
-	private static final int RESETTLE_ROUND = 600;
 	private static final float MIN_DIST_TO_GARDENERS = 8.5f;
 
 	private static final int MAX_SOLDIER = 8;
@@ -109,12 +111,6 @@ public class GardenerLogic extends RobotLogic {
 		}
 
 		waterTrees(myTrees);
-
-		if (rc.getRoundNum() == RESETTLE_ROUND && myTrees.length < 10) {
-			plantFailCount = 0;
-			settled = hasPlantedFront = hasPlantedMiddle = hasFinishedPlanting = false;
-			steps = 0;
-		}
 
 		nav.shakeTrees(trees);
 		
