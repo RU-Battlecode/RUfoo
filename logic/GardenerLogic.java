@@ -199,7 +199,7 @@ public class GardenerLogic extends RobotLogic {
 		boolean farEnough = true;
 		for (Direction dir : Nav.DIRECTIONS) {	
 			try {
-				if (!rc.onTheMap(rc.getLocation().add(dir, rc.getType().bodyRadius * 2.1f))) {
+				if (!rc.onTheMap(rc.getLocation().add(dir, rc.getType().bodyRadius * 2.2f))) {
 					farEnough = false;
 					break;
 				}
