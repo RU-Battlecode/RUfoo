@@ -169,11 +169,7 @@ public class GardenerLogic extends RobotLogic {
 			BodyInfo[] obstacles = Util.addAll(friends, rc.senseNearbyTrees());
 
 			List<MapLocation> gardenerLocs = radio.readGardenerBaseLocations();
-			
-			for (MapLocation loc : gardenerLocs) {
-				rc.setIndicatorDot(loc, 0, 200, 0);
-			}
-			
+				
 			if (inheritedBaseLocation != null && inheritedBaseLocation.isWithinDistance(rc.getLocation(), rc.getType().sensorRadius)) {
 				for (RobotInfo friend : friends) {
 					if (friend.type == RobotType.GARDENER && friend.location.distanceTo(inheritedBaseLocation) < 0.1f) {
@@ -187,12 +183,10 @@ public class GardenerLogic extends RobotLogic {
 			for (TreeInfo tree : myTrees) {				
 				// See if it doesn't have a gardener
 				if (!treeHasGardener(tree, friends)) {
-					rc.setIndicatorDot(tree.location, 200, 200, 100);
 					// Find the base location to this fallen gardener
 					for (MapLocation loc : gardenerLocs) {
 						
 						if (!forgetInheritedLocations.contains(loc) && loc.distanceTo(tree.location) <= RobotType.GARDENER.strideRadius + GameConstants.BULLET_TREE_RADIUS) {
-							rc.setIndicatorLine(loc, tree.location, 100, 1, 10);
 							inheritedBaseLocation = loc;
 							System.out.println("Found an old base I can take.");
 							break;
@@ -293,7 +287,6 @@ public class GardenerLogic extends RobotLogic {
 				try {
 					for (Direction dir : TREE_BUILD_DIRS) {
 						dir = dir.rotateLeftDegrees(buildOffset);
-						rc.setIndicatorDot(rc.getLocation().add(dir, 2), 0, 200, 50);
 						float offset = 0.0f;
 						boolean planted = false;
 						while (offset <= 5.0f && !planted) {
