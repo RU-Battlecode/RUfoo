@@ -66,6 +66,7 @@ public class SoldierLogic extends RobotLogic {
 			// Attack target aggressively!
 			MapLocation closeToTarget = target.location.add(target.location.directionTo(rc.getLocation()),
 					rc.getType().bodyRadius * 2.0f);
+			
 			if (shouldKite(target, friends)) {
 				nav.kite(target, bullets);
 			} else {
@@ -149,7 +150,7 @@ public class SoldierLogic extends RobotLogic {
 		List<MapLocation> possibleGardenerLocs = radio.readEnemyGardenerLocations();
 		for (MapLocation gardenerLoc : possibleGardenerLocs) {
 			if (gardenerLoc != null) {
-				addNewMoveArea(gardenerLoc);
+				addNewMoveArea(gardenerLoc, true);
 			}
 		}
 	}
