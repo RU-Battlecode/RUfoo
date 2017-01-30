@@ -62,7 +62,8 @@ public class TankLogic extends RobotLogic {
 			checkRadioForArchons();
 
 			RobotInfo scout = Util.findType(friends, RobotType.SCOUT);
-			if (scout != null && scout.location.distanceTo(rc.getLocation()) < rc.getType().sensorRadius) {
+			if (scout != null) {
+				System.out.println("scout near me.");
 				MapLocation targetLocation = fireAtScoutTargets(enemies, friends);
 				combat.shoot(targetLocation, enemies);
 			} else if (moveAreas.size() > 0) {
