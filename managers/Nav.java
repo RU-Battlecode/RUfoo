@@ -93,7 +93,7 @@ public class Nav {
 	}
 
 	public boolean tryHardMove(Direction dir, float dist, float maxDegreesOff) {
-		if (rc.hasMoved() || dist <= 0.1f) {
+		if (rc.hasMoved() || dist <= 0.1f || dir == null) {
 			return false;
 		}
 		
