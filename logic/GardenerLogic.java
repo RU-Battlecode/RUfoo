@@ -66,9 +66,12 @@ public class GardenerLogic extends RobotLogic {
 
 	private static final float SMALL_MAP_SIZE = 69.0f;
 	private boolean smallMap = false;
+	private MapLocation inheritedBaseLocation;
+	private List<MapLocation> forgetInheritedLocations;
 
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
+		forgetInheritedLocations = new ArrayList<>();
 		
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn()).opposite()
 				.rotateLeftDegrees(20.0f);
@@ -88,6 +91,8 @@ public class GardenerLogic extends RobotLogic {
 
 		smallMap = rc.getInitialArchonLocations(rc.getTeam())[0]
 				.distanceTo(combat.getFurthestEnemySpawn()) <= SMALL_MAP_SIZE;
+
+		inheritedBaseLocation = null;
 	}
 
 	@Override
@@ -96,8 +101,9 @@ public class GardenerLogic extends RobotLogic {
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
-		
-		if (rc.getHealth() / rc.getType().maxHealth < 0.40f && Util.contains(enemies, RobotType.SOLDIER) && !Util.contains(enemies, RobotType.TANK)) {
+
+		if (rc.getHealth() / rc.getType().maxHealth < 0.40f && Util.contains(enemies, RobotType.SOLDIER)
+				&& !Util.contains(enemies, RobotType.TANK)) {
 			tryHardPlant(buildDirection);
 		}
 
@@ -107,7 +113,7 @@ public class GardenerLogic extends RobotLogic {
 			plantTrees();
 			orderClearTrees(trees);
 		} else {
-			findBaseLocation(enemies);
+			findBaseLocation(enemies, friends, myTrees);
 		}
 
 		waterTrees(myTrees);
@@ -150,37 +156,102 @@ public class GardenerLogic extends RobotLogic {
 		}
 	}
 
-	void findBaseLocation(RobotInfo[] enemies) {
-		RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
-		RobotInfo archon = nearest(RobotType.ARCHON, robots);
-		RobotInfo gardener = nearest(RobotType.GARDENER, robots);
+	void findBaseLocation(RobotInfo[] enemies, RobotInfo[] friends, TreeInfo[] myTrees) {
 
-		if (shouldSettle(archon, gardener, enemies)) {
+		RobotInfo archon = nearest(RobotType.ARCHON, friends);
+
+		if (shouldSettle(archon, enemies, myTrees)) {
 			settled = true;
 			baseLocation = rc.getLocation();
+			radio.sendSettledBase(baseLocation);
 		} else {
 
-			BodyInfo[] obstacles = Util.addAll(robots, rc.senseNearbyTrees());
+			BodyInfo[] obstacles = Util.addAll(friends, rc.senseNearbyTrees());
+
+			List<MapLocation> gardenerLocs = radio.readGardenerBaseLocations();
+			
+			for (MapLocation loc : gardenerLocs) {
+				rc.setIndicatorDot(loc, 0, 200, 0);
+			}
+			
+			if (inheritedBaseLocation != null && inheritedBaseLocation.isWithinDistance(rc.getLocation(), rc.getType().sensorRadius)) {
+				for (RobotInfo friend : friends) {
+					if (friend.type == RobotType.GARDENER && friend.location.distanceTo(inheritedBaseLocation) < 0.1f) {
+						inheritedBaseLocation = null;
+						forgetInheritedLocations.add(inheritedBaseLocation);
+					}
+				}
+			}
+			
+			// Look at all my trees
+			for (TreeInfo tree : myTrees) {				
+				// See if it doesn't have a gardener
+				if (!treeHasGardener(tree, friends)) {
+					rc.setIndicatorDot(tree.location, 200, 200, 100);
+					// Find the base location to this fallen gardener
+					for (MapLocation loc : gardenerLocs) {
+						
+						if (!forgetInheritedLocations.contains(loc) && loc.distanceTo(tree.location) <= RobotType.GARDENER.strideRadius + GameConstants.BULLET_TREE_RADIUS) {
+							rc.setIndicatorLine(loc, tree.location, 100, 1, 10);
+							inheritedBaseLocation = loc;
+							System.out.println("Found an old base I can take.");
+							break;
+						}
+					}
+				}
+			}
+			
+			if (inheritedBaseLocation != null) {
+				nav.bug(inheritedBaseLocation, obstacles);
+				
+				if (rc.getLocation().distanceTo(inheritedBaseLocation) < 0.1f) {
+					settled = true;
+					baseLocation = rc.getLocation();
+				}
+			}
+
 			if (enemies.length > 0) {
 				nav.runAway(enemies);
 				steps++;
 			} else if (archon != null) {
 				Direction awayFromArchon = rc.getLocation().directionTo(archon.location).opposite();
-				nav.bug(rc.getLocation().add(awayFromArchon, stepsBeforeGiveUp * rc.getType().strideRadius), obstacles);
+				nav.bug(rc.getLocation().add(awayFromArchon, stepsBeforeGiveUp * rc.getType().strideRadius * 5),
+						obstacles);
 				steps++;
-			} else if (gardener != null && gardener.location.distanceTo(rc.getLocation()) >= MIN_DIST_TO_GARDENERS) {
-				//Direction awayFromGardener = rc.getLocation().directionTo(gardener.location).opposite();
-				nav.bug(combat.getFurthestEnemySpawn(), obstacles);
-				steps++;
-			} else {
-				nav.tryMove(buildDirection.opposite());
 			}
+
+			if (myTrees.length != 0 && myTrees[0].location.distanceTo(rc.getLocation()) <= MIN_DIST_TO_GARDENERS) {
+				Direction awayFromTree = myTrees[0].location.directionTo(rc.getLocation());
+				float dist = MIN_DIST_TO_GARDENERS - myTrees[0].location.distanceTo(rc.getLocation());
+				nav.bug(rc.getLocation().add(awayFromTree, dist), obstacles);
+				steps++;
+			}
+
+			nav.tryMove(buildDirection.opposite());
 		}
 	}
 
-	boolean shouldSettle(RobotInfo archon, RobotInfo gardener, RobotInfo[] enemies) {
-		return ((gardener == null || gardener.location.distanceTo(rc.getLocation()) >= MIN_DIST_TO_GARDENERS)
+	boolean treeHasGardener(TreeInfo tree, RobotInfo[] friends) {
+		boolean hasGardener = false;
+		for (RobotInfo friend : friends) {
+			if (friend.type == RobotType.GARDENER
+					&& friend.location.distanceTo(tree.location) <= RobotType.GARDENER.strideRadius) {
+				hasGardener = true;
+				break;
+			}
+		}
+
+		return hasGardener;
+	}
+
+	boolean shouldSettle(RobotInfo archon, RobotInfo[] enemies, TreeInfo[] nearestMyTree) {
+
+		float distToGardener = nearestMyTree.length == 0 ? 0 : nearestMyTree[0].location.distanceTo(rc.getLocation());
+		return ((nearestMyTree.length == 0 || distToGardener >= MIN_DIST_TO_GARDENERS
+				|| (personality.age() > 400 && distToGardener >= MIN_DIST_TO_GARDENERS / 2))
+
 				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
+
 				&& steps > MIN_STEPS_BEFORE_SETTLE && farEnoughFromEdge());
 	}
 
