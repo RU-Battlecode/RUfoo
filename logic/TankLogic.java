@@ -151,16 +151,16 @@ public class TankLogic extends RobotLogic {
 		boolean nothingAtLocation = rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0;
 		
 		if (nothingAtLocation) {
-			if (!nav.closeToArchonLocation(loc)) {
-				moveAreas.remove(moveIndex % moveAreas.size());
-				MapLocation mid = Util.midPoint(rc.getInitialArchonLocations(rc.getTeam())[0], combat.getFurthestEnemySpawn());
-				addNewMoveArea(mid);
-			}
+			moveAreas.remove(moveIndex % moveAreas.size());
+			MapLocation mid = Util.midPoint(rc.getInitialArchonLocations(rc.getTeam())[0], combat.getFurthestEnemySpawn());
+			addNewMoveArea(mid);
+			nav.isBugging = false;
 			moveFrustration++;
 		}
 		
 		if (moveFrustration > personality.getPatience()) {
 			moveIndex++;
+			nav.isBugging = false;
 			moveFrustration = 0;
 		}
 
@@ -169,6 +169,7 @@ public class TankLogic extends RobotLogic {
 			nav.moveRandom();
 		} else {
 			nav.bug(loc, Util.addAll(friends, myTrees));
+			nav.tryHardMove(rc.getLocation().directionTo(loc));
 		}
 
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 2)) {
