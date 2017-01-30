@@ -26,12 +26,14 @@ public class SoldierLogic extends RobotLogic {
 	private float prevousDistanceToTarget;
 	private List<MapLocation> moveAreas;
 	private boolean hasRespondedToDefense;
+	private RobotInfo prevousTarget;
 
 	public SoldierLogic(RobotController _rc) {
 		super(_rc);
 		moveIndex = 0;
 		moveFrustration = 0;
 		moveAreas = new ArrayList<>();
+		prevousTarget = null;
 
 		// find nearest gardener.
 		if (personality.getMother() != null) {
@@ -60,7 +62,6 @@ public class SoldierLogic extends RobotLogic {
 		}
 
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
-
 		if (target != null) {
 			// Attack target aggressively!
 			MapLocation closeToTarget = target.location.add(target.location.directionTo(rc.getLocation()),
@@ -75,6 +76,11 @@ public class SoldierLogic extends RobotLogic {
 		} else {
 			// No target.
 
+			if (prevousTarget != null) {
+				combat.shoot(prevousTarget, enemies);
+				prevousTarget = null;
+			}
+			
 			if (rc.getRoundNum() % 2 == 0 && !hasRespondedToDefense) {
 				respondToDefenseCalls();
 				hasRespondedToDefense = true;
@@ -100,6 +106,7 @@ public class SoldierLogic extends RobotLogic {
 		}
 
 		nav.shakeTrees(trees);
+		prevousTarget = target;
 	}
 
 	boolean shouldKite(RobotInfo target, RobotInfo[] friends) {
