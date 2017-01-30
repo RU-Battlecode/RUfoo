@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import RUfoo.util.Circle;
+import RUfoo.model.Circle;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.BulletInfo;
@@ -551,7 +551,7 @@ public class Nav {
 
 			Direction dir = rc.getLocation().directionTo(target.location);
 
-			if (delta > 0) {
+			if (delta < 0) {
 				dir = dir.opposite();
 			}
 
