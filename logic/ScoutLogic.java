@@ -1,6 +1,6 @@
 package RUfoo.logic;
 
-import RUfoo.managers.Channel;
+import RUfoo.model.Channel;
 import RUfoo.util.Util;
 import battlecode.common.BulletInfo;
 import battlecode.common.Direction;

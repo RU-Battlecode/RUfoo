@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import RUfoo.managers.Channel;
+import RUfoo.model.Channel;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.GameActionException;
