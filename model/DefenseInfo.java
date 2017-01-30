@@ -1,4 +1,4 @@
-package RUfoo.managers;
+package RUfoo.model;
 
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;

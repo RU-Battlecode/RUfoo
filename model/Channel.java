@@ -1,4 +1,4 @@
-package RUfoo.managers;
+package RUfoo.model;
 
 public enum Channel {
 	

@@ -1,10 +1,12 @@
 package RUfoo.managers;
 
-import static RUfoo.managers.Channel.*;
+import static RUfoo.model.Channel.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import RUfoo.model.Channel;
+import RUfoo.model.DefenseInfo;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;

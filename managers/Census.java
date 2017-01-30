@@ -1,9 +1,10 @@
 package RUfoo.managers;
 
-import static RUfoo.managers.Channel.*;
+import static RUfoo.model.Channel.*;
 
 import java.util.Arrays;
 
+import RUfoo.model.Channel;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 
