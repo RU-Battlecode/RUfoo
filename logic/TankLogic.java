@@ -62,7 +62,7 @@ public class TankLogic extends RobotLogic {
 			checkRadioForArchons();
 
 			if (moveAreas.size() > 0) {
-				move(enemies, trees);
+				move(enemies, trees, myTrees, friends);
 			} else {
 				moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
 				for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
@@ -139,7 +139,7 @@ public class TankLogic extends RobotLogic {
 		}
 	}
 
-	void move(RobotInfo[] enemies, TreeInfo[] trees) {
+	void move(RobotInfo[] enemies, TreeInfo[] trees, TreeInfo[] myTrees, RobotInfo[] friends) {
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 
@@ -163,7 +163,7 @@ public class TankLogic extends RobotLogic {
 			nav.moveByTrees(trees);
 			nav.moveRandom();
 		} else {
-			nav.tryHardMove(rc.getLocation().directionTo(loc));
+			nav.bug(loc, Util.addAll(friends, myTrees));
 		}
 
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 2)) {
