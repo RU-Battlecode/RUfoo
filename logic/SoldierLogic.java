@@ -112,12 +112,10 @@ public class SoldierLogic extends RobotLogic {
 		List<DefenseInfo> defenseNeeds = radio.readLocationsThatNeedDefense();
 
 		if (defenseNeeds.size() > 0) {
-			System.out.println("trying to respond to defense needs");
 			DefenseInfo mostNeedy = Collections.max(defenseNeeds);
 			// Try to add the location to our moveAreas with interrupt
 			if (addNewMoveArea(mostNeedy.getLocation(), true)) {
 				// Let everyone know we got it!
-				System.out.println("heading there maybe?");
 				radio.respondToDefenseCall(mostNeedy, 1);
 			}
 		}
