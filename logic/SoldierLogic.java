@@ -61,6 +61,8 @@ public class SoldierLogic extends RobotLogic {
 			}
 		}
 
+		lookForEnemyArchons(enemies);
+		
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
 		if (target != null) {
 			// Attack target aggressively!
@@ -87,9 +89,6 @@ public class SoldierLogic extends RobotLogic {
 				hasRespondedToDefense = true;
 			}
 			
-			lookForEnemyArchons(enemies);
-
-
 			// Dodge any bullets
 			nav.dodge(bullets);
 
@@ -188,7 +187,12 @@ public class SoldierLogic extends RobotLogic {
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 
-		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
+//		for (MapLocation test : moveAreas) {
+//			rc.setIndicatorDot(test, rc.getTeam() == Team.A ? 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
+//		}
+//		rc.setIndicatorLine(rc.getLocation(), loc, rc.getTeam() == Team.A ? 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
+		
+		if (rc.getLocation().distanceTo(loc) < 3.0f && enemies.length == 0) {
 			moveAreas.remove(moveIndex % moveAreas.size());
 			hasRespondedToDefense = false;
 			nav.isBugging = false;
