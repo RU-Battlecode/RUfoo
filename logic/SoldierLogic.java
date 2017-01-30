@@ -112,7 +112,7 @@ public class SoldierLogic extends RobotLogic {
 	boolean shouldKite(RobotInfo target, RobotInfo[] friends) {
 		return target.type == RobotType.LUMBERJACK
 				|| ((target.getType().canAttack() && target.getType() != RobotType.SCOUT && target.health > 20)
-						&& friends.length <= 2);
+						&& friends.length <= 5);
 	}
 
 	void respondToDefenseCalls() {
