@@ -65,8 +65,14 @@ public class TankLogic extends RobotLogic {
 			if (scout != null) {
 				System.out.println("scout near me.");
 				MapLocation targetLocation = fireAtScoutTargets(enemies, friends);
-				combat.shoot(targetLocation, enemies);
-			} else if (moveAreas.size() > 0) {
+				
+				if (targetLocation != null) {
+					combat.singleShotAttack(targetLocation);
+				} else {
+				}
+			} 
+			
+			if (moveAreas.size() > 0) {
 				move(enemies, trees, myTrees, friends);
 			} else {
 				moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
