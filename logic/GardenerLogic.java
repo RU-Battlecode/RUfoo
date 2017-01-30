@@ -2,8 +2,8 @@ package RUfoo.logic;
 
 import java.util.Arrays;
 
-import RUfoo.managers.DefenseInfo;
 import RUfoo.managers.Nav;
+import RUfoo.model.DefenseInfo;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.Direction;
@@ -95,7 +95,7 @@ public class GardenerLogic extends RobotLogic {
 		TreeInfo[] trees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
 		TreeInfo[] myTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, rc.getTeam());
 		
-		if (rc.getHealth() / rc.getType().maxHealth < 0.50f && Util.contains(enemies, RobotType.SOLDIER) && !Util.contains(enemies, RobotType.TANK)) {
+		if (rc.getHealth() / rc.getType().maxHealth < 0.40f && Util.contains(enemies, RobotType.SOLDIER) && !Util.contains(enemies, RobotType.TANK)) {
 			tryHardPlant(buildDirection);
 		}
 		
