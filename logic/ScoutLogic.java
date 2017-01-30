@@ -96,6 +96,7 @@ public class ScoutLogic extends RobotLogic {
 			// Get behind tank
 			if (enemies.length > 0) {
 				bugLoc.add(enemies[0].location.directionTo(friendlyTank.location), 2.0f);
+				nav.isBugging = false;
 			}
 			
 			nav.bug(bugLoc, friends);
