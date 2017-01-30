@@ -1,8 +1,26 @@
 package RUfoo.managers;
 
-import static RUfoo.model.Channel.*;
+import static RUfoo.model.Channel.DEFENSE_NEEDED_COUNT_START;
+import static RUfoo.model.Channel.DEFENSE_NEEDED_LOCATION_END;
+import static RUfoo.model.Channel.DEFENSE_NEEDED_LOCATION_START;
+import static RUfoo.model.Channel.ENEMY_ARCHON_CHANNEL1;
+import static RUfoo.model.Channel.ENEMY_ARCHON_CHANNEL2;
+import static RUfoo.model.Channel.ENEMY_ARCHON_CHANNEL3;
+import static RUfoo.model.Channel.ENEMY_ARCHON_ID_CHANNEL1;
+import static RUfoo.model.Channel.ENEMY_ARCHON_ID_CHANNEL2;
+import static RUfoo.model.Channel.ENEMY_ARCHON_ID_CHANNEL3;
+import static RUfoo.model.Channel.ENEMY_GARDENER_ID_END;
+import static RUfoo.model.Channel.ENEMY_GARDENER_ID_START;
+import static RUfoo.model.Channel.ENEMY_GARDENER_LOC_END;
+import static RUfoo.model.Channel.ENEMY_GARDENER_LOC_START;
+import static RUfoo.model.Channel.GARDENER_BASE_LOCATION_END;
+import static RUfoo.model.Channel.GARDENER_BASE_LOCATION_START;
+import static RUfoo.model.Channel.SCOUT_TARGET_LOCATION_END;
+import static RUfoo.model.Channel.SCOUT_TARGET_LOCATION_START;
+import static RUfoo.model.Channel.TREE_CHANNEL;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import RUfoo.model.Channel;
@@ -33,6 +51,28 @@ public class Radio {
 		return freeIndex;
 	}
 	
+	// GARDENER BASES
+	public void sendSettledBase(MapLocation location) {
+		for (int i = GARDENER_BASE_LOCATION_START.ordinal(); i <= GARDENER_BASE_LOCATION_END.ordinal(); i++) {
+			if (readChannel(i) == 0) {
+				broadcast(Channel.values()[i], mapLocationToInt(location));
+				break;
+			}
+		}
+	}
+
+	public List<MapLocation> readGardenerBaseLocations() {
+		List<MapLocation> locations = new LinkedList<>();
+		for (int i = GARDENER_BASE_LOCATION_START.ordinal(); i <= GARDENER_BASE_LOCATION_END.ordinal(); i++) {
+			int location = readChannel(i);
+			if (location != 0) {
+				locations.add(intToMapLocation(location));
+			}
+		}
+		
+		return locations;
+	}
+	
 	// SCOUT TARGETS
 	public List<MapLocation> readScoutTargetsNearMe() {
 		List<MapLocation> locs = new ArrayList<>();
@@ -40,7 +80,7 @@ public class Radio {
 			int target = readChannel(Channel.values()[i]);
 			if (target != -1 && target != 0) {
 				MapLocation location = intToMapLocation(target);
-				if (rc.getLocation().distanceTo(location) < rc.getType().sensorRadius) {
+				if (rc.getLocation().distanceTo(location) <= rc.getType().sensorRadius + rc.getType().bodyRadius) {
 					locs.add(location);
 				}
 			}
@@ -220,6 +260,10 @@ public class Radio {
 		}
 	}
 
+	private int readChannel(int channel) {
+		return readChannel(Channel.values()[channel]);
+	}
+	
 	public int readChannel(Channel channel) {
 		int msg = 0;
 		try {
