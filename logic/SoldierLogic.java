@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import RUfoo.managers.DefenseInfo;
+import RUfoo.model.DefenseInfo;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.BulletInfo;
@@ -25,6 +25,7 @@ public class SoldierLogic extends RobotLogic {
 	private int moveFrustration;
 	private float prevousDistanceToTarget;
 	private List<MapLocation> moveAreas;
+	private boolean hasRespondedToDefense;
 
 	public SoldierLogic(RobotController _rc) {
 		super(_rc);
@@ -74,8 +75,13 @@ public class SoldierLogic extends RobotLogic {
 		} else {
 			// No target.
 
+			if (rc.getRoundNum() % 2 == 0 && !hasRespondedToDefense) {
+				respondToDefenseCalls();
+				hasRespondedToDefense = true;
+			}
+			
 			lookForEnemyArchons(enemies);
-			respondToDefenseCalls();
+
 
 			// Dodge any bullets
 			nav.dodge(bullets);
@@ -97,8 +103,9 @@ public class SoldierLogic extends RobotLogic {
 	}
 
 	boolean shouldKite(RobotInfo target, RobotInfo[] friends) {
-		return target.type == RobotType.LUMBERJACK || ((target.getType().canAttack() && target.getType() != RobotType.SCOUT && target.health > 20)
-				&& friends.length <= 2);
+		return target.type == RobotType.LUMBERJACK
+				|| ((target.getType().canAttack() && target.getType() != RobotType.SCOUT && target.health > 20)
+						&& friends.length <= 2);
 	}
 
 	void respondToDefenseCalls() {
@@ -140,7 +147,6 @@ public class SoldierLogic extends RobotLogic {
 				addNewMoveArea(gardenerLoc);
 			}
 		}
-
 	}
 
 	boolean addNewMoveArea(MapLocation location) {
@@ -177,11 +183,10 @@ public class SoldierLogic extends RobotLogic {
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 
 		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
-			if (!nav.closeToArchonLocation(loc)) {
-				moveAreas.remove(moveIndex % moveAreas.size());
-				nav.isBugging = false;
-				moveIndex++;
-			}
+			moveAreas.remove(moveIndex % moveAreas.size());
+			hasRespondedToDefense = false;
+			nav.isBugging = false;
+			moveIndex++;
 			moveFrustration++;
 		}
 
@@ -197,7 +202,7 @@ public class SoldierLogic extends RobotLogic {
 						- b2.getLocation().distanceSquaredTo(rc.getLocation()));
 			});
 		}
-		
+
 		nav.bug(loc, obstacles);
 
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius - 0.1f)) {
