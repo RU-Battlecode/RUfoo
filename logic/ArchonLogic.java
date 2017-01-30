@@ -273,7 +273,7 @@ public class ArchonLogic extends RobotLogic {
 	private void moveOffOfGardeners(RobotInfo[] robots) {
 		for (RobotInfo robot : robots) {
 			if (robot.type == RobotType.GARDENER
-					&& robot.location.distanceTo(rc.getLocation()) <= rc.getType().bodyRadius * 2.0f) {
+					&& robot.location.distanceTo(rc.getLocation()) <= rc.getType().bodyRadius * 2.5f) {
 				nav.tryHardMove(robot.location.directionTo(rc.getLocation()));
 				break;
 			}
