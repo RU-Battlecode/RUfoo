@@ -61,7 +61,11 @@ public class Combat {
 		shoot(target.location, enemies);
 	}
 	
-	public void shoot(MapLocation target, RobotInfo[] enemies) {	
+	public void shoot(MapLocation target, RobotInfo[] enemies) {
+		if (target == null) {
+			return;
+		}
+		
 		float distToTarget = target.distanceTo(rc.getLocation());
 		if (shouldUsePentadShot() && (distToTarget <= rc.getType().sensorRadius / 1.5)) {
 			pentadShot(target);
