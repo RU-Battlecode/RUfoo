@@ -100,6 +100,7 @@ public class Radio {
 			if (msg == 0) {
 				broadcast(defenseNeededLocation, mapLocationToInt(loc));
 				broadcast(numUnitsChannel, numUnits);
+				break;
 			}
 		}
 	}
