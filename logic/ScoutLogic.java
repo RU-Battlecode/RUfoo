@@ -80,6 +80,27 @@ public class ScoutLogic extends RobotLogic {
 			}
 		}
 		
+		if (target == null && enemies.length > 0) {
+			RobotInfo tank = Util.findType(enemies, RobotType.TANK);
+			if (tank != null) {
+				broadcastTargetToFriends(tank.location, friends);
+			} else {
+				broadcastTargetToFriends(enemies[0].location, friends);
+			}
+		}
+		
+		RobotInfo friendlyTank = Util.findType(friends, RobotType.TANK);
+		if (friendlyTank != null) {
+			MapLocation bugLoc = friendlyTank.location;
+
+			// Get behind tank
+			if (enemies.length > 0) {
+				bugLoc.add(enemies[0].location.directionTo(friendlyTank.location), 2.0f);
+			}
+			
+			nav.bug(bugLoc, friends);
+		}
+		
 		if (target == null && !rc.hasAttacked()) {
 			for (TreeInfo tree : trees) {
 				if (tree.containedBullets > 0) {
@@ -87,14 +108,8 @@ public class ScoutLogic extends RobotLogic {
 					break;
 				}
 			}
-			
-			RobotInfo friendlyTank = Util.findType(friends, RobotType.TANK);
-			if (friendlyTank == null) {
-				explore();
-			} else {
-				nav.bug(friendlyTank.location, friends);
-				//nav.tryHardMove(rc.getLocation().directionTo(friendlyTank.location));
-			}
+	
+			explore();	
 		}
 
 		nav.shakeTrees(trees);
