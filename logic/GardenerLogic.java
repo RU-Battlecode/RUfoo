@@ -48,9 +48,9 @@ public class GardenerLogic extends RobotLogic {
 	private static final int MAX_SCOUT = 2;
 
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
-			Direction.getWest().rotateLeftDegrees(2), Direction.getEast().rotateLeftDegrees(2), Nav.NORTH_WEST.rotateLeftDegrees(15),
-			Nav.NORTH_EAST.rotateRightDegrees(15), Nav.SOUTH_WEST.rotateRightDegrees(15),
-			Nav.SOUTH_EAST.rotateLeftDegrees(15), };
+			Direction.getWest().rotateLeftDegrees(2), Direction.getEast().rotateLeftDegrees(2),
+			Nav.NORTH_WEST.rotateLeftDegrees(15), Nav.NORTH_EAST.rotateRightDegrees(15),
+			Nav.SOUTH_WEST.rotateRightDegrees(15), Nav.SOUTH_EAST.rotateLeftDegrees(15), };
 
 	private float buildOffset;
 	private Direction buildDirection;
@@ -69,7 +69,7 @@ public class GardenerLogic extends RobotLogic {
 
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
-
+		
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn()).opposite()
 				.rotateLeftDegrees(20.0f);
 
@@ -100,7 +100,7 @@ public class GardenerLogic extends RobotLogic {
 		if (rc.getHealth() / rc.getType().maxHealth < 0.40f && Util.contains(enemies, RobotType.SOLDIER) && !Util.contains(enemies, RobotType.TANK)) {
 			tryHardPlant(buildDirection);
 		}
-		
+
 		buildRobots(trees);
 
 		if (settled) {
@@ -113,7 +113,7 @@ public class GardenerLogic extends RobotLogic {
 		waterTrees(myTrees);
 
 		nav.shakeTrees(trees);
-		
+
 		// Archons can report enemies archons too!
 		int defenseNeed = 0;
 		for (RobotInfo enemy : enemies) {
@@ -186,7 +186,7 @@ public class GardenerLogic extends RobotLogic {
 
 	boolean farEnoughFromEdge() {
 		boolean farEnough = true;
-		for (Direction dir : Nav.DIRECTIONS) {	
+		for (Direction dir : Nav.DIRECTIONS) {
 			try {
 				if (!rc.onTheMap(rc.getLocation().add(dir, rc.getType().bodyRadius * 2.2f))) {
 					farEnough = false;
@@ -194,12 +194,12 @@ public class GardenerLogic extends RobotLogic {
 				}
 			} catch (GameActionException e) {
 				e.printStackTrace();
-			}	
+			}
 		}
 
 		return farEnough;
 	}
-	
+
 	void plantTrees() {
 		if (!rc.hasTreeBuildRequirements()) {
 			return;
@@ -233,13 +233,13 @@ public class GardenerLogic extends RobotLogic {
 								rc.plantTree(dir.rotateRightDegrees(offset));
 								planted = true;
 							}
-							
+
 							offset += 0.5f;
 						}
-						
+
 						if (planted) {
 							break;
-						} 
+						}
 					}
 				} catch (GameActionException e) {
 					e.printStackTrace();
