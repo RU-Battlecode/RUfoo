@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import RUfoo.managers.DefenseInfo;
+import RUfoo.model.DefenseInfo;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.BulletInfo;
@@ -25,12 +25,15 @@ public class SoldierLogic extends RobotLogic {
 	private int moveFrustration;
 	private float prevousDistanceToTarget;
 	private List<MapLocation> moveAreas;
+	private boolean hasRespondedToDefense;
+	private RobotInfo prevousTarget;
 
 	public SoldierLogic(RobotController _rc) {
 		super(_rc);
 		moveIndex = 0;
 		moveFrustration = 0;
 		moveAreas = new ArrayList<>();
+		prevousTarget = null;
 
 		// find nearest gardener.
 		if (personality.getMother() != null) {
@@ -59,11 +62,11 @@ public class SoldierLogic extends RobotLogic {
 		}
 
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
-
 		if (target != null) {
 			// Attack target aggressively!
 			MapLocation closeToTarget = target.location.add(target.location.directionTo(rc.getLocation()),
 					rc.getType().bodyRadius * 2.0f);
+			
 			if (shouldKite(target, friends)) {
 				nav.kite(target, bullets);
 			} else {
@@ -74,8 +77,18 @@ public class SoldierLogic extends RobotLogic {
 		} else {
 			// No target.
 
+			if (prevousTarget != null) {
+				combat.shoot(prevousTarget, enemies);
+				prevousTarget = null;
+			}
+			
+			if (rc.getRoundNum() % 2 == 0 && !hasRespondedToDefense) {
+				respondToDefenseCalls();
+				hasRespondedToDefense = true;
+			}
+			
 			lookForEnemyArchons(enemies);
-			respondToDefenseCalls();
+
 
 			// Dodge any bullets
 			nav.dodge(bullets);
@@ -94,23 +107,23 @@ public class SoldierLogic extends RobotLogic {
 		}
 
 		nav.shakeTrees(trees);
+		prevousTarget = target;
 	}
 
 	boolean shouldKite(RobotInfo target, RobotInfo[] friends) {
-		return target.type == RobotType.LUMBERJACK || ((target.getType().canAttack() && target.getType() != RobotType.SCOUT && target.health > 20)
-				&& friends.length <= 2);
+		return target.type == RobotType.LUMBERJACK
+				|| ((target.getType().canAttack() && target.getType() != RobotType.SCOUT && target.health > 20)
+						&& friends.length <= 5);
 	}
 
 	void respondToDefenseCalls() {
 		List<DefenseInfo> defenseNeeds = radio.readLocationsThatNeedDefense();
 
 		if (defenseNeeds.size() > 0) {
-			System.out.println("trying to respond to defense needs");
 			DefenseInfo mostNeedy = Collections.max(defenseNeeds);
 			// Try to add the location to our moveAreas with interrupt
 			if (addNewMoveArea(mostNeedy.getLocation(), true)) {
 				// Let everyone know we got it!
-				System.out.println("heading there maybe?");
 				radio.respondToDefenseCall(mostNeedy, 1);
 			}
 		}
@@ -137,10 +150,9 @@ public class SoldierLogic extends RobotLogic {
 		List<MapLocation> possibleGardenerLocs = radio.readEnemyGardenerLocations();
 		for (MapLocation gardenerLoc : possibleGardenerLocs) {
 			if (gardenerLoc != null) {
-				addNewMoveArea(gardenerLoc);
+				addNewMoveArea(gardenerLoc, true);
 			}
 		}
-
 	}
 
 	boolean addNewMoveArea(MapLocation location) {
@@ -177,11 +189,10 @@ public class SoldierLogic extends RobotLogic {
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 
 		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
-			if (!nav.closeToArchonLocation(loc)) {
-				moveAreas.remove(moveIndex % moveAreas.size());
-				nav.isBugging = false;
-				moveIndex++;
-			}
+			moveAreas.remove(moveIndex % moveAreas.size());
+			hasRespondedToDefense = false;
+			nav.isBugging = false;
+			moveIndex++;
 			moveFrustration++;
 		}
 
@@ -197,7 +208,7 @@ public class SoldierLogic extends RobotLogic {
 						- b2.getLocation().distanceSquaredTo(rc.getLocation()));
 			});
 		}
-		
+
 		nav.bug(loc, obstacles);
 
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius - 0.1f)) {

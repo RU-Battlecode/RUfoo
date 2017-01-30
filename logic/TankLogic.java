@@ -61,42 +61,47 @@ public class TankLogic extends RobotLogic {
 			// No target or enemy trees.
 			checkRadioForArchons();
 
+			RobotInfo scout = Util.findType(friends, RobotType.SCOUT);
+			if (scout != null) {
+				System.out.println("scout near me.");
+				MapLocation targetLocation = fireAtScoutTargets(enemies, friends);
+				
+				if (targetLocation != null) {
+					combat.singleShotAttack(targetLocation);
+				} else {
+				}
+			} 
+			
 			if (moveAreas.size() > 0) {
-				move(enemies, trees);
+				move(enemies, trees, myTrees, friends);
 			} else {
 				moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
 				for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
 					moveAreas.add(loc);
 				}
 				nav.moveRandom();
-			}
-			
-			RobotInfo scout = Util.findType(friends, RobotType.SCOUT);
-			
-			if (scout != null && scout.location.distanceTo(rc.getLocation()) < rc.getType().sensorRadius) {
-				fireAtScoutTargets(enemies, friends);
-			}
+			}			
 		}
 
 		nav.shakeTrees(trees);
 	}
 	
-	void fireAtScoutTargets(RobotInfo[] enemies, RobotInfo[] friends) {
+	MapLocation fireAtScoutTargets(RobotInfo[] enemies, RobotInfo[] friends) {
 		
 		List<MapLocation> locs = radio.readScoutTargetsNearMe();
 		for (MapLocation target : locs) {
 			
 			for (RobotInfo friend : friends) {
 				MapLocation closestPoint = Util.distanceToSegment(rc.getLocation(), target, friend.location);
-				if (friend.location.distanceTo(closestPoint) <= friend.type.bodyRadius) {
-					return; // This would hit my friend
+				if (friend.location.distanceTo(closestPoint) < friend.type.bodyRadius) {
+					return null; // This would hit my friend
 				}
 			}
 			
-			combat.shoot(target, enemies);
-			break;
+			return target;
 		}
 		
+		return null;
 	}
 
 	void lookForEnemyArchons(RobotInfo[] enemies) {
@@ -139,23 +144,23 @@ public class TankLogic extends RobotLogic {
 		}
 	}
 
-	void move(RobotInfo[] enemies, TreeInfo[] trees) {
+	void move(RobotInfo[] enemies, TreeInfo[] trees, TreeInfo[] myTrees, RobotInfo[] friends) {
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 
 		boolean nothingAtLocation = rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0;
 		
 		if (nothingAtLocation) {
-			if (!nav.closeToArchonLocation(loc)) {
-				moveAreas.remove(moveIndex % moveAreas.size());
-				MapLocation mid = Util.midPoint(rc.getInitialArchonLocations(rc.getTeam())[0], combat.getFurthestEnemySpawn());
-				addNewMoveArea(mid);
-			}
+			moveAreas.remove(moveIndex % moveAreas.size());
+			MapLocation mid = Util.midPoint(rc.getInitialArchonLocations(rc.getTeam())[0], combat.getFurthestEnemySpawn());
+			addNewMoveArea(mid);
+			nav.isBugging = false;
 			moveFrustration++;
 		}
 		
 		if (moveFrustration > personality.getPatience()) {
 			moveIndex++;
+			nav.isBugging = false;
 			moveFrustration = 0;
 		}
 
@@ -163,6 +168,7 @@ public class TankLogic extends RobotLogic {
 			nav.moveByTrees(trees);
 			nav.moveRandom();
 		} else {
+			nav.bug(loc, Util.addAll(friends, myTrees));
 			nav.tryHardMove(rc.getLocation().directionTo(loc));
 		}
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import RUfoo.managers.Channel;
+import RUfoo.model.Channel;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.GameActionException;
@@ -46,6 +46,7 @@ public class LumberjackLogic extends RobotLogic {
 	private List<MapLocation> moveAreas;
 	private int moveFrustration;
 	private float prevousDistanceToTarget;
+	private MapLocation home;
 
 	public LumberjackLogic(RobotController _rc) {
 		super(_rc);
@@ -60,6 +61,7 @@ public class LumberjackLogic extends RobotLogic {
 
 		targetTree = null;
 		treeFrustration = 0;
+		home = rc.getLocation();
 	}
 
 	@Override
@@ -67,7 +69,10 @@ public class LumberjackLogic extends RobotLogic {
 		TreeInfo[] trees = rc.senseNearbyTrees();
 		RobotInfo[] friends = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
-
+		BodyInfo[] obstacles = Util.addAll(friends, trees);
+		
+		moveOffSpawn(obstacles);
+		
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
 				radio.foundEnemyArchon(enemy);
@@ -87,7 +92,6 @@ public class LumberjackLogic extends RobotLogic {
 		clearTreesAroundBase(friends, trees);
 
 		if (!rc.hasAttacked() && target == null) {
-			BodyInfo[] obstacles = Util.addAll(friends, trees);
 			checkRadioTreeChannel(obstacles);
 
 			if (!rc.hasMoved()) {
@@ -104,6 +108,13 @@ public class LumberjackLogic extends RobotLogic {
 		}
 
 		nav.shakeTrees();
+	}
+
+	void moveOffSpawn(BodyInfo[] obstacles) {
+		if (rc.getLocation().distanceTo(home) < 0.1f) {
+			
+			nav.bug(combat.getFurthestEnemySpawn(), obstacles);
+		}
 	}
 
 	void clearTreesAroundBase(RobotInfo[] robots, TreeInfo[] trees) {

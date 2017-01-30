@@ -61,7 +61,11 @@ public class Combat {
 		shoot(target.location, enemies);
 	}
 	
-	public void shoot(MapLocation target, RobotInfo[] enemies) {	
+	public void shoot(MapLocation target, RobotInfo[] enemies) {
+		if (target == null) {
+			return;
+		}
+		
 		float distToTarget = target.distanceTo(rc.getLocation());
 		if (shouldUsePentadShot() && (distToTarget <= rc.getType().sensorRadius / 1.5)) {
 			pentadShot(target);
@@ -122,7 +126,7 @@ public class Combat {
 			for (BodyInfo body : bodiesToAvoid) {
 				MapLocation closestPoint = Util.distanceToSegment(rc.getLocation(), enemy.location, body.getLocation());
 				Float dist = closestPoint.distanceTo(body.getLocation());
-				if (dist < body.getRadius() - 0.01f) {
+				if (dist < body.getRadius() - 0.07f) {
 					// The bullet would just hit a tree or a friend if we fire it...
 					// Maybe we should just save ;)
 					hittable.remove(enemy);

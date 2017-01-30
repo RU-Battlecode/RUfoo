@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import RUfoo.managers.Channel;
-import RUfoo.managers.DefenseInfo;
 import RUfoo.managers.Nav;
+import RUfoo.model.Channel;
+import RUfoo.model.DefenseInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
@@ -132,7 +132,12 @@ public class ArchonLogic extends RobotLogic {
 				break;
 			}
 		}
-
+		
+		// There are buildDirs and the Archon could not build
+		if (buildDirs.size() > 0 && built == null) {
+			makeRoomForGardener();
+		}
+		
 		if (built != null) {
 			buildDirs.remove(built);
 		}
@@ -156,7 +161,7 @@ public class ArchonLogic extends RobotLogic {
 			break;
 		default:
 			Direction dir = nav.randomDirection();
-			if (round > 120 && gardenersAlive < gardenerLimit && rc.canBuildRobot(RobotType.GARDENER, dir)) {
+			if (round > 180 && gardenersAlive < gardenerLimit && rc.canBuildRobot(RobotType.GARDENER, dir)) {
 				buildDirs.add(dir);
 			}
 			
@@ -166,6 +171,21 @@ public class ArchonLogic extends RobotLogic {
 		}
 	}
 
+	void makeRoomForGardener() {
+		for (Direction dir : Nav.DIRECTIONS) {
+			MapLocation gardenerSpawn = rc.getLocation().add(dir, rc.getType().bodyRadius + GameConstants.GENERAL_SPAWN_OFFSET);
+			try {
+				if (rc.isCircleOccupiedExceptByThisRobot(gardenerSpawn, RobotType.GARDENER.bodyRadius)) {
+					if (nav.tryHardMove(dir.opposite())) {
+						break;
+					}
+				}
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public void castArchonVote() {
 		int votes = 0;
 		for (Direction dir : Nav.DIRECTIONS) {
@@ -215,22 +235,21 @@ public class ArchonLogic extends RobotLogic {
 			}
 		} else if (rc.getRoundNum() < GARDENER_LIMIT_UNTIL_ROUND && gardeners > gardenerLimit) {
 			return false;
-		}
-
-		if (!rc.hasRobotBuildRequirements(RobotType.GARDENER)) {
+		} else if (!rc.hasRobotBuildRequirements(RobotType.GARDENER)) {
 			return false;
 		}
 
 		try {
 			float offset = 0.0f;
 			while (offset < 360.0f) {
-				Direction hireDir = dir.rotateRightDegrees(personality.getIsLeftHanded() ? -offset : offset);
+				Direction hireDir = dir.rotateRightDegrees(offset);
 				if (rc.canHireGardener(hireDir)) {
 					rc.hireGardener(hireDir);
 					census.increment(RobotType.GARDENER);
 					return true;
 				}
-				offset += 15.0f;
+				
+				offset += 10.0f;
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
@@ -254,7 +273,7 @@ public class ArchonLogic extends RobotLogic {
 	private void moveOffOfGardeners(RobotInfo[] robots) {
 		for (RobotInfo robot : robots) {
 			if (robot.type == RobotType.GARDENER
-					&& robot.location.distanceTo(rc.getLocation()) <= rc.getType().bodyRadius * 2.0f) {
+					&& robot.location.distanceTo(rc.getLocation()) <= rc.getType().bodyRadius * 2.5f) {
 				nav.tryHardMove(robot.location.directionTo(rc.getLocation()));
 				break;
 			}
