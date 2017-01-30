@@ -151,12 +151,12 @@ public class Nav {
 			return tryHardMoveClosestTo(dir, dist / 2, maxDegreesOff, targetDir);
 		}
 	}
-
+	
 	public void moveByTrees(TreeInfo[] trees) {
 		if (rc.hasMoved()) {
 			return;
 		}
-
+		
 		for (TreeInfo tree : trees) {
 			if (tryMove(rc.getLocation().directionTo(tree.location))) {
 				break;
@@ -274,7 +274,7 @@ public class Nav {
 				float degrees = best.degreesBetween(direct);
 				if (prioritizeSafety) {
 					// Obvious choice. Be safe.
-					rc.move(best, dist);
+					tryHardMove(best, dist);
 				} else if (Math.abs(degrees) <= 30 && rc.canMove(direct, dist)) {
 					// The safest is to far off course for someone who
 					// does not care about safety. Just take the bullet.
