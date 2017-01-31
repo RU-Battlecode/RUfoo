@@ -195,14 +195,14 @@ public class SoldierLogic extends RobotLogic {
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 
-		MapLocation otherTarget = radio.readSoldierAttackLocation();
-		if (otherTarget != null && otherTarget.distanceSquaredTo(otherTarget) < rc.getType().sensorRadius * 2) {
-			nav.isBugging = false;
-			nav.bug(otherTarget, obstacles);
-			if (rc.hasMoved()) {
-				return;
-			}
-		}
+//		MapLocation otherTarget = radio.readSoldierAttackLocation();
+//		if (otherTarget != null && otherTarget.distanceSquaredTo(otherTarget) < rc.getType().sensorRadius * 2) {
+//			nav.isBugging = false;
+//			nav.bug(otherTarget, obstacles);
+//			if (rc.hasMoved()) {
+//				return;
+//			}
+//		}
 		
 		// for (MapLocation test : moveAreas) {
 		// rc.setIndicatorDot(test, rc.getTeam() == Team.A ? 200 : 1, 1,
