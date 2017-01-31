@@ -169,7 +169,7 @@ public class TankLogic extends RobotLogic {
 			nav.moveByTrees(trees);
 			nav.moveRandom();
 		} else {
-			nav.bug(loc, Util.addAll(friends, myTrees));
+			nav.bug(loc, Util.addAll(friends, myTrees), true);
 			nav.tryHardMove(rc.getLocation().directionTo(loc));
 		}
 

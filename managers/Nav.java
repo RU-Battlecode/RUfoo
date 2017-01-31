@@ -401,6 +401,10 @@ public class Nav {
 	float bugDistance;
 
 	public void bug(MapLocation target, BodyInfo[] bodies) {
+		bug(target, bodies, false);
+	}
+	
+	public void bug(MapLocation target, BodyInfo[] bodies, boolean addNormal) {
 		MapLocation location = rc.getLocation();
 		float totalDist = location.distanceTo(target);
 
@@ -441,7 +445,7 @@ public class Nav {
 
 			}
 			// Try to follow body tangents.
-			else if (handleBodies(bodies, dist)) {
+			else if (handleBodies(bodies, dist, addNormal)) {
 			}
 			// No trees... move to target?
 			else {
@@ -456,7 +460,7 @@ public class Nav {
 		}
 	}
 
-	boolean handleBodies(BodyInfo[] bodies, float dist) {
+	boolean handleBodies(BodyInfo[] bodies, float dist, boolean addNormal) {
 		int bodiesCalculated = 0;
 		Direction best = null;
 		Direction direction = lastDir != null ? lastDir : bugDir;
@@ -473,8 +477,10 @@ public class Nav {
 			});
 
 			for (MapLocation intersection : intersections) {
-				// Direction normal =
-				// body.getLocation().directionTo(intersection);
+				Direction normal = body.getLocation().directionTo(intersection);
+				if (addNormal) {
+					intersection = intersection.add(normal, rc.getType().bodyRadius);
+				}
 				Direction dir = rc.getLocation().directionTo(intersection);
 				if (best == null || Math.abs(dir.degreesBetween(direction)) < Math
 						.abs(best.degreesBetween(direction))) {
