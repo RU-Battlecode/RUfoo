@@ -8,6 +8,7 @@ import RUfoo.managers.Nav;
 import RUfoo.model.DefenseInfo;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
@@ -38,14 +39,14 @@ import battlecode.common.TreeInfo;
  */
 public class GardenerLogic extends RobotLogic {
 
-	private static final float TOO_MUCH_TREE_SUM_RADIUS = 10.0f;
+	private static final float TOO_MUCH_TREE_SUM_RADIUS = 8.0f;
 	private static final int MIN_STEPS_BEFORE_SETTLE = 6;
 	private static final float MIN_DIST_TO_GARDENERS = 8.5f;
 
-	private static final int MAX_SOLDIER = 8;
-	private static final int MAX_LUMBERJACK = 5;
-	private static final int MAX_TANKS = 4;
-	private static final int MAX_SCOUT = 2;
+	private static int MAX_SOLDIER = 8;
+	private static final int MAX_LUMBERJACK = 7;
+	private static final int MAX_TANKS = 5;
+	private static final int MAX_SCOUT = 3;
 
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
 			Direction.getWest().rotateLeftDegrees(2), Direction.getEast().rotateLeftDegrees(2),
@@ -68,11 +69,10 @@ public class GardenerLogic extends RobotLogic {
 	private boolean smallMap = false;
 	private MapLocation inheritedBaseLocation;
 	private List<MapLocation> forgetInheritedLocations;
+	private int inheritedFrustration;
 
 	public GardenerLogic(RobotController _rc) {
 		super(_rc);
-		forgetInheritedLocations = new ArrayList<>();
-		
 		Direction pointAt = rc.getLocation().directionTo(combat.getClosestEnemySpawn()).opposite()
 				.rotateLeftDegrees(20.0f);
 
@@ -89,10 +89,13 @@ public class GardenerLogic extends RobotLogic {
 
 		stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.6f);
 
-		smallMap = rc.getInitialArchonLocations(rc.getTeam())[0]
-				.distanceTo(combat.getFurthestEnemySpawn()) <= SMALL_MAP_SIZE;
-
+		float dist = rc.getInitialArchonLocations(rc.getTeam())[0]
+				.distanceTo(combat.getFurthestEnemySpawn()); 
+		smallMap = dist <= SMALL_MAP_SIZE;
+	
+		forgetInheritedLocations = new ArrayList<>();
 		inheritedBaseLocation = null;
+		inheritedFrustration = 0;
 	}
 
 	@Override
@@ -106,7 +109,7 @@ public class GardenerLogic extends RobotLogic {
 				&& !Util.contains(enemies, RobotType.TANK)) {
 			tryHardPlant(buildDirection);
 		}
-
+		
 		buildRobots(trees);
 
 		if (settled) {
@@ -118,27 +121,31 @@ public class GardenerLogic extends RobotLogic {
 
 		waterTrees(myTrees);
 
-		nav.shakeTrees(trees);
+		if (enemies.length > 0) {
+			// Archons can report enemies archons too!
+			int defenseNeed = 0;
+			for (RobotInfo enemy : enemies) {
+				if (enemy.type == RobotType.ARCHON) {
+					radio.foundEnemyArchon(enemy);
+				}
 
-		// Archons can report enemies archons too!
-		int defenseNeed = 0;
-		for (RobotInfo enemy : enemies) {
-			if (enemy.type == RobotType.ARCHON) {
-				radio.foundEnemyArchon(enemy);
+				defenseNeed += DefenseInfo.unitValue(enemy.type);
 			}
 
-			defenseNeed += DefenseInfo.unitValue(enemy.type);
-		}
-
-		for (RobotInfo friend : friends) {
-			defenseNeed -= DefenseInfo.unitValue(friend.type);
-		}
-
-		if (defenseNeed > 0) {
-			if (!hasCalledForDefense) {
-				radio.requestDefense(rc.getLocation(), defenseNeed);
-				hasCalledForDefense = true;
+			for (RobotInfo friend : friends) {
+				defenseNeed -= DefenseInfo.unitValue(friend.type);
 			}
+
+			if (defenseNeed > 0) {
+				if (!hasCalledForDefense) {
+					radio.requestDefense(rc.getLocation(), defenseNeed);
+					hasCalledForDefense = true;
+				}
+			}
+		}
+
+		if (Clock.getBytecodesLeft() > 300) {
+			nav.shakeTrees(trees);
 		}
 	}
 
@@ -167,49 +174,11 @@ public class GardenerLogic extends RobotLogic {
 		} else {
 
 			BodyInfo[] obstacles = Util.addAll(friends, rc.senseNearbyTrees());
-
-			List<MapLocation> gardenerLocs = radio.readGardenerBaseLocations();
 			
-			for (MapLocation loc : gardenerLocs) {
-				rc.setIndicatorDot(loc, 0, 200, 0);
+			if (inheritedFrustration < personality.getPatience()) {
+				lookForInherritableBase(friends, myTrees, obstacles);
 			}
 			
-			if (inheritedBaseLocation != null && inheritedBaseLocation.isWithinDistance(rc.getLocation(), rc.getType().sensorRadius)) {
-				for (RobotInfo friend : friends) {
-					if (friend.type == RobotType.GARDENER && friend.location.distanceTo(inheritedBaseLocation) < 0.1f) {
-						inheritedBaseLocation = null;
-						forgetInheritedLocations.add(inheritedBaseLocation);
-					}
-				}
-			}
-			
-			// Look at all my trees
-			for (TreeInfo tree : myTrees) {				
-				// See if it doesn't have a gardener
-				if (!treeHasGardener(tree, friends)) {
-					rc.setIndicatorDot(tree.location, 200, 200, 100);
-					// Find the base location to this fallen gardener
-					for (MapLocation loc : gardenerLocs) {
-						
-						if (!forgetInheritedLocations.contains(loc) && loc.distanceTo(tree.location) <= RobotType.GARDENER.strideRadius + GameConstants.BULLET_TREE_RADIUS) {
-							rc.setIndicatorLine(loc, tree.location, 100, 1, 10);
-							inheritedBaseLocation = loc;
-							System.out.println("Found an old base I can take.");
-							break;
-						}
-					}
-				}
-			}
-			
-			if (inheritedBaseLocation != null) {
-				nav.bug(inheritedBaseLocation, obstacles);
-				
-				if (rc.getLocation().distanceTo(inheritedBaseLocation) < 0.1f) {
-					settled = true;
-					baseLocation = rc.getLocation();
-				}
-			}
-
 			if (enemies.length > 0) {
 				nav.runAway(enemies);
 				steps++;
@@ -220,15 +189,76 @@ public class GardenerLogic extends RobotLogic {
 				steps++;
 			}
 
-			if (myTrees.length != 0 && myTrees[0].location.distanceTo(rc.getLocation()) <= MIN_DIST_TO_GARDENERS) {
+			if (myTrees.length != 0) {
 				Direction awayFromTree = myTrees[0].location.directionTo(rc.getLocation());
 				float dist = MIN_DIST_TO_GARDENERS - myTrees[0].location.distanceTo(rc.getLocation());
-				nav.bug(rc.getLocation().add(awayFromTree, dist), obstacles);
+				nav.bug(rc.getLocation().add(awayFromTree, dist * 2), obstacles);
 				steps++;
 			}
 
 			nav.tryMove(buildDirection.opposite());
 		}
+	}
+	
+	void lookForInherritableBase(RobotInfo[] friends, TreeInfo[] myTrees, BodyInfo[] obstacles) {
+		List<MapLocation> gardenerLocs = radio.readGardenerBaseLocations();
+
+		if (inheritedBaseLocation != null
+				&& inheritedBaseLocation.isWithinDistance(rc.getLocation(), rc.getType().sensorRadius)) {
+			for (RobotInfo friend : friends) {
+				if (friend.type == RobotType.GARDENER && friend.location.distanceTo(inheritedBaseLocation) < 0.1f) {
+					forgetInheritedLocations.add(inheritedBaseLocation);
+					inheritedBaseLocation = null;
+					inheritedFrustration++;
+					break;
+				}
+			}
+		}
+
+		boolean foundBase = false;
+		// Look at all my trees
+		for (TreeInfo tree : myTrees) {
+			
+			if (foundBase) {
+				break;
+			}
+			
+			// See if it doesn't have a gardener
+			if (!treeHasGardener(tree, friends)) {
+				// Find the base location to this fallen gardener
+				for (MapLocation loc : gardenerLocs) {
+
+					if (!forgotten(loc)
+							&& loc.distanceTo(tree.location) <= RobotType.GARDENER.strideRadius
+									+ GameConstants.BULLET_TREE_RADIUS) {
+						inheritedBaseLocation = loc;
+						foundBase = true;
+						inheritedFrustration++;
+						break;
+					}
+				}
+			}
+		}
+
+		if (inheritedBaseLocation != null) {
+			if (rc.getLocation().distanceTo(inheritedBaseLocation) < 0.1f) {
+				settled = true;
+				baseLocation = rc.getLocation();
+			} else {
+				nav.bug(inheritedBaseLocation, obstacles);
+				inheritedFrustration++;
+			}
+		}
+	}
+	
+	boolean forgotten(MapLocation loc) {
+		for (MapLocation forgotten : forgetInheritedLocations) {
+			if (forgotten.distanceTo(loc) < 2.0f) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	boolean treeHasGardener(TreeInfo tree, RobotInfo[] friends) {
@@ -293,10 +323,9 @@ public class GardenerLogic extends RobotLogic {
 				try {
 					for (Direction dir : TREE_BUILD_DIRS) {
 						dir = dir.rotateLeftDegrees(buildOffset);
-						rc.setIndicatorDot(rc.getLocation().add(dir, 2), 0, 200, 50);
 						float offset = 0.0f;
 						boolean planted = false;
-						while (offset <= 5.0f && !planted) {
+						while (offset <= 4.0f && !planted) {
 							if (rc.canPlantTree(dir.rotateLeftDegrees(offset))) {
 								rc.plantTree(dir.rotateLeftDegrees(offset));
 								planted = true;
@@ -340,7 +369,12 @@ public class GardenerLogic extends RobotLogic {
 		int lumberjacks = census.count(RobotType.LUMBERJACK);
 		int soldiers = census.count(RobotType.SOLDIER);
 		int scouts = census.count(RobotType.SCOUT);
-
+		int tanks = census.count(RobotType.TANK);
+		
+		if (rc.getRoundNum() > 700) {
+			MAX_SOLDIER = 10;
+		}
+		
 		if (!smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < MAX_LUMBERJACK) {
 			build(RobotType.LUMBERJACK);
 		} else if (smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < 1) {
@@ -348,7 +382,7 @@ public class GardenerLogic extends RobotLogic {
 		}
 
 		if (settled) {
-			if (census.count(RobotType.TANK) < MAX_TANKS) {
+			if (tanks < MAX_TANKS) {
 				build(RobotType.TANK);
 			}
 
@@ -371,8 +405,12 @@ public class GardenerLogic extends RobotLogic {
 				build(RobotType.SOLDIER);
 			} else if (!smallMap && scouts < 1) {
 				build(RobotType.SCOUT);
-			} else if (soldiers < 2) {
+			} else if (soldiers < 1) {
 				build(RobotType.SOLDIER);
+			} else if (scouts < 1) {
+				build(RobotType.SCOUT);
+			} else if (tanks < MAX_TANKS) {
+				build(RobotType.TANK);
 			}
 		}
 	}
@@ -384,7 +422,7 @@ public class GardenerLogic extends RobotLogic {
 
 		float offset = 0.0f;
 
-		while (offset < 360.0f) {
+		while (offset < 350.0f) {
 			Direction dir = buildDirection.rotateLeftDegrees((personality.getIsLeftHanded() ? 1 : 1) * offset);
 			if (rc.canBuildRobot(type, dir)) {
 				try {
@@ -395,7 +433,7 @@ public class GardenerLogic extends RobotLogic {
 					e.printStackTrace();
 				}
 			}
-			offset += 5.0f;
+			offset += 6.0f;
 		}
 	}
 

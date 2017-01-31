@@ -9,6 +9,7 @@ import RUfoo.model.DefenseInfo;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.BulletInfo;
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -61,6 +62,8 @@ public class SoldierLogic extends RobotLogic {
 			}
 		}
 
+		lookForEnemyArchons(enemies);
+		
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
 		if (target != null) {
 			// Attack target aggressively!
@@ -87,9 +90,6 @@ public class SoldierLogic extends RobotLogic {
 				hasRespondedToDefense = true;
 			}
 			
-			lookForEnemyArchons(enemies);
-
-
 			// Dodge any bullets
 			nav.dodge(bullets);
 
@@ -98,8 +98,7 @@ public class SoldierLogic extends RobotLogic {
 			if (moveAreas.size() > 0) {
 				move(enemies, trees, friends);
 			} else {
-				moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
-				for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
+				for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
 					moveAreas.add(loc);
 				}
 				nav.moveRandom();
@@ -108,6 +107,10 @@ public class SoldierLogic extends RobotLogic {
 
 		nav.shakeTrees(trees);
 		prevousTarget = target;
+		
+		if (Clock.getBytecodesLeft() > 10_000) {
+			logic();
+		}
 	}
 
 	boolean shouldKite(RobotInfo target, RobotInfo[] friends) {
@@ -176,8 +179,7 @@ public class SoldierLogic extends RobotLogic {
 
 		if (interrupt) {
 			nav.isBugging = false;
-			moveFrustration = 0;
-			moveIndex = moveAreas.size() - 1;
+			//moveIndex = moveAreas.size() - 1;
 		}
 
 		return isNew || interrupt;
@@ -188,12 +190,16 @@ public class SoldierLogic extends RobotLogic {
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 
-		if (rc.getLocation().distanceTo(loc) < 2.0f && enemies.length == 0) {
-			moveAreas.remove(moveIndex % moveAreas.size());
+//		for (MapLocation test : moveAreas) {
+//			rc.setIndicatorDot(test, rc.getTeam() == Team.A ? 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
+//		}
+//		rc.setIndicatorLine(rc.getLocation(), loc, rc.getTeam() == Team.A ? 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
+		
+		if (rc.getLocation().distanceTo(loc) <= rc.getType().sensorRadius && enemies.length == 0) {
+			moveAreas.remove(loc);
 			hasRespondedToDefense = false;
 			nav.isBugging = false;
 			moveIndex++;
-			moveFrustration++;
 		}
 
 		if (moveFrustration > personality.getPatience()) {

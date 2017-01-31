@@ -173,9 +173,14 @@ public class Combat {
 			break;
 		case SOLDIER:
 			priority += 100;
+			if (rc.getType() == RobotType.SOLDIER) {
+				priority += 10;
+			} else if (rc.getType() == RobotType.LUMBERJACK) {
+				priority -= 10;
+			}
 			break;
 		case TANK:
-			priority += 110;
+			priority += 111;
 			break;
 		default:
 			System.out.println("Missing robot type in switch.");
