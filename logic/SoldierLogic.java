@@ -105,7 +105,8 @@ public class SoldierLogic extends RobotLogic {
 
 		nav.shakeTrees(trees);
 		prevousTarget = target;
-
+		nav.moveRandom();
+		
 		if (Clock.getBytecodesLeft() > 10_000) {
 			logic();
 		}
@@ -220,6 +221,8 @@ public class SoldierLogic extends RobotLogic {
 
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 3)) {
 			moveFrustration++;
+		} else if (Util.equals(distToTarget, prevousDistanceToTarget, 0.1f)) {
+			moveFrustration += 3;
 		}
 
 		prevousDistanceToTarget = distToTarget;
