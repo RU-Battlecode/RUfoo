@@ -45,7 +45,7 @@ public class GardenerLogic extends RobotLogic {
 
 	private static int MAX_SOLDIER = 8;
 	private static final int MAX_LUMBERJACK = 7;
-	private static final int MAX_TANKS = 5;
+	private static int MAX_TANKS = 5;
 	private static final int MAX_SCOUT = 3;
 
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
@@ -190,9 +190,10 @@ public class GardenerLogic extends RobotLogic {
 			}
 
 			if (myTrees.length != 0) {
-				Direction awayFromTree = myTrees[0].location.directionTo(rc.getLocation());
-				float dist = MIN_DIST_TO_GARDENERS - myTrees[0].location.distanceTo(rc.getLocation());
-				nav.bug(rc.getLocation().add(awayFromTree, dist * 2), obstacles);
+//				Direction awayFromTree = myTrees[0].location.directionTo(rc.getLocation());
+//				float dist = MIN_DIST_TO_GARDENERS - myTrees[0].location.distanceTo(rc.getLocation());
+//				nav.bug(rc.getLocation().add(awayFromTree, dist * 2), obstacles);
+				nav.bug(combat.getFurthestEnemySpawn(), obstacles);
 				steps++;
 			}
 
@@ -373,6 +374,9 @@ public class GardenerLogic extends RobotLogic {
 		
 		if (rc.getRoundNum() > 700) {
 			MAX_SOLDIER = 10;
+		} else if (rc.getRoundNum() > 1000) {  
+			MAX_SOLDIER = 15;
+			MAX_TANK = 6;
 		}
 		
 		if (!smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < MAX_LUMBERJACK) {
