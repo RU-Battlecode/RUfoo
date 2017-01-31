@@ -198,13 +198,12 @@ public class SoldierLogic extends RobotLogic {
 		// 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
 
 		if (rc.getLocation().distanceTo(loc) <= rc.getType().sensorRadius && enemies.length == 0) {
-			moveAreas.remove(loc);
 			hasRespondedToDefense = false;
 			nav.isBugging = false;
 			moveIndex++;
 		}
 
-		if (moveFrustration > personality.getPatience()) {
+		if (moveFrustration > personality.getPatience() * 3) {
 			nav.isBugging = false;
 			moveIndex++;
 			moveFrustration = 0;
@@ -219,7 +218,7 @@ public class SoldierLogic extends RobotLogic {
 
 		nav.bug(loc, obstacles);
 
-		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius - 0.1f)) {
+		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 3)) {
 			moveFrustration++;
 		}
 
