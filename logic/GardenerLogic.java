@@ -44,7 +44,7 @@ public class GardenerLogic extends RobotLogic {
 	private static float MIN_DIST_TO_GARDENERS = 8.5f;
 
 	private static int MAX_SOLDIER = 8;
-	private static final int MAX_LUMBERJACK = 7;
+	private static int MAX_LUMBERJACK = 7;
 	private static int MAX_TANKS = 5;
 	private static final int MAX_SCOUT = 3;
 
@@ -56,7 +56,6 @@ public class GardenerLogic extends RobotLogic {
 	private float buildOffset;
 	private Direction buildDirection;
 	private int steps;
-	private int stepsBeforeGiveUp;
 	private boolean settled;
 	private MapLocation baseLocation;
 	private boolean hasPlantedFront;
@@ -87,14 +86,14 @@ public class GardenerLogic extends RobotLogic {
 		hasPlantedFront = hasPlantedMiddle = hasFinishedPlanting = false;
 		plantFailCount = 0;
 
-		stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.6f);
+		///stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.6f);
 
 		float dist = rc.getInitialArchonLocations(rc.getTeam())[0]
 				.distanceTo(combat.getFurthestEnemySpawn()); 
 		smallMap = dist <= SMALL_MAP_SIZE;
 	
 		if (smallMap) {
-			MIN_DIST_TO_GARDENERS = 6.0f;
+			MIN_DIST_TO_GARDENERS = 6.5f;
 		}
 		
 		forgetInheritedLocations = new ArrayList<>();
@@ -380,17 +379,27 @@ public class GardenerLogic extends RobotLogic {
 		
 		if (rc.getRoundNum() > 700) {
 			MAX_SOLDIER = 10;
-		} else if (rc.getRoundNum() > 1000) {  
+		} else if (rc.getRoundNum() > 800) {  
 			MAX_SOLDIER = 20;
 			MAX_TANKS = 6;
 		}
 		
-		if (!smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < MAX_LUMBERJACK) {
-			build(RobotType.LUMBERJACK);
-		} else if (smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < 1 && soldiers >= 2) {
-			build(RobotType.LUMBERJACK);
+		float treeSum = treeSumRadius(trees);
+		
+		if (smallMap) {
+			
+			if (treeSum >= TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < 2 && soldiers >= 2) {
+				build(RobotType.LUMBERJACK);
+			}
+			
+		} else {
+			
+			if (treeSum >= TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < MAX_LUMBERJACK) {
+				build(RobotType.LUMBERJACK);
+			}
+			
 		}
-
+		
 		if (settled) {
 			if (tanks < MAX_TANKS) {
 				build(RobotType.TANK);

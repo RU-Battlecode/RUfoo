@@ -61,16 +61,6 @@ public class TankLogic extends RobotLogic {
 			// No target or enemy trees.
 			checkRadioForArchons();
 
-			RobotInfo scout = Util.findType(friends, RobotType.SCOUT);
-			if (scout != null) {
-				MapLocation targetLocation = fireAtScoutTargets(enemies, friends);
-				
-				if (targetLocation != null) {
-					combat.singleShotAttack(targetLocation);
-				} else {
-				}
-			} 
-			
 			if (moveAreas.size() > 0) {
 				move(enemies, trees, myTrees, friends);
 			} else {
@@ -79,7 +69,16 @@ public class TankLogic extends RobotLogic {
 					moveAreas.add(loc);
 				}
 				nav.moveRandom();
-			}			
+			}
+			
+			RobotInfo scout = Util.findType(friends, RobotType.SCOUT);
+			if (scout != null) {
+				MapLocation targetLocation = fireAtScoutTargets(enemies, friends);
+				
+				if (targetLocation != null) {
+					combat.singleShotAttack(targetLocation);
+				}
+			} 
 		}
 
 		nav.shakeTrees(trees);
