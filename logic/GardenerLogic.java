@@ -65,7 +65,7 @@ public class GardenerLogic extends RobotLogic {
 	private int plantFailCount;
 	private boolean hasCalledForDefense;
 
-	private static final float SMALL_MAP_SIZE = 69.0f;
+	private static final float SMALL_MAP_SIZE = 60.0f;
 	private boolean smallMap = false;
 	private MapLocation inheritedBaseLocation;
 	private List<MapLocation> forgetInheritedLocations;
