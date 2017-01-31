@@ -125,9 +125,9 @@ public class Nav {
 			return false;
 		}
 
-		boolean isLeft = dir.rotateRightDegrees(1).degreesBetween(targetDir) < dir.rotateLeftDegrees(1)
-				.degreesBetween(targetDir);
-
+		boolean isLeft = Math.abs(dir.rotateRightDegrees(0.1f).degreesBetween(targetDir)) > Math.abs(dir.rotateLeftDegrees(0.1f)
+				.degreesBetween(targetDir));
+		
 		int sign = isLeft ? -1 : 1;
 		try {
 			float offset = 0.0f;
@@ -418,7 +418,7 @@ public class Nav {
 		//rc.setIndicatorLine(location, location.add(bugDir, 5), 0, 100, 1);
 
 		if (!isBugging) {
-			if (!tryHardMove(dirToTarget, dist, 90.0f)) {
+			if (!tryMove(dirToTarget, dist)) {
 				bugDistance = totalDist;
 				bugDir = dirToTarget;
 				isBugging = true;
@@ -432,7 +432,7 @@ public class Nav {
 			// System.out.println("test : " +
 			// lastDir.opposite().degreesBetween(dirToTarget));
 			if (Util.closeEnough(bugDir, dirToTarget, 5.0f) && totalDist < bugDistance
-					&& tryHardMove(dirToTarget, dist, 90.0f)) {
+					&& tryHardMove(dirToTarget, dist, 95.0f)) {
 				// We were able to move to the target
 				bugDistance = totalDist;
 				lastDir = dirToTarget;
@@ -482,7 +482,7 @@ public class Nav {
 			}
 
 			bodiesCalculated++;
-			if (bodiesCalculated > 5) {
+			if (bodiesCalculated > 4) {
 				break;
 			}
 		}
