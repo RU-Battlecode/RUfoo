@@ -10,7 +10,6 @@ import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.BulletInfo;
 import battlecode.common.Clock;
-import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -118,8 +117,8 @@ public class SoldierLogic extends RobotLogic {
 
 	boolean shouldKite(RobotInfo target, RobotInfo[] friends) {
 		return target.type == RobotType.LUMBERJACK
-				|| ((target.getType().canAttack() && target.getType() != RobotType.SCOUT && target.health > 20)
-						&& friends.length <= 5);
+				|| ((target.getType().canAttack() && target.getType() != RobotType.SCOUT 
+					&& (target.health > 20 || friends.length <= 5)));
 	}
 
 	void respondToDefenseCalls() {
@@ -190,6 +189,8 @@ public class SoldierLogic extends RobotLogic {
 		return isNew || interrupt;
 	}
 
+	boolean switchToBuggingAlgorithm2 = false;
+	
 	void move(RobotInfo[] enemies, TreeInfo[] trees, RobotInfo[] friends) {
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
@@ -221,6 +222,7 @@ public class SoldierLogic extends RobotLogic {
 			nav.isBugging = false;
 			moveIndex++;
 			moveFrustration = 0;
+			switchToBuggingAlgorithm2 = true;
 		}
 
 		if (obstacles.length > 1) {
@@ -229,8 +231,11 @@ public class SoldierLogic extends RobotLogic {
 						- b2.getLocation().distanceSquaredTo(rc.getLocation()));
 			});
 		}
-
-		nav.isBugging = false;
+		
+		if (switchToBuggingAlgorithm2) {
+			// Reset bugging
+			nav.isBugging = false;
+		}
 		nav.bug(loc, obstacles);
 
 		if (Util.equals(distToTarget, prevousDistanceToTarget, 0.0001f)) {
