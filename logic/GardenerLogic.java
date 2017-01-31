@@ -281,6 +281,8 @@ public class GardenerLogic extends RobotLogic {
 		return ((nearestMyTree.length == 0 || distToGardener >= MIN_DIST_TO_GARDENERS
 				|| (personality.age() > 400 && distToGardener >= MIN_DIST_TO_GARDENERS / 2))
 
+				&& (archon == null || rc.getLocation().distanceTo(archon.location) >= MIN_DIST_TO_GARDENERS)
+				
 				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
 
 				&& steps > MIN_STEPS_BEFORE_SETTLE && farEnoughFromEdge());
