@@ -170,7 +170,7 @@ public class TankLogic extends RobotLogic {
 			nav.moveRandom();
 		} else {
 			nav.bug(loc, Util.addAll(friends, myTrees), true);
-			nav.tryHardMove(rc.getLocation().directionTo(loc));
+			//nav.tryHardMove(rc.getLocation().directionTo(loc));
 		}
 
 		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 2)) {
