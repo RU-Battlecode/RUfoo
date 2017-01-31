@@ -66,6 +66,8 @@ public class SoldierLogic extends RobotLogic {
 
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
 		if (target != null) {
+			
+			radio.postToSoldierAttackLocation(target.location);
 			// Attack target aggressively!
 			MapLocation closeToTarget = target.location.add(target.location.directionTo(rc.getLocation()),
 					rc.getType().bodyRadius * 2.0f);
@@ -79,7 +81,7 @@ public class SoldierLogic extends RobotLogic {
 			combat.shoot(target, enemies);
 		} else {
 			// No target.
-
+						
 			if (prevousTarget != null) {
 				combat.shoot(prevousTarget, enemies);
 				prevousTarget = null;
@@ -193,6 +195,15 @@ public class SoldierLogic extends RobotLogic {
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 
+		MapLocation otherTarget = radio.readSoldierAttackLocation();
+		if (otherTarget != null && otherTarget.distanceSquaredTo(otherTarget) < rc.getType().sensorRadius * 2) {
+			nav.isBugging = false;
+			nav.bug(otherTarget, obstacles);
+			if (rc.hasMoved()) {
+				return;
+			}
+		}
+		
 		// for (MapLocation test : moveAreas) {
 		// rc.setIndicatorDot(test, rc.getTeam() == Team.A ? 200 : 1, 1,
 		// rc.getTeam() == Team.A ? 1 : 200);

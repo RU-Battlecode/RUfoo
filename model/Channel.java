@@ -91,4 +91,6 @@ public enum Channel {
 	GBL8,
 	GARDENER_BASE_LOCATION_END,
 	
+	SOLDIER_ATTACK_LOCATION
+	
 }
