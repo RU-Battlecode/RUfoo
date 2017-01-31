@@ -432,7 +432,7 @@ public class Nav {
 			// System.out.println("test : " +
 			// lastDir.opposite().degreesBetween(dirToTarget));
 			if (Util.closeEnough(bugDir, dirToTarget, 5.0f) && totalDist < bugDistance
-					&& tryHardMove(dirToTarget, dist)) {
+					&& tryHardMove(dirToTarget, dist, 90.0f)) {
 				// We were able to move to the target
 				bugDistance = totalDist;
 				lastDir = dirToTarget;
@@ -496,8 +496,13 @@ public class Nav {
 	}
 
 	boolean handleEdgeOfMap() {
-		if (rc.canSenseAllOfCircle(rc.getLocation(), rc.getType().sensorRadius)) {
-			return false;
+
+		try {
+			if (rc.onTheMap(rc.getLocation(), rc.getType().sensorRadius - 0.1f)) {
+				return false;
+			}
+		} catch (GameActionException e1) {
+			e1.printStackTrace();
 		}
 		
 		try {
@@ -507,9 +512,8 @@ public class Nav {
 				if (!rc.onTheMap(checkLoc)) {
 
 					Direction tangent = rc.getLocation().directionTo(checkLoc).rotateLeftDegrees(90);
-
-					if (!tryHardMoveClosestTo(tangent.opposite(), rc.getType().strideRadius, 180.0f, bugDir)) {
-
+					if (tryHardMoveClosestTo(tangent.opposite(), rc.getType().strideRadius, 180.0f, bugDir)) {
+						break;
 					}
 				}
 			}
