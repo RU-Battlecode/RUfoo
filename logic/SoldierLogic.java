@@ -108,7 +108,7 @@ public class SoldierLogic extends RobotLogic {
 		nav.shakeTrees(trees);
 		prevousTarget = target;
 		
-		if (Clock.getBytecodesLeft() > 11_000) {
+		if (Clock.getBytecodesLeft() > 10_000) {
 			logic();
 		}
 	}
@@ -186,18 +186,16 @@ public class SoldierLogic extends RobotLogic {
 	}
 
 	void move(RobotInfo[] enemies, TreeInfo[] trees, RobotInfo[] friends) {
-		System.out.println("getting: " + moveIndex % moveAreas.size());
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 
-		for (MapLocation test : moveAreas) {
-			rc.setIndicatorDot(test, rc.getTeam() == Team.A ? 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
-		}
-		rc.setIndicatorLine(rc.getLocation(), loc, rc.getTeam() == Team.A ? 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
+//		for (MapLocation test : moveAreas) {
+//			rc.setIndicatorDot(test, rc.getTeam() == Team.A ? 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
+//		}
+//		rc.setIndicatorLine(rc.getLocation(), loc, rc.getTeam() == Team.A ? 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
 		
 		if (rc.getLocation().distanceTo(loc) <= rc.getType().sensorRadius && enemies.length == 0) {
-			System.out.println("nothing here!!! move on!");
 			moveAreas.remove(loc);
 			hasRespondedToDefense = false;
 			nav.isBugging = false;
