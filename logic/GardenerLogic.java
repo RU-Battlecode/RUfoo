@@ -284,7 +284,7 @@ public class GardenerLogic extends RobotLogic {
 		return ((nearestMyTree.length == 0 || distToGardener >= MIN_DIST_TO_GARDENERS
 				|| (personality.age() > 400 && distToGardener >= MIN_DIST_TO_GARDENERS / 2))
 
-				&& (archon == null || rc.getLocation().distanceTo(archon.location) >= MIN_DIST_TO_GARDENERS / 2)
+				&& (archon == null || rc.getLocation().distanceTo(archon.location) >= MIN_DIST_TO_GARDENERS / 1.5)
 				
 				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
 
@@ -400,6 +400,10 @@ public class GardenerLogic extends RobotLogic {
 			
 		}
 		
+		if (rc.getRobotCount() > 100 && treeSum >= TOO_MUCH_TREE_SUM_RADIUS) {
+			build(RobotType.LUMBERJACK);
+		}
+		
 		if (settled) {
 			if (tanks < MAX_TANKS) {
 				build(RobotType.TANK);
@@ -441,7 +445,7 @@ public class GardenerLogic extends RobotLogic {
 
 		float offset = 0.0f;
 
-		while (offset < 350.0f) {
+		while (offset <= 360.0f) {
 			Direction dir = buildDirection.rotateLeftDegrees((personality.getIsLeftHanded() ? 1 : 1) * offset);
 			if (rc.canBuildRobot(type, dir)) {
 				try {
@@ -452,7 +456,7 @@ public class GardenerLogic extends RobotLogic {
 					e.printStackTrace();
 				}
 			}
-			offset += 6.0f;
+			offset += 5.0f;
 		}
 	}
 

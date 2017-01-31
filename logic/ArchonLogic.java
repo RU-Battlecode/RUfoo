@@ -148,20 +148,20 @@ public class ArchonLogic extends RobotLogic {
 		case 20:
 			buildDirs.add(Nav.NORTH_EAST);
 			break;
-		case 160:
+		case 190:
 			buildDirs.add(Nav.NORTH_WEST);
 			break;
-		case 190:
+		case 260:
 			buildDirs.add(Direction.getEast());
 			buildDirs.add(Direction.getWest());
 			break;
-		case 260:
+		case 280:
 			buildDirs.add(Nav.SOUTH_EAST);
 			buildDirs.add(Nav.SOUTH_WEST);
 			break;
 		default:
 			Direction dir = nav.randomDirection();
-			if (round > 260 && gardenersAlive < gardenerLimit && rc.canBuildRobot(RobotType.GARDENER, dir)) {
+			if (round > 280 && gardenersAlive < gardenerLimit && rc.canBuildRobot(RobotType.GARDENER, dir)) {
 				buildDirs.add(dir);
 			}
 			
