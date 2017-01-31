@@ -446,6 +446,7 @@ public class Nav {
 			// No trees... move to target?
 			else {
 				tryHardMoveClosestTo(dirToTarget, dist, 180.0f, bugDir);
+				tryHardMoveClosestTo(dirToTarget, dist, 180.0f,  lastDir != null ? lastDir : bugDir);
 				isBugging = false;
 			}
 		}
