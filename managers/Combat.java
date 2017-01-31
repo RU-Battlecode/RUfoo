@@ -154,10 +154,10 @@ public class Combat {
 
 		switch (robot.getType()) {
 		case ARCHON:
-			if (rc.getRoundNum() < 100 || rc.getRoundNum() > 300 || rc.getType() == RobotType.LUMBERJACK) {
-				priority += 80;
+			if (rc.getRoundNum() < 100 || rc.getRoundNum() > 500 || rc.getType() == RobotType.LUMBERJACK) {
+				priority += 70;
 			} else {
-				priority += 50;
+				priority += 40;
 			}
 			break;
 		case GARDENER:
@@ -170,7 +170,7 @@ public class Combat {
 			}
 			break;
 		case SCOUT:
-			priority += 80;
+			priority += 85;
 			break;
 		case SOLDIER:
 			priority += 100;
