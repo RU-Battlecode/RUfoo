@@ -39,10 +39,6 @@ public class SoldierLogic extends RobotLogic {
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
 			moveAreas.add(loc);
 		}
-		
-		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
-			moveAreas.add(loc);
-		}
 	}
 
 	@Override
@@ -57,6 +53,12 @@ public class SoldierLogic extends RobotLogic {
 		if (rc.getRoundNum() == 600) {
 			for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
 				addNewMoveArea(loc);
+			}
+		}
+		
+		if (personality.age() == 300) {
+			for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
+				moveAreas.add(loc);
 			}
 		}
 
@@ -217,12 +219,12 @@ public class SoldierLogic extends RobotLogic {
 			});
 		}
 
+		nav.isBugging = false;
 		nav.bug(loc, obstacles);
 
-		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 3)) {
-			moveFrustration++;
-		} else if (Util.equals(distToTarget, prevousDistanceToTarget, 0.1f)) {
+		if (Util.equals(distToTarget, prevousDistanceToTarget, 0.0001f)) {
 			moveFrustration += 3;
+			nav.isBugging = false;
 		}
 
 		prevousDistanceToTarget = distToTarget;
