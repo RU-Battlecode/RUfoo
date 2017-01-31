@@ -432,7 +432,7 @@ public class Nav {
 			// System.out.println("test : " +
 			// lastDir.opposite().degreesBetween(dirToTarget));
 			if (Util.closeEnough(bugDir, dirToTarget, 5.0f) && totalDist < bugDistance
-					&& tryHardMove(dirToTarget, dist, 95.0f)) {
+					&& tryHardMove(dirToTarget, dist, 100.0f)) {
 				// We were able to move to the target
 				bugDistance = totalDist;
 				lastDir = dirToTarget;
@@ -445,7 +445,7 @@ public class Nav {
 			}
 			// No trees... move to target?
 			else {
-				tryHardMoveClosestTo(dirToTarget, dist, 180.0f, bugDir);
+				//tryHardMoveClosestTo(dirToTarget, dist, 180.0f, bugDir);
 				tryHardMoveClosestTo(dirToTarget, dist, 180.0f,  lastDir != null ? lastDir : bugDir);
 				isBugging = false;
 			}
