@@ -39,14 +39,14 @@ import battlecode.common.TreeInfo;
  */
 public class GardenerLogic extends RobotLogic {
 
-	private static final float TOO_MUCH_TREE_SUM_RADIUS = 9.8f;
+	private static final float TOO_MUCH_TREE_SUM_RADIUS = 8.0f;
 	private static final int MIN_STEPS_BEFORE_SETTLE = 6;
 	private static final float MIN_DIST_TO_GARDENERS = 8.5f;
 
-	private static final int MAX_SOLDIER = 8;
-	private static final int MAX_LUMBERJACK = 5;
-	private static final int MAX_TANKS = 4;
-	private static final int MAX_SCOUT = 2;
+	private static int MAX_SOLDIER = 8;
+	private static final int MAX_LUMBERJACK = 7;
+	private static final int MAX_TANKS = 5;
+	private static final int MAX_SCOUT = 3;
 
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
 			Direction.getWest().rotateLeftDegrees(2), Direction.getEast().rotateLeftDegrees(2),
@@ -107,7 +107,7 @@ public class GardenerLogic extends RobotLogic {
 				&& !Util.contains(enemies, RobotType.TANK)) {
 			tryHardPlant(buildDirection);
 		}
-
+		
 		buildRobots(trees);
 
 		if (settled) {
@@ -341,7 +341,12 @@ public class GardenerLogic extends RobotLogic {
 		int lumberjacks = census.count(RobotType.LUMBERJACK);
 		int soldiers = census.count(RobotType.SOLDIER);
 		int scouts = census.count(RobotType.SCOUT);
-
+		int tanks = census.count(RobotType.TANK);
+		
+		if (rc.getRoundNum() > 700) {
+			MAX_SOLDIER = 10;
+		}
+		
 		if (!smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < MAX_LUMBERJACK) {
 			build(RobotType.LUMBERJACK);
 		} else if (smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < 1) {
@@ -349,7 +354,7 @@ public class GardenerLogic extends RobotLogic {
 		}
 
 		if (settled) {
-			if (census.count(RobotType.TANK) < MAX_TANKS) {
+			if (tanks < MAX_TANKS) {
 				build(RobotType.TANK);
 			}
 
@@ -372,8 +377,12 @@ public class GardenerLogic extends RobotLogic {
 				build(RobotType.SOLDIER);
 			} else if (!smallMap && scouts < 1) {
 				build(RobotType.SCOUT);
-			} else if (soldiers < 2) {
+			} else if (soldiers < 1) {
 				build(RobotType.SOLDIER);
+			} else if (scouts < 1) {
+				build(RobotType.SCOUT);
+			} else if (tanks < MAX_TANKS) {
+				build(RobotType.TANK);
 			}
 		}
 	}
