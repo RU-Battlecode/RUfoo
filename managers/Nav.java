@@ -433,17 +433,17 @@ public class Nav {
 			// in the stored bugDir.
 
 			// Can we move straight to target?
-			if (Util.closeEnough(bugDir, dirToTarget, 5.0f) && totalDist < bugDistance
+			if (Util.closeEnough(bugDir, dirToTarget, 6.0f) && totalDist < bugDistance
 					&& tryHardMove(dirToTarget, dist, 100.0f)) {
 				// We were able to move to the target
 				bugDistance = totalDist;
 				lastDir = dirToTarget;
-
 			} else if (handleEdgeOfMap()) {
 
 			}
 			// Try to follow body tangents.
 			else if (handleBodies(bodies, dist, addNormal)) {
+				
 			}
 			// No trees... move to target?
 			else {
@@ -462,6 +462,7 @@ public class Nav {
 		int bodiesCalculated = 0;
 		Direction best = null;
 		Direction direction = lastDir != null ? lastDir : bugDir;
+		
 		for (BodyInfo body : bodies) {
 			Circle treeCircle = new Circle(body.getLocation(), body.getRadius());
 			MapLocation midPoint = Util.midPoint(rc.getLocation(), body.getLocation());
