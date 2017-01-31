@@ -36,13 +36,11 @@ public class SoldierLogic extends RobotLogic {
 		moveAreas = new ArrayList<>();
 		prevousTarget = null;
 
-		// find nearest gardener.
-		if (personality.getMother() != null) {
-			Direction awayFromMom = rc.getLocation().directionTo(personality.getMother().location).opposite();
-			moveAreas.add(rc.getLocation().add(awayFromMom, 2.0f));
-		}
-
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
+			moveAreas.add(loc);
+		}
+		
+		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
 			moveAreas.add(loc);
 		}
 	}
@@ -63,13 +61,13 @@ public class SoldierLogic extends RobotLogic {
 		}
 
 		lookForEnemyArchons(enemies);
-		
+
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
 		if (target != null) {
 			// Attack target aggressively!
 			MapLocation closeToTarget = target.location.add(target.location.directionTo(rc.getLocation()),
 					rc.getType().bodyRadius * 2.0f);
-			
+
 			if (shouldKite(target, friends)) {
 				nav.kite(target, bullets);
 			} else {
@@ -84,12 +82,12 @@ public class SoldierLogic extends RobotLogic {
 				combat.shoot(prevousTarget, enemies);
 				prevousTarget = null;
 			}
-			
+
 			if (rc.getRoundNum() % 2 == 0 && !hasRespondedToDefense) {
 				respondToDefenseCalls();
 				hasRespondedToDefense = true;
 			}
-			
+
 			// Dodge any bullets
 			nav.dodge(bullets);
 
@@ -107,6 +105,7 @@ public class SoldierLogic extends RobotLogic {
 
 		nav.shakeTrees(trees);
 		prevousTarget = target;
+		nav.moveRandom();
 		
 		if (Clock.getBytecodesLeft() > 10_000) {
 			logic();
@@ -164,9 +163,11 @@ public class SoldierLogic extends RobotLogic {
 
 	boolean addNewMoveArea(MapLocation location, boolean interrupt) {
 		boolean isNew = true;
-		for (MapLocation loc : moveAreas) {
-			if (loc.distanceSquaredTo(location) < 2.0f) {
-				isNew = false;
+		if (!moveAreas.contains(location)) {
+			for (MapLocation loc : moveAreas) {
+				if (loc.distanceSquaredTo(location) < 2.0f) {
+					isNew = false;
+				}
 			}
 		}
 
@@ -179,7 +180,7 @@ public class SoldierLogic extends RobotLogic {
 
 		if (interrupt) {
 			nav.isBugging = false;
-			//moveIndex = moveAreas.size() - 1;
+			// moveIndex = moveAreas.size() - 1;
 		}
 
 		return isNew || interrupt;
@@ -190,19 +191,20 @@ public class SoldierLogic extends RobotLogic {
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 
-//		for (MapLocation test : moveAreas) {
-//			rc.setIndicatorDot(test, rc.getTeam() == Team.A ? 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
-//		}
-//		rc.setIndicatorLine(rc.getLocation(), loc, rc.getTeam() == Team.A ? 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
-		
+		// for (MapLocation test : moveAreas) {
+		// rc.setIndicatorDot(test, rc.getTeam() == Team.A ? 200 : 1, 1,
+		// rc.getTeam() == Team.A ? 1 : 200);
+		// }
+		// rc.setIndicatorLine(rc.getLocation(), loc, rc.getTeam() == Team.A ?
+		// 200 : 1, 1, rc.getTeam() == Team.A ? 1 : 200);
+
 		if (rc.getLocation().distanceTo(loc) <= rc.getType().sensorRadius && enemies.length == 0) {
-			moveAreas.remove(loc);
 			hasRespondedToDefense = false;
 			nav.isBugging = false;
 			moveIndex++;
 		}
 
-		if (moveFrustration > personality.getPatience()) {
+		if (moveFrustration > personality.getPatience() * 3) {
 			nav.isBugging = false;
 			moveIndex++;
 			moveFrustration = 0;
@@ -217,8 +219,10 @@ public class SoldierLogic extends RobotLogic {
 
 		nav.bug(loc, obstacles);
 
-		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius - 0.1f)) {
+		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 3)) {
 			moveFrustration++;
+		} else if (Util.equals(distToTarget, prevousDistanceToTarget, 0.1f)) {
+			moveFrustration += 3;
 		}
 
 		prevousDistanceToTarget = distToTarget;

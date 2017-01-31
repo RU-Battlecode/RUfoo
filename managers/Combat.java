@@ -67,9 +67,9 @@ public class Combat {
 		}
 		
 		float distToTarget = target.distanceTo(rc.getLocation());
-		if (shouldUsePentadShot() && (distToTarget <= rc.getType().sensorRadius / 1.5)) {
+		if (shouldUsePentadShot() || (distToTarget <= rc.getType().sensorRadius / 2)) {
 			pentadShot(target);
-		} else if (shouldUseTriadShot()) {
+		} else if (shouldUseTriadShot() || (distToTarget <= rc.getType().sensorRadius / 1.5)) {
 			triadShot(target);
 		} else {
 			singleShotAttack(target);
@@ -107,12 +107,13 @@ public class Combat {
 	}
 
 	public boolean shouldUsePentadShot() {
-		return rc.canFirePentadShot() && GameConstants.VICTORY_POINTS_TO_WIN
+		return rc.getRoundNum() > 400 &&
+				rc.canFirePentadShot() && GameConstants.VICTORY_POINTS_TO_WIN
 				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f;
 	}
 
 	public boolean shouldUseTriadShot() {
-		return rc.canFireTriadShot() && GameConstants.VICTORY_POINTS_TO_WIN
+		return rc.getRoundNum() > 300 && rc.canFireTriadShot() && GameConstants.VICTORY_POINTS_TO_WIN
 				- rc.getTeamVictoryPoints() > GameConstants.VICTORY_POINTS_TO_WIN * 0.1f;
 	}
 
@@ -153,10 +154,10 @@ public class Combat {
 
 		switch (robot.getType()) {
 		case ARCHON:
-			if (rc.getRoundNum() < 100 || rc.getRoundNum() > 300 || rc.getType() == RobotType.LUMBERJACK) {
-				priority += 80;
+			if (rc.getRoundNum() < 100 || rc.getRoundNum() > 500 || rc.getType() == RobotType.LUMBERJACK) {
+				priority += 70;
 			} else {
-				priority += 50;
+				priority += 40;
 			}
 			break;
 		case GARDENER:
@@ -169,7 +170,7 @@ public class Combat {
 			}
 			break;
 		case SCOUT:
-			priority += 80;
+			priority += 85;
 			break;
 		case SOLDIER:
 			priority += 100;

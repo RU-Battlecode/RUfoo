@@ -401,6 +401,10 @@ public class Nav {
 	float bugDistance;
 
 	public void bug(MapLocation target, BodyInfo[] bodies) {
+		bug(target, bodies, false);
+	}
+	
+	public void bug(MapLocation target, BodyInfo[] bodies, boolean addNormal) {
 		MapLocation location = rc.getLocation();
 		float totalDist = location.distanceTo(target);
 
@@ -429,10 +433,8 @@ public class Nav {
 			// in the stored bugDir.
 
 			// Can we move straight to target?
-			// System.out.println("test : " +
-			// lastDir.opposite().degreesBetween(dirToTarget));
 			if (Util.closeEnough(bugDir, dirToTarget, 5.0f) && totalDist < bugDistance
-					&& tryHardMove(dirToTarget, dist, 95.0f)) {
+					&& tryHardMove(dirToTarget, dist, 100.0f)) {
 				// We were able to move to the target
 				bugDistance = totalDist;
 				lastDir = dirToTarget;
@@ -441,11 +443,11 @@ public class Nav {
 
 			}
 			// Try to follow body tangents.
-			else if (handleBodies(bodies, dist)) {
+			else if (handleBodies(bodies, dist, addNormal)) {
 			}
 			// No trees... move to target?
 			else {
-				tryHardMoveClosestTo(dirToTarget, dist, 180.0f, bugDir);
+				//tryHardMoveClosestTo(dirToTarget, dist, 180.0f, bugDir);
 				tryHardMoveClosestTo(dirToTarget, dist, 180.0f,  lastDir != null ? lastDir : bugDir);
 				isBugging = false;
 			}
@@ -456,7 +458,7 @@ public class Nav {
 		}
 	}
 
-	boolean handleBodies(BodyInfo[] bodies, float dist) {
+	boolean handleBodies(BodyInfo[] bodies, float dist, boolean addNormal) {
 		int bodiesCalculated = 0;
 		Direction best = null;
 		Direction direction = lastDir != null ? lastDir : bugDir;
@@ -473,8 +475,10 @@ public class Nav {
 			});
 
 			for (MapLocation intersection : intersections) {
-				// Direction normal =
-				// body.getLocation().directionTo(intersection);
+				Direction normal = body.getLocation().directionTo(intersection);
+				if (addNormal) {
+					intersection = intersection.add(normal, rc.getType().bodyRadius);
+				}
 				Direction dir = rc.getLocation().directionTo(intersection);
 				if (best == null || Math.abs(dir.degreesBetween(direction)) < Math
 						.abs(best.degreesBetween(direction))) {
