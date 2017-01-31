@@ -20,8 +20,8 @@ import battlecode.common.TreeInfo;
  */
 public abstract class RobotLogic {
 
-	private static final float DONATE_AFTER = 400; // bullets
-	private static final float DONATE_PERCENTAGE = 0.01f;
+	private static final float DONATE_AFTER = 350; // bullets
+	private static final float DONATE_PERCENTAGE = 0.03f;
 
 	protected RobotController rc;
 	protected Nav nav;
