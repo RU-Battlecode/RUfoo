@@ -105,9 +105,9 @@ public class ArchonLogic extends RobotLogic {
 
 		buildBase(gardeners);
 
-		nav.dodge(rc.senseNearbyBullets());
 		nav.runAway(enemies);
 		moveOffOfGardeners(friends);
+		nav.dodge(rc.senseNearbyBullets());
 
 		orderClearTrees(trees);
 		nav.shakeTrees(trees);
