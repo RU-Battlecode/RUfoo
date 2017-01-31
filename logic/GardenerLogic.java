@@ -41,7 +41,7 @@ public class GardenerLogic extends RobotLogic {
 
 	private static final float TOO_MUCH_TREE_SUM_RADIUS = 8.0f;
 	private static final int MIN_STEPS_BEFORE_SETTLE = 6;
-	private static final float MIN_DIST_TO_GARDENERS = 8.5f;
+	private static float MIN_DIST_TO_GARDENERS = 8.5f;
 
 	private static int MAX_SOLDIER = 8;
 	private static final int MAX_LUMBERJACK = 7;
@@ -93,6 +93,10 @@ public class GardenerLogic extends RobotLogic {
 				.distanceTo(combat.getFurthestEnemySpawn()); 
 		smallMap = dist <= SMALL_MAP_SIZE;
 	
+		if (smallMap) {
+			MIN_DIST_TO_GARDENERS = 6.0f;
+		}
+		
 		forgetInheritedLocations = new ArrayList<>();
 		inheritedBaseLocation = null;
 		inheritedFrustration = 0;
@@ -281,7 +285,7 @@ public class GardenerLogic extends RobotLogic {
 		return ((nearestMyTree.length == 0 || distToGardener >= MIN_DIST_TO_GARDENERS
 				|| (personality.age() > 400 && distToGardener >= MIN_DIST_TO_GARDENERS / 2))
 
-				&& (archon == null || rc.getLocation().distanceTo(archon.location) >= MIN_DIST_TO_GARDENERS)
+				&& (archon == null || rc.getLocation().distanceTo(archon.location) >= MIN_DIST_TO_GARDENERS / 2)
 				
 				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
 
@@ -413,8 +417,6 @@ public class GardenerLogic extends RobotLogic {
 				build(RobotType.SCOUT);
 			} else if (soldiers < 1) {
 				build(RobotType.SOLDIER);
-			} else if (scouts < 1) {
-				build(RobotType.SCOUT);
 			} else if (tanks < MAX_TANKS) {
 				build(RobotType.TANK);
 			} else if (soldiers < MAX_SOLDIER) {
