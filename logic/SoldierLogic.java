@@ -206,6 +206,12 @@ public class SoldierLogic extends RobotLogic {
 			nav.isBugging = false;
 			moveIndex++;
 			moveFrustration = 0;
+			
+			for (TreeInfo tree : trees) {
+				if (tree.team != rc.getTeam()) {
+					combat.shoot(tree.location, null);
+				}
+			}
 		}
 
 		if (obstacles.length > 1) {
