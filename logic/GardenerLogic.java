@@ -183,8 +183,8 @@ public class GardenerLogic extends RobotLogic {
 				nav.runAway(enemies);
 				steps++;
 			} else if (archon != null) {
-				Direction awayFromArchon = rc.getLocation().directionTo(archon.location).opposite();
-				nav.bug(rc.getLocation().add(awayFromArchon, stepsBeforeGiveUp * rc.getType().strideRadius * 5),
+				Direction awayFromArchon = archon.location.directionTo(rc.getLocation()).rotateLeftDegrees(10);
+				nav.bug(rc.getLocation().add(awayFromArchon, rc.getType().strideRadius * 5),
 						obstacles);
 				steps++;
 			}
