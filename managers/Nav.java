@@ -433,8 +433,6 @@ public class Nav {
 			// in the stored bugDir.
 
 			// Can we move straight to target?
-			// System.out.println("test : " +
-			// lastDir.opposite().degreesBetween(dirToTarget));
 			if (Util.closeEnough(bugDir, dirToTarget, 5.0f) && totalDist < bugDistance
 					&& tryHardMove(dirToTarget, dist, 100.0f)) {
 				// We were able to move to the target
