@@ -97,8 +97,7 @@ public class SoldierLogic extends RobotLogic {
 			if (moveAreas.size() > 0) {
 				move(enemies, trees, friends);
 			} else {
-				moveAreas.add(rc.getInitialArchonLocations(rc.getTeam())[0]);
-				for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
+				for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
 					moveAreas.add(loc);
 				}
 				nav.moveRandom();
