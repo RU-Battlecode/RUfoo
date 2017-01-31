@@ -71,8 +71,6 @@ public class LumberjackLogic extends RobotLogic {
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 		
-		moveOffSpawn(obstacles);
-		
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type == RobotType.ARCHON) {
 				radio.foundEnemyArchon(enemy);
@@ -107,11 +105,12 @@ public class LumberjackLogic extends RobotLogic {
 			}
 		}
 
+		moveOffSpawn(obstacles);
 		nav.shakeTrees();
 	}
 
 	void moveOffSpawn(BodyInfo[] obstacles) {
-		if (rc.getLocation().distanceTo(home) < 0.1f) {
+		if (rc.getLocation().distanceTo(home) < rc.getType().strideRadius * 2.0f) {
 			
 			nav.bug(combat.getFurthestEnemySpawn(), obstacles);
 		}
