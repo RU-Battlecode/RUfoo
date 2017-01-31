@@ -60,8 +60,6 @@ public enum Channel {
 	EG7,
 	EG8,
 	EG9,
-	EG10,
-	EG11,
 	ENEMY_GARDENER_ID_END,
 	
 	ENEMY_GARDENER_LOC_START,
