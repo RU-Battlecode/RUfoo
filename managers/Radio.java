@@ -51,6 +51,15 @@ public class Radio {
 		return freeIndex;
 	}
 	
+	public MapLocation readSoldierAttackLocation() {
+		int msg = readChannel(Channel.SOLDIER_ATTACK_LOCATION);
+		return msg != 0 ? intToMapLocation(msg) : null;
+	}
+	
+	public void postToSoldierAttackLocation(MapLocation loc) {
+		broadcast(Channel.SOLDIER_ATTACK_LOCATION, mapLocationToInt(loc));
+	}
+	
 	// GARDENER BASES
 	public void sendSettledBase(MapLocation location) {
 		for (int i = GARDENER_BASE_LOCATION_START.ordinal(); i <= GARDENER_BASE_LOCATION_END.ordinal(); i++) {

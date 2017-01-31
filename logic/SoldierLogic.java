@@ -10,7 +10,6 @@ import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.BulletInfo;
 import battlecode.common.Clock;
-import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -39,10 +38,6 @@ public class SoldierLogic extends RobotLogic {
 		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam().opponent())) {
 			moveAreas.add(loc);
 		}
-		
-		for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
-			moveAreas.add(loc);
-		}
 	}
 
 	@Override
@@ -59,11 +54,19 @@ public class SoldierLogic extends RobotLogic {
 				addNewMoveArea(loc);
 			}
 		}
+		
+		if (personality.age() == 300) {
+			for (MapLocation loc : rc.getInitialArchonLocations(rc.getTeam())) {
+				moveAreas.add(loc);
+			}
+		}
 
 		lookForEnemyArchons(enemies);
 
 		RobotInfo target = combat.findTarget(enemies, friends, myTrees, neutralTrees);
 		if (target != null) {
+			
+			radio.postToSoldierAttackLocation(target.location);
 			// Attack target aggressively!
 			MapLocation closeToTarget = target.location.add(target.location.directionTo(rc.getLocation()),
 					rc.getType().bodyRadius * 2.0f);
@@ -77,7 +80,7 @@ public class SoldierLogic extends RobotLogic {
 			combat.shoot(target, enemies);
 		} else {
 			// No target.
-
+						
 			if (prevousTarget != null) {
 				combat.shoot(prevousTarget, enemies);
 				prevousTarget = null;
@@ -114,8 +117,8 @@ public class SoldierLogic extends RobotLogic {
 
 	boolean shouldKite(RobotInfo target, RobotInfo[] friends) {
 		return target.type == RobotType.LUMBERJACK
-				|| ((target.getType().canAttack() && target.getType() != RobotType.SCOUT && target.health > 20)
-						&& friends.length <= 5);
+				|| ((target.getType().canAttack() && target.getType() != RobotType.SCOUT 
+					&& (target.health > 20 || friends.length <= 5)));
 	}
 
 	void respondToDefenseCalls() {
@@ -186,11 +189,22 @@ public class SoldierLogic extends RobotLogic {
 		return isNew || interrupt;
 	}
 
+	boolean switchToBuggingAlgorithm2 = false;
+	
 	void move(RobotInfo[] enemies, TreeInfo[] trees, RobotInfo[] friends) {
 		MapLocation loc = moveAreas.get(moveIndex % moveAreas.size());
 		float distToTarget = rc.getLocation().distanceSquaredTo(loc);
 		BodyInfo[] obstacles = Util.addAll(friends, trees);
 
+//		MapLocation otherTarget = radio.readSoldierAttackLocation();
+//		if (otherTarget != null && otherTarget.distanceSquaredTo(otherTarget) < rc.getType().sensorRadius * 2) {
+//			nav.isBugging = false;
+//			nav.bug(otherTarget, obstacles);
+//			if (rc.hasMoved()) {
+//				return;
+//			}
+//		}
+		
 		// for (MapLocation test : moveAreas) {
 		// rc.setIndicatorDot(test, rc.getTeam() == Team.A ? 200 : 1, 1,
 		// rc.getTeam() == Team.A ? 1 : 200);
@@ -208,6 +222,7 @@ public class SoldierLogic extends RobotLogic {
 			nav.isBugging = false;
 			moveIndex++;
 			moveFrustration = 0;
+			switchToBuggingAlgorithm2 = true;
 		}
 
 		if (obstacles.length > 1) {
@@ -216,13 +231,16 @@ public class SoldierLogic extends RobotLogic {
 						- b2.getLocation().distanceSquaredTo(rc.getLocation()));
 			});
 		}
-
+		
+		if (switchToBuggingAlgorithm2) {
+			// Reset bugging
+			nav.isBugging = false;
+		}
 		nav.bug(loc, obstacles);
 
-		if (Util.equals(distToTarget, prevousDistanceToTarget, rc.getType().strideRadius / 3)) {
-			moveFrustration++;
-		} else if (Util.equals(distToTarget, prevousDistanceToTarget, 0.1f)) {
+		if (Util.equals(distToTarget, prevousDistanceToTarget, 0.0001f)) {
 			moveFrustration += 3;
+			nav.isBugging = false;
 		}
 
 		prevousDistanceToTarget = distToTarget;

@@ -41,11 +41,11 @@ public class GardenerLogic extends RobotLogic {
 
 	private static final float TOO_MUCH_TREE_SUM_RADIUS = 8.0f;
 	private static final int MIN_STEPS_BEFORE_SETTLE = 6;
-	private static final float MIN_DIST_TO_GARDENERS = 8.5f;
+	private static float MIN_DIST_TO_GARDENERS = 8.5f;
 
 	private static int MAX_SOLDIER = 8;
-	private static final int MAX_LUMBERJACK = 7;
-	private static final int MAX_TANKS = 5;
+	private static int MAX_LUMBERJACK = 7;
+	private static int MAX_TANKS = 5;
 	private static final int MAX_SCOUT = 3;
 
 	private static final Direction[] TREE_BUILD_DIRS = { Direction.getNorth(), Direction.getEast(), Direction.getWest(),
@@ -56,7 +56,6 @@ public class GardenerLogic extends RobotLogic {
 	private float buildOffset;
 	private Direction buildDirection;
 	private int steps;
-	private int stepsBeforeGiveUp;
 	private boolean settled;
 	private MapLocation baseLocation;
 	private boolean hasPlantedFront;
@@ -87,12 +86,16 @@ public class GardenerLogic extends RobotLogic {
 		hasPlantedFront = hasPlantedMiddle = hasFinishedPlanting = false;
 		plantFailCount = 0;
 
-		stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.6f);
+		///stepsBeforeGiveUp = Math.round(combat.getClosestEnemySpawn().distanceTo(rc.getLocation()) / 1.6f);
 
 		float dist = rc.getInitialArchonLocations(rc.getTeam())[0]
 				.distanceTo(combat.getFurthestEnemySpawn()); 
 		smallMap = dist <= SMALL_MAP_SIZE;
 	
+		if (smallMap) {
+			MIN_DIST_TO_GARDENERS = 6.5f;
+		}
+		
 		forgetInheritedLocations = new ArrayList<>();
 		inheritedBaseLocation = null;
 		inheritedFrustration = 0;
@@ -183,16 +186,17 @@ public class GardenerLogic extends RobotLogic {
 				nav.runAway(enemies);
 				steps++;
 			} else if (archon != null) {
-				Direction awayFromArchon = rc.getLocation().directionTo(archon.location).opposite();
-				nav.bug(rc.getLocation().add(awayFromArchon, stepsBeforeGiveUp * rc.getType().strideRadius * 5),
+				Direction awayFromArchon = archon.location.directionTo(rc.getLocation()).rotateLeftDegrees(10);
+				nav.bug(rc.getLocation().add(awayFromArchon, rc.getType().strideRadius * 5),
 						obstacles);
 				steps++;
 			}
 
 			if (myTrees.length != 0) {
-				Direction awayFromTree = myTrees[0].location.directionTo(rc.getLocation());
-				float dist = MIN_DIST_TO_GARDENERS - myTrees[0].location.distanceTo(rc.getLocation());
-				nav.bug(rc.getLocation().add(awayFromTree, dist * 2), obstacles);
+//				Direction awayFromTree = myTrees[0].location.directionTo(rc.getLocation());
+//				float dist = MIN_DIST_TO_GARDENERS - myTrees[0].location.distanceTo(rc.getLocation());
+//				nav.bug(rc.getLocation().add(awayFromTree, dist * 2), obstacles);
+				nav.bug(combat.getFurthestEnemySpawn(), obstacles);
 				steps++;
 			}
 
@@ -280,6 +284,8 @@ public class GardenerLogic extends RobotLogic {
 		return ((nearestMyTree.length == 0 || distToGardener >= MIN_DIST_TO_GARDENERS
 				|| (personality.age() > 400 && distToGardener >= MIN_DIST_TO_GARDENERS / 2))
 
+				&& (archon == null || rc.getLocation().distanceTo(archon.location) >= MIN_DIST_TO_GARDENERS / 2)
+				
 				&& nav.isLocationFree(buildDirection) && nav.isLocationFree(buildDirection.opposite())
 
 				&& steps > MIN_STEPS_BEFORE_SETTLE && farEnoughFromEdge());
@@ -373,14 +379,27 @@ public class GardenerLogic extends RobotLogic {
 		
 		if (rc.getRoundNum() > 700) {
 			MAX_SOLDIER = 10;
+		} else if (rc.getRoundNum() > 800) {  
+			MAX_SOLDIER = 20;
+			MAX_TANKS = 6;
 		}
 		
-		if (!smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < MAX_LUMBERJACK) {
-			build(RobotType.LUMBERJACK);
-		} else if (smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < 1) {
-			build(RobotType.LUMBERJACK);
+		float treeSum = treeSumRadius(trees);
+		
+		if (smallMap) {
+			
+			if (treeSum >= TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < 2 && soldiers >= 2) {
+				build(RobotType.LUMBERJACK);
+			}
+			
+		} else {
+			
+			if (treeSum >= TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < MAX_LUMBERJACK) {
+				build(RobotType.LUMBERJACK);
+			}
+			
 		}
-
+		
 		if (settled) {
 			if (tanks < MAX_TANKS) {
 				build(RobotType.TANK);
@@ -407,10 +426,10 @@ public class GardenerLogic extends RobotLogic {
 				build(RobotType.SCOUT);
 			} else if (soldiers < 1) {
 				build(RobotType.SOLDIER);
-			} else if (scouts < 1) {
-				build(RobotType.SCOUT);
 			} else if (tanks < MAX_TANKS) {
 				build(RobotType.TANK);
+			} else if (soldiers < MAX_SOLDIER) {
+				build(RobotType.SOLDIER);
 			}
 		}
 	}

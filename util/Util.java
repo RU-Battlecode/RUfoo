@@ -130,4 +130,8 @@ public final class Util {
 	public static MapLocation midPoint(MapLocation a, MapLocation b) {
 		return new MapLocation((a.x + b.x) / 2, (a.y + b.y) / 2);
 	}
-}
+	
+	public static Direction add(Direction a, Direction b) {
+		return new Direction(a.radians + b.radians);
+	}
+ }
