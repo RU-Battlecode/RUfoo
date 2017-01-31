@@ -377,13 +377,13 @@ public class GardenerLogic extends RobotLogic {
 		if (rc.getRoundNum() > 700) {
 			MAX_SOLDIER = 10;
 		} else if (rc.getRoundNum() > 1000) {  
-			MAX_SOLDIER = 15;
+			MAX_SOLDIER = 20;
 			MAX_TANKS = 6;
 		}
 		
 		if (!smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < MAX_LUMBERJACK) {
 			build(RobotType.LUMBERJACK);
-		} else if (smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < 1) {
+		} else if (smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < 1 && soldiers >= 2) {
 			build(RobotType.LUMBERJACK);
 		}
 
@@ -417,6 +417,8 @@ public class GardenerLogic extends RobotLogic {
 				build(RobotType.SCOUT);
 			} else if (tanks < MAX_TANKS) {
 				build(RobotType.TANK);
+			} else if (soldiers < MAX_SOLDIER) {
+				build(RobotType.SOLDIER);
 			}
 		}
 	}
