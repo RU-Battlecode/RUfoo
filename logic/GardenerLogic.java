@@ -376,7 +376,7 @@ public class GardenerLogic extends RobotLogic {
 			MAX_SOLDIER = 10;
 		} else if (rc.getRoundNum() > 1000) {  
 			MAX_SOLDIER = 15;
-			MAX_TANK = 6;
+			MAX_TANKS = 6;
 		}
 		
 		if (!smallMap && treeSumRadius(trees) > TOO_MUCH_TREE_SUM_RADIUS && lumberjacks < MAX_LUMBERJACK) {
