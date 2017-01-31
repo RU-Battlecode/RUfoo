@@ -63,7 +63,6 @@ public class TankLogic extends RobotLogic {
 
 			RobotInfo scout = Util.findType(friends, RobotType.SCOUT);
 			if (scout != null) {
-				System.out.println("scout near me.");
 				MapLocation targetLocation = fireAtScoutTargets(enemies, friends);
 				
 				if (targetLocation != null) {
