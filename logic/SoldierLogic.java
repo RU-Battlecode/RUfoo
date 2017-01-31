@@ -9,6 +9,7 @@ import RUfoo.model.DefenseInfo;
 import RUfoo.util.Util;
 import battlecode.common.BodyInfo;
 import battlecode.common.BulletInfo;
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -106,6 +107,10 @@ public class SoldierLogic extends RobotLogic {
 
 		nav.shakeTrees(trees);
 		prevousTarget = target;
+		
+		if (Clock.getBytecodesLeft() > 11_000) {
+			logic();
+		}
 	}
 
 	boolean shouldKite(RobotInfo target, RobotInfo[] friends) {
